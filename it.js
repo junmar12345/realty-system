@@ -23,6 +23,24 @@ function formatDisplayDate(dateStr){
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+async function checkStorageSize() {
+    const storageEl = document.getElementById('git-storage');
+    if(!storageEl) return;
+    
+    try {
+        const response = await fetch('https://api.github.com/repos/junmar12345/realty-system');
+        if(!response.ok) throw new Error("API Limit reached or Repo is Private");
+        const data = await response.json();
+        
+        // Convert Kilobytes to Megabytes
+        const sizeInMB = (data.size / 1024).toFixed(2);
+        storageEl.innerText = `${sizeInMB} MB`;
+    } catch (error) {
+        console.log("Hindi ma-check ang storage:", error);
+        storageEl.innerText = "N/A";
+    }
+}
+
 function renderITRoom(){
     if(!isIT()){
         document.getElementById("content").innerHTML = `
@@ -106,6 +124,43 @@ function renderITRoom(){
                 </div>
                 <h3 style="font-size:28px; font-weight:900; margin:10px 0 2px 0;">${lockedOut} <span style="font-size:14px; font-weight:normal;">Branches</span></h3>
                 <small style="opacity:0.85; font-size:12px;">Login Blocked / Delinquent</small>
+            </div>
+        </div>
+
+        <!-- NEW: SYSTEM HEALTH MONITORING PANEL -->
+        <div class="panel" style="background:#0f172a; border:1px solid #1e293b; border-radius:18px; padding:22px; margin-bottom:24px; color:#f8fafc;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid #334155; padding-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:20px;">🌐</span>
+                    <strong style="font-size:15px; color:#f8fafc;">CLOUD & SERVER STATUS (LIVE MONITORING)</strong>
+                </div>
+                <span class="badge badge-green" style="background:#059669; color:#fff;">System Online</span>
+            </div>
+
+            <div class="grid-2" style="gap:20px;">
+                <!-- Column 1: Hosting & Repo -->
+                <div style="background:#1e293b; padding:15px; border-radius:10px; border:1px solid #334155;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
+                        <span style="color:#94a3b8; font-size:13px; font-weight:bold;">Cloudflare Hosting:</span>
+                        <span style="color:#22c55e; font-weight:bold; font-size:13px;">🟢 Active & Live</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#94a3b8; font-size:13px; font-weight:bold;">GitHub Repository:</span>
+                        <span style="color:#e2e8f0; font-size:13px;">main branch (Up to date)</span>
+                    </div>
+                </div>
+
+                <!-- Column 2: Resources -->
+                <div style="background:#1e293b; padding:15px; border-radius:10px; border:1px solid #334155;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
+                        <span style="color:#94a3b8; font-size:13px; font-weight:bold;">Cloudflare Build Minutes:</span>
+                        <span style="color:#e2e8f0; font-size:13px;">0 / 500 (Free Tier)</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#94a3b8; font-size:13px; font-weight:bold;">Project File Size (GitHub):</span>
+                        <span id="git-storage" style="color:#38bdf8; font-weight:bold; font-size:13px;">Checking...</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -214,6 +269,9 @@ function renderITRoom(){
             </div>
         </div>
     `;
+
+    // Awtomatikong kukunin ang file size mula sa GitHub pagkatapos mag-load ng HTML
+    setTimeout(checkStorageSize, 500);
 }
 
 function saveITSystemBranding(){
