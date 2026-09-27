@@ -361,3 +361,146 @@ function addRealty(event){
 function renderApprovals(){
     if(typeof renderRefund === "function") renderRefund();
 }
+
+/* =========================================================
+   PRE-LOGIN EXPIRATION POP-UP & OFFLINE MODE OVERLAY
+========================================================= */
+
+function processLoginExpiration(userRole, branchId, proceedToDashboardCallback) {
+    if (userRole === "IT") {
+        proceedToDashboardCallback();
+        return;
+    }
+
+    let dueDateStr = null;
+    let targetName = "";
+
+    if (userRole === "BOSS") {
+        dueDateStr = (db.settings && db.settings.systemDueDate) ? db.settings.systemDueDate : null;
+        targetName = "Master System (Boss Account)";
+    } else if (userRole === "REALTY") {
+        const branch = (db.realties || []).find(r => r.id === branchId);
+        dueDateStr = branch ? branch.dueDate : null;
+        targetName = branch ? branch.name : "Realty Branch";
+    }
+
+    if (!dueDateStr) {
+        proceedToDashboardCallback();
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const due = new Date(dueDateStr);
+    due.setHours(0, 0, 0, 0);
+
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 7 && diffDays > 0) {
+        // 7 Days or less warning POPUP
+        showExpirationPopup(diffDays, due, targetName, proceedToDashboardCallback);
+    } else if (diffDays <= 0) {
+        // Expired (OFFLINE MODE OVERLAY)
+        proceedToDashboardCallback();
+        triggerOfflineModeGlow();
+    } else {
+        // Safe (tuloy agad sa dashboard)
+        proceedToDashboardCallback();
+    }
+}
+
+function showExpirationPopup(daysLeft, dueDate, targetName, proceedCallback) {
+    const formattedDate = dueDate.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+    
+    const modalHtml = `
+        <div id="preLoginWarningModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+            <div style="background:#1e293b;border:2px solid #f59e0b;border-radius:16px;padding:30px;max-width:650px;width:90%;display:flex;gap:20px;color:#fff;box-shadow:0 15px 50px rgba(245,158,11,0.2);flex-wrap:wrap;">
+                
+                <div style="flex:1;min-width:250px;">
+                    <h2 style="color:#f59e0b;margin-top:0;display:flex;align-items:center;gap:10px;font-size:24px;">
+                        ⚠️ ${daysLeft} Araw Nalang!
+                    </h2>
+                    <p style="color:#cbd5e1;line-height:1.6;font-size:15px;">
+                        Paalala: Ang subscription para sa <strong>${targetName}</strong> ay mag-eexpire na sa <strong>${formattedDate}</strong>.
+                    </p>
+                    <p style="color:#cbd5e1;line-height:1.6;font-size:15px;">
+                        Upang maiwasan ang pagiging <strong>OFFLINE MODE</strong> ng system, mangyaring i-scan ang QR code sa gilid at magpadala ng resibo sa IT bago pa mag-expire.
+                    </p>
+                    
+                    <button id="btnProceedToDash" style="margin-top:20px;background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;font-size:16px;box-shadow:0 4px 15px rgba(245,158,11,0.4);">
+                        Acknowledge & Proceed to System
+                    </button>
+                </div>
+
+                <div style="width:200px;background:#ffffff;border-radius:12px;padding:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:inset 0 0 10px rgba(0,0,0,0.1);">
+                    <p style="color:#0f172a;font-weight:900;margin:0 0 10px 0;font-size:15px;">SCAN TO RENEW</p>
+                    
+                    <div style="width:150px;height:150px;background:#f1f5f9;border:2px dashed #94a3b8;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                        <span style="color:#64748b;font-size:12px;font-weight:bold;">[ GCASH QR IMAGE ]</span>
+                        <!-- PALITAN MO ITO NG SARILI MONG QR CODE IMAGE LINK -->
+                    </div>
+                    
+                    <small style="color:#64748b;margin-top:10px;font-size:11px;font-weight:bold;">Send payment proof to IT Support</small>
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    document.getElementById("btnProceedToDash").onclick = function() {
+        document.getElementById("preLoginWarningModal").remove();
+        proceedCallback(); 
+    };
+}
+
+function triggerOfflineModeGlow() {
+    const existing = document.getElementById("offlineModeOverlay");
+    if(existing) existing.remove();
+
+    const offlineHtml = `
+        <div id="offlineModeOverlay" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;pointer-events:none;text-align:center;animation: glowBlink 3s ease-in-out infinite;width:100%;">
+            <style>
+                @keyframes glowBlink {
+                    0% { opacity: 0.15; text-shadow: 0 0 20px #ef4444; transform: translate(-50%,-50%) scale(1); }
+                    50% { opacity: 0.7; text-shadow: 0 0 40px #ef4444, 0 0 80px #dc2626; transform: translate(-50%,-50%) scale(1.05); }
+                    100% { opacity: 0.15; text-shadow: 0 0 20px #ef4444; transform: translate(-50%,-50%) scale(1); }
+                }
+            </style>
+            <h1 style="color:rgba(239,68,68,0.3);font-size:clamp(40px, 8vw, 120px);font-weight:900;margin:0;letter-spacing:10px;text-transform:uppercase;">
+                OFFLINE MODE
+            </h1>
+            <p style="color:rgba(252,165,165,0.7);font-size:clamp(16px, 3vw, 24px);font-weight:bold;margin-top:0;letter-spacing:3px;">
+                SUBSCRIPTION EXPIRED
+            </p>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', offlineHtml);
+}
+
+/* =========================================================
+   AUTO-CHECKER PARA SA OFFLINE MODE (KAHIT NASA LOOB NA)
+========================================================= */
+setInterval(function() {
+    // 1. Kung IT ang nakalogin, walang mangyayari (Ligtas ang IT)
+    if (typeof isIT === 'function' && isIT()) return;
+
+    // 2. I-check ang expiration ng Boss
+    if (db.settings && db.settings.systemDueDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const due = new Date(db.settings.systemDueDate);
+        due.setHours(0, 0, 0, 0);
+
+        const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Kung expired na (0 days or below), i-trigger ang blinking offline mode!
+        if (diffDays <= 0) {
+            triggerOfflineModeGlow();
+        }
+    }
+}, 1000);

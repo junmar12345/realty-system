@@ -57,31 +57,110 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="loginScreen" class="login-screen">
-    <div id="loginSubscriptionBanner" class="login-subscription-alert hidden"></div>
+<!-- LOGIN SCREEN WITH SIDE-BY-SIDE RENEWAL LAYOUT -->
+<div id="loginScreen" class="login-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+    <div id="loginSubscriptionBanner" class="login-subscription-alert hidden" style="margin-bottom:20px; max-width:850px; width:100%;"></div>
 
-    <div class="login-box">
-        <div id="loginLogoPreview" class="login-logo">🏢</div>
-        <h1 id="loginSystemNameDisplay">REALTY SYSTEM</h1>
-        <p>SECURE EXECUTIVE &amp; STAFF PORTAL</p>
+    <div id="loginSideBySideContainer" style="display: flex; align-items: center; justify-content: center; gap: 30px; max-width: 450px; width: 100%; flex-wrap: wrap; transition: all 0.3s ease;">
+        
+        <!-- Login Form Box -->
+        <div class="login-box" style="flex: 1; min-width: 320px; margin: 0;">
+            <div id="loginLogoPreview" class="login-logo">🏢</div>
+            <h1 id="loginSystemNameDisplay">REALTY SYSTEM</h1>
+            <p>SECURE EXECUTIVE &amp; STAFF PORTAL</p>
 
-        <div class="form-group">
-            <label>USERNAME OR REALTY NAME</label>
-            <input id="loginUsername" type="text" placeholder="Enter username or realty name" autocomplete="username" onkeydown="if(event.key==='Enter') login()">
+            <div class="form-group">
+                <label>USERNAME OR REALTY NAME</label>
+                <input id="loginUsername" type="text" placeholder="Enter username or realty name" autocomplete="username" onkeydown="if(event.key==='Enter') login()">
+            </div>
+
+            <div class="form-group">
+                <label>PASSWORD / TEMPORARY PASSWORD</label>
+                <input id="loginPassword" type="password" placeholder="Enter permanent or temporary password" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()">
+            </div>
+
+            <button class="btn btn-primary full" onclick="login()">🔐 LOGIN</button>
+
+            <div class="login-demo"></div>
         </div>
 
-        <div class="form-group">
-            <label>PASSWORD / TEMPORARY PASSWORD</label>
-            <input id="loginPassword" type="password" placeholder="Enter permanent or temporary password" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()">
+        <!-- QR Code & Renewal Reminder Box (Lilitaw lang kapag 7 days o less na lang ang natitira) -->
+        <div id="loginRenewalNoticeBox" style="display: none; flex: 1; min-width: 280px; background: rgba(15, 23, 42, 0.9); padding: 25px; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.3); text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <div style="font-size: 15px; font-weight: bold; color: #fcd34d; margin-bottom: 8px;">
+                💳 RENEW TO CONTINUE
+            </div>
+            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 16px; line-height: 1.4;">
+                I-scan ang QR code sa ibaba para sa mabilis na pag-update at mapanatiling tuloy-tuloy ang operasyon ng sistema.
+            </p>
+            
+            <div style="background: #ffffff; padding: 12px; border-radius: 12px; display: inline-block; margin-bottom: 12px;">
+                <img src="qr-code.png" alt="QR Code" style="width: 140px; height: 140px; display: block; border-radius: 6px;">
+            </div>
+            
+            <div style="font-size: 11px; color: #94a3b8; font-weight: bold; letter-spacing: 0.5px;">
+                SCAN HERE TO UPDATE &amp; RENEW
+            </div>
         </div>
 
-        <button class="btn btn-primary full" onclick="login()">🔐 LOGIN</button>
-
-        <div class="login-demo"></div>
     </div>
 </div>
 
+<!-- EXPIRED / OFFLINE ROOM -->
+<div id="expiredOfflineRoom" class="expired-offline-room hidden">
+    <div class="expired-offline-card">
+        <div class="offline-status-animation">
+            <div class="offline-spinner"></div>
+        </div>
+
+        <div class="offline-status-text">DISCONNECTED FROM SERVER</div>
+
+        <h1>Subscription Expired</h1>
+
+        <p id="expiredOfflineBranchName">
+            Your Realty subscription has expired.
+        </p>
+
+        <p class="expired-offline-message">
+            Your existing local data remains available on this device.
+            Cloud/server connection and synchronization are currently unavailable.
+        </p>
+
+        <div class="renewal-section">
+            <h3>RENEW SUBSCRIPTION</h3>
+
+            <div class="renewal-payment-options">
+                <a id="mayaRenewalLink"
+                   class="renewal-payment-btn"
+                   href="#"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    MAYA PAYMENT
+                </a>
+
+                <a id="gotymeRenewalLink"
+                   class="renewal-payment-btn"
+                   href="#"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    GoTyme PAYMENT
+                </a>
+            </div>
+
+            <button type="button"
+                    class="renewal-submit-btn"
+                    onclick="openSubscriptionPaymentSubmission()">
+                SUBMIT PAYMENT FOR VERIFICATION
+            </button>
+
+            <div id="subscriptionPaymentStatus" style="min-height:18px;margin-bottom:10px;"></div>
+
+            <div class="verification-note">
+                Payment verification may take up to
+                <strong>1 working business day</strong>.
+            </div>
+        </div>
+    </div>
+</div>
 <!-- APP WRAPPER -->
 <div id="app" class="app hidden">
     <aside class="sidebar">
@@ -105,6 +184,13 @@
         <div id="vaultMenuContainer" style="margin-top:15px;">
             <button class="nav-btn" onclick="renderResiboReport()" style="background:#e2e8f0; color:#1e293b; font-weight:bold; border: 1px solid #cbd5e1;">
                 🧾 AR Vault (Resibo)
+            </button>
+        </div>
+
+        <!-- PRIVATE CHAT ROOM BUTTON -->
+        <div id="privateChatMenuContainer" style="margin-top:5px;">
+            <button class="nav-btn" onclick="renderPrivateChatUI()" style="background:#1e293b; color:white; font-weight:bold; border:1px solid #334155;">
+                💬 Private Chat Room
             </button>
         </div>
 
@@ -166,6 +252,7 @@
 <script src="realty.js"></script>
 <script src="boss.js"></script>
 <script src="it.js"></script>
+<script src="chat.js"></script>
 
 </body>
 </html>

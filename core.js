@@ -216,6 +216,8 @@ db.expenses = Array.isArray(db.expenses) ? db.expenses : [];
 db.staff = Array.isArray(db.staff) ? db.staff : [];
 db.settings = db.settings || {};
 
+db.subscriptionPayments = Array.isArray(db.subscriptionPayments) ? db.subscriptionPayments : [];
+
 db.realties.forEach(r => {
     if(!r.dueDate) r.dueDate = "2026-10-24";
     if(r.monthlyFee === undefined) r.monthlyFee = 2500;
@@ -339,37 +341,67 @@ function universalSwitchBranch(realtyId){
     showPage(currentPage);
 }
 
-function checkAndDisplayLoginSubscriptionNotice(){
-    const banner = document.getElementById("loginSubscriptionBanner");
-    if(!banner) return;
+function isRealtySubscriptionExpired(realtyId){
+    const branch = db.realties.find(r => r.id === realtyId);
+    if(!branch || !branch.dueDate) return false;
 
     const today = new Date();
     today.setHours(0,0,0,0);
 
-    const lockedBranches = db.realties.filter(r => r.isLocked);
-    const dueSoonBranches = db.realties.filter(r => {
-        if(r.isLocked || !r.dueDate) return false;
+    const due = new Date(branch.dueDate);
+    due.setHours(0,0,0,0);
+
+    return due.getTime() < today.getTime();
+}
+
+function getRealtySubscriptionState(realtyId){
+    const branch = db.realties.find(r => r.id === realtyId);
+    if(!branch) return "UNKNOWN";
+    if(!branch.dueDate) return "ACTIVE";
+    return isRealtySubscriptionExpired(realtyId) ? "EXPIRED" : "ACTIVE";
+}
+
+/* =========================================================
+   LOGIN 7-DAY EXPIRATION SIDE-BY-SIDE RENDER LOGIC
+========================================================= */
+function checkAndDisplayLoginSubscriptionNotice(){
+    const banner = document.getElementById("loginSubscriptionBanner");
+    const renewalBox = document.getElementById("loginRenewalNoticeBox");
+    const loginWrapper = document.getElementById("loginSideBySideContainer");
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    let showNotice = false;
+    let dueSoonList = [];
+
+    db.realties.forEach(r => {
+        if(!r.dueDate) return;
         const due = new Date(r.dueDate);
         const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        return diffDays <= 25;
+        if(diffDays <= 7 || r.isLocked){
+            showNotice = true;
+            dueSoonList.push(`• <strong>${esc(r.name)}</strong> (Due: ${r.dueDate})`);
+        }
     });
 
-    if(lockedBranches.length > 0){
-        const names = lockedBranches.map(r => r.name).join(", ");
-        banner.className = "login-subscription-alert locked";
-        banner.innerHTML = `
-            <strong>🚫 BRANCH ACCESS SUSPENDED:</strong><br>
-            The following branch accounts are currently locked: <strong>${esc(names)}</strong>.<br>
-            <small style="color:#fecaca;">(Notice: Boss &amp; IT Platform Master retain unrestricted access.)</small>
-        `;
-        banner.classList.remove("hidden");
-    } else if(dueSoonBranches.length > 0){
-        const listText = dueSoonBranches.map(r => `• <strong>${esc(r.name)}</strong> (Due: ${formatDisplayDate(r.dueDate)})`).join("<br>");
+    if(renewalBox && loginWrapper){
+        if(showNotice){
+            renewalBox.style.display = "block";
+            loginWrapper.style.maxWidth = "850px";
+        } else {
+            renewalBox.style.display = "none";
+            loginWrapper.style.maxWidth = "450px";
+        }
+    }
+
+    if(!banner) return;
+    if(showNotice){
         banner.className = "login-subscription-alert";
         banner.innerHTML = `
-            <strong>⚠️ CLOUD PLATFORM SUBSCRIPTION NOTICE:</strong><br>
-            Your monthly cloud platform subscription is due soon. Please settle your account .<br>
-            <div style="margin-top:4px; font-size:11px;">${listText}</div>
+            <strong>⚠️ RENEWAL NOTICE:</strong><br>
+            May mga sangay na malapit nang mapaso ang suskripsyon. Mangyaring mag-renew upang maiwasan ang pansamantalang lockout.<br>
+            <div style="margin-top:4px; font-size:11px;">${dueSoonList.join("<br>")}</div>
         `;
         banner.classList.remove("hidden");
     } else {
@@ -384,6 +416,19 @@ function checkAndDisplayLoginSubscriptionNotice(){
 let currentUser = null;
 let currentPage = "dashboard";
 
+function isCurrentUserSubscriptionExpired(user = currentUser){
+    if(!user) return false;
+    if(user.role === "IT" || user.role === "BOSS") return false;
+    if(!user.realtyId) return false;
+    return isRealtySubscriptionExpired(user.realtyId);
+}
+
+function getInitialPageForUser(user = currentUser){
+    if(!user) return "dashboard";
+    if(user.role === "IT") return "it-room";
+    if(isCurrentUserSubscriptionExpired(user)) return "expired-room";
+    return "dashboard";
+}
 function saveSession(user, page="dashboard"){
     localStorage.setItem(SESSION_KEY, JSON.stringify({ user, page }));
 }
@@ -491,7 +536,7 @@ function login(){
 
         if(staff.realtyId){
             const branch = db.realties.find(r => r.id === staff.realtyId);
-            if(branch && branch.isLocked){
+            if(branch && branch.isLocked && !isRealtySubscriptionExpired(branch.id)){
                 alert(`🚫 ACCESS DENIED: Ang ${branch.name} ay kasalukuyang naka-lock dahil sa subscription hold.`);
                 return;
             }
@@ -524,7 +569,7 @@ function login(){
         saveDB();
     }
 
-    const defaultInitialPage = currentUser.role === "IT" ? "it-room" : "dashboard";
+    const defaultInitialPage = getInitialPageForUser(currentUser);
     saveSession(currentUser, defaultInitialPage);
     setupUserInterface();
     showPage(defaultInitialPage);
@@ -587,14 +632,13 @@ function savePersonalPasswordAfterLogin(){
 }
 
 /* =========================================================
-   SIDEBAR MENU CONFIGURATION (PINALITAN: WALA NA ANG PAYMENT)
+   SIDEBAR MENU CONFIGURATION
 ========================================================= */
 
 const SIDEBAR_MENU = [
-    { id: "dashboard",   label: "Dashboard",        icon: "🏠", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN", "STAFF"] },
-    { id: "projects",    label: "Project / Site",   icon: "📁", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN", "STAFF"] },
+    { id: "dashboard",   label: "Dashboard",        icon: "🏠", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN", "STAFF"] },
+    { id: "projects",    label: "Project / Site",    icon: "📁", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN", "STAFF"] },
     
-    // Bawal mag-reserve si Boss sa All-Branches Mode
     { 
         id: "reservation", 
         label: "Reservation",      
@@ -610,28 +654,22 @@ const SIDEBAR_MENU = [
         }
     },
 
-    // DITO NA PAPASOK ANG LAHAT NG PAYMENT / RECORDS NG CLIENT
-    { id: "buyers",      label: "Buyers",           icon: "👥", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN", "STAFF"] },
-    
-    // TINANGGAL NA ANG HIWALAY NA PAYMENT BUTTON SA SIDEBAR!
-
-    { id: "staff",       label: "Staff Management", icon: "👥", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN"] },
-    { id: "money",       label: "Money In / Out",   icon: "💵", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN"] },
-    { id: "commission",  label: "Commission",       icon: "🤝", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN"] },
-    { id: "refund",      label: "Refund",           icon: "↩️", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN"] },
-    { id: "expenses",    label: "Expenses",         icon: "📊", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN"] },
-    { id: "reports",     label: "Reports",          icon: "📈", group: "MAIN ROOM",      roles: ["IT", "BOSS", "ADMIN"] },
+    { id: "buyers",      label: "Buyers",           icon: "👥", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN", "STAFF"] },
+    { id: "staff",       label: "Staff Management", icon: "👥", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN"] },
+    { id: "money",       label: "Money In / Out",   icon: "💵", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN"] },
+    { id: "commission",  label: "Commission",       icon: "🤝", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN"] },
+    { id: "refund",      label: "Refund",           icon: "↩️", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN"] },
+    { id: "expenses",    label: "Expenses",         icon: "📊", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN"] },
+    { id: "reports",     label: "Reports",          icon: "📈", group: "MAIN ROOM",     roles: ["IT", "BOSS", "ADMIN"] },
 
     { id: "records",     label: "Records / Audit",  icon: "📋", group: "SYSTEM AUDIT",   roles: ["IT", "BOSS"] },
     
-    // Tanging IT lamang ang may Control
     { id: "control",     label: "CONTROL",          icon: "🎛️", group: "SYSTEM CONTROL", roles: ["IT"] },
+    { id: "cloud-subscription", label: "Cloud Subscription", icon: "CLOUD", group: "SYSTEM CONTROL", roles: ["IT"] },
 
-    // BOSS ROOM
-    { id: "approvals",   label: "Approvals",        icon: "✅", group: "BOSS ROOM",       roles: ["IT", "BOSS"] },
+    { id: "approvals",   label: "Approvals",        icon: "✅", group: "BOSS ROOM",      roles: ["IT", "BOSS"] },
     { id: "add-realty",  label: "Add Realty",       icon: "🏢", group: "BRANCH MANAGEMENT", roles: ["IT", "BOSS"] },
 
-    // IT ROOM
     { id: "it-room",     label: "Master Technical Control", icon: "🛠️", group: "IT ROOM (VENDOR)", roles: ["IT"] }
 ];
 
@@ -717,7 +755,255 @@ function refreshCurrentRoom(){
    PAGE ROUTER
 ========================================================= */
 
+function openSubscriptionPaymentSubmission(){
+    if(!currentUser || currentUser.role === "IT" || currentUser.role === "BOSS"){
+        alert("Subscription payment submission is available only for a Realty branch account.");
+        return;
+    }
+
+    const branch = db.realties.find(r => r.id === currentUser.realtyId);
+    if(!branch){
+        alert("Realty branch information could not be found.");
+        return;
+    }
+
+    const existingPending = db.subscriptionPayments.find(p =>
+        p.realtyId === branch.id &&
+        p.status === "PENDING"
+    );
+
+    if(existingPending){
+        alert("May pending payment verification na para sa branch na ito. Please allow up to 1 working business day for verification.");
+        return;
+    }
+
+    const modal = document.getElementById("modal");
+    const modalContent = document.getElementById("modalContent");
+
+    if(!modal || !modalContent){
+        alert("Payment submission window is unavailable.");
+        return;
+    }
+
+    modalContent.innerHTML = `
+        <div style="max-width:620px;">
+            <h2 style="margin-bottom:8px;">SUBMIT RENEWAL PAYMENT</h2>
+            <p style="color:#64748b;margin-bottom:18px;">
+                ${esc(branch.name)}
+            </p>
+
+            <label>Payment Method</label>
+            <select id="subscriptionPaymentMethod" style="width:100%;margin-bottom:12px;">
+                <option value="MAYA">Maya</option>
+                <option value="GOTYME">GoTyme</option>
+            </select>
+
+            <label>Reference Number</label>
+            <input
+                type="text"
+                id="subscriptionPaymentReference"
+                placeholder="Enter payment reference number"
+                style="width:100%;margin-bottom:12px;"
+            >
+
+            <label>Amount</label>
+            <input
+                type="number"
+                id="subscriptionPaymentAmount"
+                min="0"
+                step="0.01"
+                value="${Number(branch.monthlyFee || db.settings.defaultMonthlyRate || 0)}"
+                style="width:100%;margin-bottom:12px;"
+            >
+
+            <label>Payment Date</label>
+            <input
+                type="date"
+                id="subscriptionPaymentDate"
+                value="${new Date().toISOString().slice(0,10)}"
+                style="width:100%;margin-bottom:12px;"
+            >
+
+            <label>Payment Proof / Screenshot</label>
+            <input
+                type="file"
+                id="subscriptionPaymentProof"
+                accept="image/*,.pdf"
+                style="width:100%;margin-bottom:14px;"
+            >
+
+            <div style="padding:12px;border-radius:8px;background:#f1f5f9;color:#475569;font-size:12px;line-height:1.6;margin-bottom:16px;">
+                After submission, your payment will remain <strong>PENDING</strong>
+                until verified by the System Administrator.
+                Verification may take up to <strong>1 working business day</strong>.
+            </div>
+
+            <button
+                type="button"
+                class="btn btn-success full"
+                onclick="submitSubscriptionPayment()">
+                SUBMIT FOR VERIFICATION
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary full"
+                onclick="closeModal()"
+                style="margin-top:8px;">
+                CANCEL
+            </button>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+}
+
+async function submitSubscriptionPayment(){
+    if(!currentUser || currentUser.role === "IT" || currentUser.role === "BOSS"){
+        alert("Subscription payment submission is available only for a Realty branch account.");
+        return;
+    }
+
+    const branch = db.realties.find(r => r.id === currentUser.realtyId);
+    if(!branch){
+        alert("Realty branch information could not be found.");
+        return;
+    }
+
+    const method = document.getElementById("subscriptionPaymentMethod")?.value;
+    const reference = document.getElementById("subscriptionPaymentReference")?.value.trim();
+    const amount = Number(document.getElementById("subscriptionPaymentAmount")?.value || 0);
+    const paymentDate = document.getElementById("subscriptionPaymentDate")?.value;
+    const proofInput = document.getElementById("subscriptionPaymentProof");
+
+    if(!method || !reference || !amount || amount <= 0 || !paymentDate){
+        alert("Please complete the payment method, reference number, amount, and payment date.");
+        return;
+    }
+
+    if(!proofInput || !proofInput.files || !proofInput.files[0]){
+        alert("Please upload your payment proof or screenshot.");
+        return;
+    }
+
+    const existingPending = db.subscriptionPayments.find(p =>
+        p.realtyId === branch.id &&
+        p.status === "PENDING"
+    );
+
+    if(existingPending){
+        alert("May pending payment verification na para sa branch na ito.");
+        return;
+    }
+
+    const file = proofInput.files[0];
+
+    if(file.size > 5 * 1024 * 1024){
+        alert("Payment proof must not exceed 5 MB.");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(){
+        db.subscriptionPayments.unshift({
+            id: uid("SUBPAY"),
+            realtyId: branch.id,
+            realtyName: branch.name,
+            submittedBy: currentUser.username,
+            submittedByName: currentUser.name,
+            method,
+            reference,
+            amount,
+            paymentDate,
+            proofName: file.name,
+            proofType: file.type || "application/octet-stream",
+            proofData: reader.result,
+            status: "PENDING",
+            submittedAt: new Date().toISOString()
+        });
+
+        saveDB();
+        closeModal();
+
+        alert("Payment submitted successfully. Status: PENDING. Please allow up to 1 working business day for verification.");
+
+        renderExpiredOfflineRoom();
+    };
+
+    reader.onerror = function(){
+        alert("Unable to read the payment proof file.");
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function renderExpiredOfflineRoom(){
+    const app = document.getElementById("app");
+    const room = document.getElementById("expiredOfflineRoom");
+
+    if(!room) return;
+
+    const branch = currentUser?.realtyId
+        ? db.realties.find(r => r.id === currentUser.realtyId)
+        : null;
+
+    if(app) app.classList.add("hidden");
+    room.classList.remove("hidden");
+
+    const branchName = document.getElementById("expiredOfflineBranchName");
+    if(branchName){
+        branchName.textContent = branch
+            ? `${branch.name} — subscription expired`
+            : "Your Realty subscription has expired.";
+    }
+
+    const pendingPayment = branch
+        ? db.subscriptionPayments.find(p =>
+            p.realtyId === branch.id &&
+            p.status === "PENDING"
+        )
+        : null;
+
+    const existingStatus = document.getElementById("subscriptionPaymentStatus");
+
+    if(existingStatus){
+        existingStatus.innerHTML = pendingPayment
+            ? `<strong style="color:#fbbf24;">PAYMENT STATUS: PENDING</strong><br>
+               <span style="font-size:12px;color:#94a3b8;">
+               Payment submitted. Please allow up to 1 working business day for verification.
+               </span>`
+            : "";
+    }
+
+    const maya = document.getElementById("mayaRenewalLink");
+    const gotyme = document.getElementById("gotymeRenewalLink");
+
+    const mayaUrl = db.settings?.mayaPaymentUrl || "";
+    const gotymeUrl = db.settings?.gotymePaymentUrl || "";
+
+    if(maya){
+        maya.href = mayaUrl || "#";
+        maya.style.display = mayaUrl ? "flex" : "none";
+    }
+
+    if(gotyme){
+        gotyme.href = gotymeUrl || "#";
+        gotyme.style.display = gotymeUrl ? "flex" : "none";
+    }
+}
+
 function showPage(page, btn){
+    if(currentUser && isCurrentUserSubscriptionExpired(currentUser) && page !== "expired-room"){
+        page = "expired-room";
+    }
+
+    if(page === "cloud-subscription" && currentUser?.role !== "IT"){
+        alert("ACCESS RESTRICTED: Cloud Subscription Control is available only to the System Administrator.");
+        showPage("dashboard");
+        return;
+    }
+
     if(page === "control" && currentUser?.role !== "IT"){
         alert("🚫 ACCESS RESTRICTED: Ang System Controller ay eksklusibo lamang para sa IT Master Vendor.");
         showPage("dashboard");
@@ -731,6 +1017,17 @@ function showPage(page, btn){
     }
 
     currentPage = page;
+
+    const app = document.getElementById("app");
+    const expiredRoom = document.getElementById("expiredOfflineRoom");
+
+    if(page === "expired-room"){
+        renderExpiredOfflineRoom();
+        return;
+    }
+
+    if(expiredRoom) expiredRoom.classList.add("hidden");
+    if(app) app.classList.remove("hidden");
     if(currentUser) saveSession(currentUser, currentPage);
 
     document.querySelectorAll(".sidebar .nav-btn").forEach(b => {
@@ -755,7 +1052,8 @@ function showPage(page, btn){
         staff:["Staff Management", activeBranch ? `${activeBranch.name} Staff & Workers` : "Staff & User Administration"],
         approvals:["Approvals Hub","Pending refunds and executive clearances"],
         "add-realty":["Branch Management","Create and manage branch realty profiles"],
-        "it-room":["IT Room","Master Technical Control & Platform Billing"]
+        "it-room":["IT Room","Master Technical Control & Platform Billing"],
+        "cloud-subscription":["Cloud Subscription","Hosting, Storage & Billing Control"]
     };
 
     if(titles[page]){
@@ -781,6 +1079,7 @@ function showPage(page, btn){
     else if(page === "staff" && typeof renderStaff === "function") renderStaff();
     else if(page === "approvals" && typeof renderApprovals === "function") renderApprovals();
     else if(page === "add-realty" && typeof renderAddRealty === "function") renderAddRealty();
+    else if(page === "cloud-subscription" && typeof renderCloudSubscription === "function") renderCloudSubscription();
     else if(page === "it-room" && typeof renderITRoom === "function") renderITRoom();
 }
 
@@ -796,7 +1095,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const saved = JSON.parse(localStorage.getItem(SESSION_KEY));
         if(saved && saved.user){
             currentUser = saved.user;
-            currentPage = saved.page || (currentUser.role === "IT" ? "it-room" : "dashboard");
+            currentPage = isCurrentUserSubscriptionExpired(currentUser) ? "expired-room" : (saved.page || getInitialPageForUser(currentUser));
             setupUserInterface();
             showPage(currentPage);
 
@@ -807,3 +1106,86 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     } catch(e){}
 });
+
+/* =========================================================
+   MASTER SYSTEM EXPIRATION CHECKER & WARNING BANNER
+========================================================= */
+
+function checkSystemExpirationWarning() {
+    // 1. EXEMPTION RULE: Kapag IT ang nakalog-in, itigil na agad ang function.
+    // Boss at Realty (Branches) lang ang kasama sa expiration check at lockout.
+    const isUserIT = typeof isIT === 'function' ? isIT() : false;
+    
+    if (isUserIT) {
+        // Siguraduhing walang banner na lalabas sa IT
+        const existingBanner = document.getElementById("master-expiration-banner");
+        if (existingBanner) existingBanner.remove();
+        document.body.style.paddingTop = "0px";
+        return; // Dito pa lang, stop na agad ang check. Safe ang IT!
+    }
+
+    // 2. EXECUTED ONLY PARA SA BOSS AT REALTY:
+    if (!db.settings || !db.settings.systemDueDate) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const due = new Date(db.settings.systemDueDate);
+    due.setHours(0, 0, 0, 0);
+
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Burahin ang lumang banner kung meron man
+    const existingBanner = document.getElementById("master-expiration-banner");
+    if (existingBanner) existingBanner.remove();
+
+    // 3. LOCKOUT PARA SA BOSS AT REALTY: Kapag expired na (-1 day pataas)
+    if (diffDays < 0) {
+        document.body.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#fff;text-align:center;padding:20px;font-family:sans-serif;">
+                <div style="font-size:60px;margin-bottom:10px;">🔒</div>
+                <h1 style="color:#ef4444;font-size:36px;margin:0 0 10px 0;font-weight:900;">SYSTEM LOCKED</h1>
+                <p style="color:#cbd5e1;font-size:18px;max-width:500px;margin:0;">
+                    Ang Master Subscription para sa platform na ito ay expired na.
+                </p>
+                <div style="margin-top:30px;background:#1e293b;padding:20px;border-radius:12px;border:1px solid #334155;">
+                    <p style="color:#94a3b8;font-size:14px;margin:0;">
+                        Mangyaring makipag-ugnayan sa iyong <strong>IT Platform Administrator</strong> upang makapag-renew at maibalik ang access sa system.
+                    </p>
+                </div>
+                <button onclick="localStorage.clear(); sessionStorage.clear(); window.location.reload();" style="margin-top:30px;padding:10px 20px;background:#334155;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+                    Bumalik sa Login Page
+                </button>
+            </div>
+        `;
+        return; // Pigilan ang pag-load ng ibang parts ng system para sa Boss/Realty
+    }
+
+    // 4. Huwag magpakita ng warning kung higit pa sa 7 days ang natitira
+    if (diffDays > 7) return;
+
+    let bannerHTML = "";
+
+    if (diffDays === 0) {
+        // LAST DAY NGAYON (Para lang sa Boss at Realty)
+        bannerHTML = `
+            <div id="master-expiration-banner" style="background:#dc2626;color:#fff;text-align:center;padding:10px;font-weight:bold;font-size:14px;position:fixed;top:0;left:0;width:100%;z-index:99999;box-shadow:0 4px 6px rgba(0,0,0,0.2);animation: pulse 2s infinite;">
+                ⚠️ CRITICAL WARNING: Ngayon na ang LAST DAY ng inyong System Subscription! Makipag-ugnayan sa IT agad para hindi ma-lock ang system bukas.
+            </div>
+        `;
+    } else {
+        // WARNING: 7 days or less (Para lang sa Boss at Realty)
+        bannerHTML = `
+            <div id="master-expiration-banner" style="background:#d97706;color:#fff;text-align:center;padding:10px;font-weight:bold;font-size:13px;position:fixed;top:0;left:0;width:100%;z-index:99999;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                ⏳ PAALALA: Ang inyong System Subscription ay mag-eexpire sa loob ng ${diffDays} araw (Due Date: ${formatDisplayDate(db.settings.systemDueDate)}).
+            </div>
+        `;
+    }
+
+    // Ilagay ang banner sa pinakataas ng page
+    if (bannerHTML) {
+        document.body.style.paddingTop = "40px"; // Adjust based sa height ng banner
+        document.body.insertAdjacentHTML('afterbegin', bannerHTML);
+    }
+}

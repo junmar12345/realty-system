@@ -218,17 +218,17 @@ async function checkInfrastructureMetrics(){
 
 function renderITRoom(){
     if(!isIT()){
-        document.getElementById("content").innerHTML = `
-            <div class="panel" style="background:#fef2f2; border:1px solid #fecaca; text-align:center; padding:35px;">
-                <h3 style="color:#b91c1c; font-size:22px; margin-bottom:8px;">
-                    🚫 ACCESS RESTRICTED: IT MASTER VENDOR ONLY
-                </h3>
-                <p style="color:#7f1d1d; font-size:14px;">
-                    The IT Room is strictly reserved for the Platform Technical Vendor.
-                </p>
-            </div>
-        `;
-        return;
+document.getElementById("content").innerHTML = `
+    <div class="panel" style="background:#fef2f2; border:1px solid #fecaca; text-align:center; padding:35px;">
+        <h3 style="color:#b91c1c;font-size:22px;margin-bottom:8px;">
+            &#128680; ACCESS RESTRICTED: IT MASTER VENDOR ONLY
+        </h3>
+        <p style="color:#7f1d1d; font-size:14px;">
+            The IT Room is strictly reserved for the Platform Technical Vendor.
+        </p>
+    </div>
+`;
+return;
     }
 
     const realties = db.realties || [];
@@ -275,23 +275,23 @@ function renderITRoom(){
 
                     <p style="color:#94a3b8;font-size:13px;margin:0;">
                         Real-time tenant licensing, automated database backup dispatch, and system health telemetry.
-                    </p>
+        </p>[]
                 </div>
 
                 <div style="display:flex;gap:10px;align-items:center;">
                     <button class="btn btn-success"
                         style="box-shadow:0 8px 20px rgba(22,163,74,0.35);font-size:13px;padding:10px 18px;display:flex;align-items:center;gap:6px;"
                         onclick="itExportDatabase()">
-                        💾 Backup JSON
+                     **&#128190; Backup JSON**
                     </button>
 
-                    <button class="btn btn-secondary"
-                        style="background:#334155;color:#fff;font-size:13px;padding:10px 18px;"
-                        onclick="openITConfigModal()">
-                        ⚙️ Config
-                    </button>
-                </div>
-            </div>
+                <button class="btn btn-secondary"
+    style="background:#334155;color:#fff;font-size:13px;padding:10px 18px;"
+    onclick="openITConfigModal()">
+    &#9881;&#65039; Config
+</button>
+</div>
+</div>
         </div>
 
         <div class="grid-4" style="margin-bottom:24px;">
@@ -301,7 +301,7 @@ function renderITRoom(){
                     <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">
                         Monthly IT Rev
                     </span>
-                    <span style="font-size:22px;">💵</span>
+                    <span style="font-size:22px;">📆</span>
                 </div>
 
                 <h3 style="font-size:28px;font-weight:900;margin:10px 0 2px 0;">
@@ -318,7 +318,7 @@ function renderITRoom(){
                     <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">
                         Active Realty
                     </span>
-                    <span style="font-size:22px;">🏢</span>
+                   <span style="font-size:22px;">🏢</span>
                 </div>
 
                 <h3 style="font-size:28px;font-weight:900;margin:10px 0 2px 0;">
@@ -336,7 +336,7 @@ function renderITRoom(){
                     <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">
                         Expiring Soon
                     </span>
-                    <span style="font-size:22px;">⚠️</span>
+                    <span style="font-size:22px;">⏳</span>
                 </div>
 
                 <h3 style="font-size:28px;font-weight:900;margin:10px 0 2px 0;">
@@ -350,12 +350,12 @@ function renderITRoom(){
             </div>
 
             <div class="it-vibrant-card" style="background:linear-gradient(135deg,#b91c1c 0%,#ef4444 100%);">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                    <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">
-                        Locked Out
-                    </span>
-                    <span style="font-size:22px;">🚫</span>
-                </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">
+            Locked Out
+        </span>
+        <span style="font-size:22px;">&#128274;</span>
+    </div>
 
                 <h3 style="font-size:28px;font-weight:900;margin:10px 0 2px 0;">
                     ${lockedOut}
@@ -368,18 +368,17 @@ function renderITRoom(){
             </div>
 
         </div>
+<!-- SYSTEM HEALTH MONITORING -->
+<div class="panel"
+    style="background:#0f172a;border:1px solid #1e293b;border-radius:18px;padding:22px;margin-bottom:24px;color:#f8fafc;">
 
-        <!-- SYSTEM HEALTH MONITORING -->
-        <div class="panel"
-            style="background:#0f172a;border:1px solid #1e293b;border-radius:18px;padding:22px;margin-bottom:24px;color:#f8fafc;">
-
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid #334155;padding-bottom:12px;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:20px;">🌐</span>
-                    <strong style="font-size:15px;color:#f8fafc;">
-                        CLOUD & SERVER STATUS (LIVE MONITORING)
-                    </strong>
-                </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid #334155;padding-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:20px;">&#127759;</span>
+            <strong style="font-size:15px;color:#f8fafc;">
+                CLOUD & SERVER STATUS (LIVE MONITORING)
+            </strong>
+        </div>
 
                 <span class="badge badge-green"
                     style="background:#059669;color:#fff;">
@@ -393,10 +392,10 @@ function renderITRoom(){
                     <div style="display:flex;justify-content:space-between;margin-bottom:12px;align-items:center;">
                         <span style="color:#94a3b8;font-size:13px;font-weight:bold;">
                             Cloudflare Hosting:
-                        </span>
-                        <span style="color:#22c55e;font-weight:bold;font-size:13px;">
-                            🟢 Active & Live
-                        </span>
+    </span>
+<span style="color:#22c55e;font-weight:bold;font-size:13px;">
+    &#128994; Active &amp; Live
+</span>
                     </div>
 
                     <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -458,7 +457,7 @@ function renderITRoom(){
 
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid #f1f5f9;padding-bottom:12px;">
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:20px;">🎨</span>
+                    <span style="font-size:20px;"&#127912;¨</span>
                     <strong style="font-size:15px;color:#1e293b;">
                         GLOBAL SYSTEM LOGO &amp; PLATFORM NAME CHANGER
                     </strong>
@@ -488,7 +487,7 @@ function renderITRoom(){
                     <div class="form-group">
                         <label>Or Paste Logo Image URL / Emoji:</label>
                         <input id="itSystemLogoInput"
-                            value="${esc(db.settings.systemLogo || "🏢")}"
+                            value="${esc(db.settings.systemLogo || "Ã°Å¸ÂÂ¢")}"
                             oninput="document.getElementById('itSystemLogoPreview').innerHTML = renderLogoHTML(this.value)">
                     </div>
 
@@ -521,10 +520,10 @@ function renderITRoom(){
         <div class="card-3d">
 
             <div class="panel-header" style="margin-bottom:14px;">
-                <div>
-                    <h4 style="margin:0;font-size:1.1rem;font-weight:900;color:#1e293b;">
-                        🏢 REALTY BRANCHES SUBSCRIPTION &amp; LOCKOUT CONTROL TABLE
-                    </h4>
+ <div>
+    <h4 style="margin:0;font-size:1.1rem;font-weight:900;color:#1e293b;">
+        &#127970; REALTY BRANCHES SUBSCRIPTION &amp; LOCKOUT CONTROL TABLE
+    </h4>
 
                     <small style="color:#64748b;">
                         One-click renewal, manual date adjustment, and emergency lockouts.
@@ -570,7 +569,7 @@ function renderITRoom(){
                                             <div style="display:flex;align-items:center;gap:10px;">
 
                                                 <div style="width:38px;height:38px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid #e2e8f0;overflow:hidden;">
-                                                    ${renderLogoHTML(r.logo || "🏢")}
+                                                    ${renderLogoHTML(r.logo || "Ã°Å¸ÂÂ¢")}
                                                 </div>
 
                                                 <div>
@@ -596,7 +595,7 @@ function renderITRoom(){
                                             <br>
 
                                             <small style="color:#64748b;">
-                                                ${esc(r.contact || "—")}
+                                                ${esc(r.contact || "Ã¢â‚¬â€")}
                                             </small>
                                         </td>
 
@@ -614,27 +613,26 @@ function renderITRoom(){
                                         </td>
 
                                         <td>
-                                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
 
-                                                <button class="btn btn-purple"
-                                                    style="padding:6px 11px;font-size:12px;"
-                                                    onclick="openEditBranchSubscriptionModal('${r.id}')">
-                                                    🎨 Logo &amp; Name
-                                                </button>
+    <button class="btn btn-purple"
+        style="padding:6px 11px;font-size:12px;"
+        onclick="openEditBranchSubscriptionModal('${r.id}')">
+        &#127912; Logo &amp; Name
+    </button>
 
-                                                <button class="btn btn-success"
-                                                    style="padding:6px 11px;font-size:12px;"
-                                                    onclick="itRenewBranch('${r.id}',30)">
-                                                    Renew +30d
-                                                </button>
+    <button class="btn btn-success"
+        style="padding:6px 11px;font-size:12px;"
+        onclick="itRenewBranch('${r.id}',30)">
+        Renew +30d
+    </button>
 
-                                                <button class="btn ${r.isLocked ? "btn-primary" : "btn-danger"}"
-                                                    style="padding:6px 11px;font-size:12px;"
-                                                    onclick="itToggleFreezeBranch('${r.id}')">
-                                                    ${r.isLocked ? "🔓 Unfreeze" : "Freeze/Lockout"}
-                                                </button>
-
-                                                <button class="btn btn-warning"
+    <button class="btn ${r.isLocked ? "btn-primary" : "btn-danger"}"
+        style="padding:6px 11px;font-size:12px;"
+        onclick="itToggleFreezeBranch('${r.id}')">
+        ${r.isLocked ? "&#128275; Unfreeze" : "Freeze/Lockout"}
+    </button>
+                     <button class="btn btn-warning"
                                                     style="padding:6px 11px;font-size:12px;"
                                                     onclick="itVerifyPayment('${r.id}')">
                                                     Verify Payment
@@ -657,26 +655,276 @@ function renderITRoom(){
 }
 
 /* =========================================================
+   CLOUD SUBSCRIPTION CONTROL (EDITABLE PRICING & MASTER EXPIRATION)
+========================================================= */
+
+function renderCloudSubscription(){
+    if(!isIT()){
+        document.getElementById("content").innerHTML = `
+            <div class="panel" style="background:#fef2f2;border:1px solid #fecaca;text-align:center;padding:35px;">
+                <h3 style="color:#b91c1c;font-size:22px;margin-bottom:8px;">
+                    ACCESS RESTRICTED
+                </h3>
+                <p style="color:#7f1d1d;font-size:14px;">
+                    Cloud Subscription Control is available only to the System Administrator.
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    const realtyCount = Array.isArray(db.realties) ? db.realties.length : 0;
+    
+    // DYNAMIC PRICING VARIABLES (Kinukuha na sa Database)
+    db.settings = db.settings || {};
+    const includedRealty = db.settings.includedRealty !== undefined ? db.settings.includedRealty : 2;
+    const baseHosting = db.settings.baseHosting !== undefined ? db.settings.baseHosting : 2500;
+    const additionalRate = db.settings.additionalRate !== undefined ? db.settings.additionalRate : 1200;
+    const annualStorage = db.settings.annualStorage !== undefined ? db.settings.annualStorage : 10000;
+    const deploymentFee = db.settings.deploymentFee !== undefined ? db.settings.deploymentFee : 2500;
+    
+    // MASTER SYSTEM EXPIRATION (Para sa Boss Room / System Lockout)
+    const systemDueDate = db.settings.systemDueDate || "";
+
+    const additionalRealty = Math.max(0, realtyCount - includedRealty);
+    const monthlyHosting = baseHosting + (additionalRealty * additionalRate);
+
+    document.getElementById("content").innerHTML = `
+        <div style="background:linear-gradient(135deg,#07111f 0%,#0f2742 50%,#172554 100%);color:#fff;border-radius:18px;padding:26px;margin-bottom:24px;box-shadow:0 15px 35px rgba(15,23,42,.28);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div>
+                   <div style="font-size:11px;font-weight:900;letter-spacing:1.5px;color:#38bdf8;text-transform:uppercase;margin-bottom:6px;">
+    SYSTEM CONTROL &bull; CLOUD SERVICES
+</div>
+
+                    <h2 style="font-size:26px;font-weight:900;margin:0 0 6px;">
+                        Cloud Subscription
+                    </h2>
+
+                    <p style="margin:0;color:#cbd5e1;font-size:13px;">
+                        Hosting, cloud storage, billing and service activation control.
+                    </p>
+                </div>
+<div style="display:flex;gap:10px;align-items:center;">
+    <!-- BAGONG BUTTON PARA MA-EDIT ANG PRESYO AT EXPIRATION -->
+    <button class="btn btn-primary"
+        style="background:#2563eb;color:#fff;font-size:13px;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:bold;box-shadow:0 8px 20px rgba(37,99,235,0.35);"
+        onclick="openCloudSettingsModal()">
+        &#9881;&#65039; Edit Pricing &amp; Expiration
+    </button>
+
+                    <div style="padding:10px 16px;border-radius:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#86efac;font-size:12px;font-weight:800;">
+                        SYSTEM ADMINISTRATOR ONLY
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-4" style="margin-bottom:24px;">
+            <div class="it-vibrant-card" style="background:linear-gradient(135deg,#1d4ed8 0%,#3b82f6 100%);">
+                <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">
+                    Active Realty Accounts
+                </span>
+                <h3 style="font-size:30px;font-weight:900;margin:10px 0 2px;">
+                    ${realtyCount}
+                </h3>
+                <small style="opacity:.85;">Current tenant count</small>
+            </div>
+
+            <div class="it-vibrant-card" style="background:linear-gradient(135deg,#059669 0%,#10b981 100%);">
+                <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">
+                    Monthly Hosting
+                </span>
+                <h3 style="font-size:30px;font-weight:900;margin:10px 0 2px;">
+                    ${money(monthlyHosting)}
+                </h3>
+                <small style="opacity:.85;">Up to ${includedRealty} Realty included</small>
+            </div>
+
+            <div class="it-vibrant-card" style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);">
+                <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">
+                    Cloud Storage
+                </span>
+                <h3 style="font-size:30px;font-weight:900;margin:10px 0 2px;">
+                    ${money(annualStorage)}
+                </h3>
+                <small style="opacity:.85;">Annual cloud storage service</small>
+            </div>
+
+            <div class="it-vibrant-card" style="background:linear-gradient(135deg,#d97706 0%,#f59e0b 100%);">
+                <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">
+                    Deployment / Setup
+                </span>
+                <h3 style="font-size:30px;font-weight:900;margin:10px 0 2px;">
+                    ${money(deploymentFee)}
+                </h3>
+                <small style="opacity:.85;">One-time initial deployment</small>
+            </div>
+        </div>
+
+        <div class="panel" style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:24px;margin-bottom:24px;">
+            <h3 style="margin:0 0 18px;color:#0f172a;">HOSTING PRICING MODEL</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+                <div style="padding:18px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;">
+                    <strong style="display:block;color:#0f172a;margin-bottom:7px;">First ${includedRealty} Realty Accounts</strong>
+                    <span style="font-size:22px;font-weight:900;color:#2563eb;">${money(baseHosting)} / month</span>
+                    <small style="display:block;color:#64748b;margin-top:6px;">Hosting platform fee</small>
+                </div>
+                <div style="padding:18px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;">
+                    <strong style="display:block;color:#0f172a;margin-bottom:7px;">Additional Realty</strong>
+                    <span style="font-size:22px;font-weight:900;color:#7c3aed;">+${money(additionalRate)} / month</span>
+                    <small style="display:block;color:#64748b;margin-top:6px;">Each account beyond the first ${includedRealty}</small>
+                </div>
+                <div style="padding:18px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;">
+                    <strong style="display:block;color:#0f172a;margin-bottom:7px;">Cloud Storage</strong>
+                    <span style="font-size:22px;font-weight:900;color:#059669;">${money(annualStorage)} / year</span>
+                    <small style="display:block;color:#64748b;margin-top:6px;">Cloud storage service</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="background:#0f172a;border:1px solid #1e293b;border-radius:18px;padding:24px;color:#f8fafc;margin-bottom:24px;">
+            <h3 style="margin:0 0 18px;">CURRENT BILLING SUMMARY</h3>
+            <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:12px;">
+                <span style="color:#cbd5e1;">Active Realty Accounts</span>
+                <strong>${realtyCount}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:12px;">
+                <span style="color:#cbd5e1;">Monthly Hosting</span>
+                <strong>${money(monthlyHosting)}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:12px;">
+                <span style="color:#cbd5e1;">Annual Cloud Storage</span>
+                <strong>${money(annualStorage)}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                <span style="color:#cbd5e1;">Initial Deployment / Setup</span>
+                <strong>${money(deploymentFee)}</strong>
+            </div>
+        </div>
+
+        <!-- NEW: MASTER SYSTEM EXPIRATION PANEL -->
+        <div class="panel" style="background:#fffbeb;border:1px solid #fde68a;border-radius:18px;padding:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;">
+                <div>
+                    <strong style="display:block;color:#92400e;margin-bottom:6px;font-size:16px;">
+    &#9888; MASTER SYSTEM / BOSS EXPIRATION
+</strong>
+                    <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">
+                        Date kung kailan mag-eexpire ang buong system o ang Boss Account. <br>
+                        Current Expiration: 
+                        <strong style="font-size:15px;color:#b91c1c;background:#fef3c7;padding:2px 6px;border-radius:4px;">
+                            ${systemDueDate ? formatDisplayDate(systemDueDate) : 'Walang Expiration Set (Unlimited)'}
+                        </strong>
+                    </p>
+                </div>
+                <button class="btn btn-warning" style="font-weight:bold;box-shadow:0 4px 10px rgba(245,158,11,0.3);" onclick="openCloudSettingsModal()">
+                    Set System Expiration
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function openCloudSettingsModal(){
+    db.settings = db.settings || {};
+    const includedRealty = db.settings.includedRealty !== undefined ? db.settings.includedRealty : 2;
+    const baseHosting = db.settings.baseHosting !== undefined ? db.settings.baseHosting : 2500;
+    const additionalRate = db.settings.additionalRate !== undefined ? db.settings.additionalRate : 1200;
+    const annualStorage = db.settings.annualStorage !== undefined ? db.settings.annualStorage : 10000;
+    const deploymentFee = db.settings.deploymentFee !== undefined ? db.settings.deploymentFee : 2500;
+    const systemDueDate = db.settings.systemDueDate || "";
+
+    showModal(`
+        <div class="modal-header">
+            <h3>&#9881;&#65039; EDIT CLOUD PRICING &amp; SYSTEM EXPIRATION</h3>
+            <button class="close" onclick="closeModal()">&times;”</button>
+        </div>
+
+        <div class="grid-2" style="gap:15px;margin-bottom:15px;">
+            <div class="form-group">
+                <label>Base Hosting Fee (PHP):</label>
+                <input type="number" id="csBaseHosting" value="${baseHosting}">
+            </div>
+            <div class="form-group">
+                <label>Included Realty Accounts:</label>
+                <input type="number" id="csIncludedRealty" value="${includedRealty}">
+            </div>
+        </div>
+
+        <div class="grid-2" style="gap:15px;margin-bottom:15px;">
+            <div class="form-group">
+                <label>Additional Rate Per Extra Realty (PHP):</label>
+                <input type="number" id="csAdditionalRate" value="${additionalRate}">
+            </div>
+            <div class="form-group">
+                <label>Annual Cloud Storage Fee (PHP):</label>
+                <input type="number" id="csAnnualStorage" value="${annualStorage}">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+            <label>Deployment / Setup Fee (PHP):</label>
+            <input type="number" id="csDeploymentFee" value="${deploymentFee}">
+        </div>
+
+        <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0;">
+
+        <div class="form-group" style="background:#fef2f2;padding:15px;border-radius:8px;border:1px dashed #f87171;">
+            <label style="color:#b91c1c;font-weight:bold;font-size:14px;">&#128680; Master System / Boss Room Expiration Date:</label>
+            <input type="date" id="csSystemDueDate" value="${systemDueDate}" style="margin-top:8px;border:1px solid #fca5a5;">
+            <small style="color:#7f1d1d;margin-top:5px;display:block;">
+                Pag na-reach ang date na ito, magagamit ang "db.settings.systemDueDate" para i-block ang Boss Account. I-leave na blank kung gusto mong walang expiration.
+            </small>
+        </div>
+
+        <button class="btn btn-primary full" onclick="saveCloudSettings()" style="font-size:15px;padding:12px;">
+           **&#128190; SAVE CLOUD SETTINGS**
+        </button>
+    `);
+}
+
+function saveCloudSettings(){
+    db.settings.baseHosting = Number(document.getElementById("csBaseHosting").value);
+    db.settings.includedRealty = Number(document.getElementById("csIncludedRealty").value);
+    db.settings.additionalRate = Number(document.getElementById("csAdditionalRate").value);
+    db.settings.annualStorage = Number(document.getElementById("csAnnualStorage").value);
+    db.settings.deploymentFee = Number(document.getElementById("csDeploymentFee").value);
+    
+    // Master Expiration Save
+    db.settings.systemDueDate = document.getElementById("csSystemDueDate").value;
+
+    saveDB();
+    closeModal();
+    alert("Ã¢Å“â€¦ Tagumpay! Nai-save at na-update na ang mga Pricing at System Expiration Date.");
+    
+    // Auto-refresh the page
+    if(typeof renderCloudSubscription === "function"){
+        renderCloudSubscription();
+    }
+}
+
+/* =========================================================
    IT INFRASTRUCTURE
 ========================================================= */
 
 function renderITInfrastructure(){
-    if(!isIT()){
-        document.getElementById("content").innerHTML = `
-            <div class="panel"
-                style="background:#fef2f2;border:1px solid #fecaca;text-align:center;padding:35px;">
+   if(!isIT()){
+    document.getElementById("content").innerHTML = `
+        <div class="panel"
+            style="background:#fef2f2;border:1px solid #fecaca;text-align:center;padding:35px;">
 
-                <h3 style="color:#b91c1c;font-size:22px;margin-bottom:8px;">
-                    🚫 ACCESS RESTRICTED: IT MASTER VENDOR ONLY
-                </h3>
+            <h3 style="color:#b91c1c;font-size:22px;margin-bottom:8px;">
+                &#128680; ACCESS RESTRICTED: IT MASTER VENDOR ONLY
+            </h3>
 
-                <p style="color:#7f1d1d;font-size:14px;">
-                    Exclusive infrastructure page for the IT Master.
-                </p>
-            </div>
-        `;
+            <p style="color:#7f1d1d;font-size:14px;">
+                Exclusive infrastructure page for the IT Master.
+            </p>
+        </div>
+    `;
 
-        return;
+    return;
     }
 
     document.getElementById("content").innerHTML = `
@@ -702,26 +950,25 @@ function renderITInfrastructure(){
                     </p>
                 </div>
 
-                <button class="btn btn-success"
-                    onclick="checkInfrastructureMetrics()">
-                    🔄 Refresh Telemetry
-                </button>
+              <button class="btn btn-success"
+    onclick="checkInfrastructureMetrics()">
+    &#128260; Refresh Telemetry
+</button>
 
-            </div>
-        </div>
+</div>
+</div>
 
-        <div class="grid-2"
-            style="margin-bottom:24px;gap:20px;">
+<div class="grid-2"
+    style="margin-bottom:24px;gap:20px;">
 
-            <!-- CLOUDFLARE -->
-            <div class="panel"
-                style="background:#0f172a;border:1px solid #334155;border-radius:16px;padding:22px;color:#fff;">
+    <!-- CLOUDFLARE -->
+    <div class="panel"
+        style="background:#0f172a;border:1px solid #334155;border-radius:16px;padding:22px;color:#fff;">
 
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                    <strong style="font-size:16px;color:#f97316;">
-                        ☁️ Cloudflare Pages &amp; Workers
-                    </strong>
-
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <strong style="font-size:16px;color:#f97316;">
+                &#9889;&#65039; Cloudflare Pages &amp; Workers
+            </strong>
                     <span class="badge badge-green"
                         style="background:#059669;color:#fff;">
                         Online / Free Tier
@@ -757,13 +1004,11 @@ function renderITInfrastructure(){
                         <div style="background:#10b981;width:12%;height:100%;border-radius:4px;"></div>
                     </div>
                 </div>
-
-                <button class="btn btn-secondary full"
-                    style="background:#334155;font-size:12px;"
-                    onclick="window.open('https://dash.cloudflare.com','_blank')">
-                    Open Cloudflare Dashboard ↗
-                </button>
-
+<button class="btn btn-secondary full"
+    style="background:#334155;font-size:12px;"
+    onclick="window.open('https://dash.cloudflare.com','_blank')">
+    Open Cloudflare Dashboard &mdash;
+</button>
             </div>
 
             <!-- GITHUB -->
@@ -772,7 +1017,7 @@ function renderITInfrastructure(){
 
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                     <strong style="font-size:16px;color:#e2e8f0;">
-                        🐙 GitHub Repository Storage
+                        Ã°Å¸Ââ„¢ GitHub Repository Storage
                     </strong>
 
                     <span id="git-percent-text"
@@ -820,7 +1065,7 @@ function renderITInfrastructure(){
                 <button class="btn btn-secondary full"
                     style="background:#334155;font-size:12px;"
                     onclick="window.open('https://github.com/junmar12345/realty-system','_blank')">
-                    Open GitHub Repository ↗
+                    Open GitHub Repository Ã¢â€ â€”
                 </button>
 
             </div>
@@ -832,7 +1077,7 @@ function renderITInfrastructure(){
 
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <strong style="font-size:16px;color:#a855f7;">
-                    ⚡ External Cloud, Vercel, Railway &amp; AI APIs
+                    &#9889;&#65039; External Cloud, Vercel, Railway &amp; AI APIs
                 </strong>
 
                 <span class="badge badge-purple"
@@ -916,14 +1161,13 @@ function saveITSystemBranding(){
     }
 
     db.settings.systemName = name;
-    db.settings.systemLogo = logo || "🏢";
+    db.systemLogo = logo || "Ã°Å¸ÂÂ¢";
 
     saveDB();
 
-    alert(
-        "✅ System Name and Logo successfully updated across the platform!"
-    );
-
+   alert(
+    "&#9989; System Name and Logo successfully updated across the platform!"
+);
     renderITRoom();
 }
 
@@ -998,7 +1242,7 @@ function itRenewBranch(realtyId,days=30){
     saveDB();
 
     alert(
-        `✅ Subscription Renewed!\n` +
+        `\u2705 Subscription Renewed!\n` +
         `Branch: ${branch.name}\n` +
         `New Due Date: ${formatDisplayDate(branch.dueDate)} (+${days} days)`
     );
@@ -1021,19 +1265,19 @@ function itToggleFreezeBranch(realtyId){
 
     saveDB();
 
-    if(branch.isLocked){
-        alert(
-            `🚫 ${branch.name} is now LOCKED OUT!\n` +
-            `Staff of this branch will be blocked from logging in.`
-        );
-    }else{
-        alert(
-            `🔓 ${branch.name} has been UNLOCKED.`
-        );
-    }
-
-    renderITRoom();
+  if(branch.isLocked){
+alert(
+`🔒 ${branch.name} is now LOCKED OUT!\n` +
+`Staff of this branch will be blocked from logging in.`
+);
+}else{
+alert(
+`🔓 ${branch.name} has been UNLOCKED.`
+);
 }
+renderITRoom();
+}
+
 
 /* =========================================================
    PAYMENT VERIFICATION
@@ -1046,10 +1290,18 @@ function itVerifyPayment(realtyId){
 
     if(!branch) return;
 
+    const pendingPayment = Array.isArray(db.subscriptionPayments)
+        ? db.subscriptionPayments.find(p =>
+            p.realtyId === branch.id &&
+            p.status === "PENDING"
+        )
+        : null;
+
     showModal(`
         <div class="modal-header">
-            <h3>💳 VERIFY PLATFORM SUBSCRIPTION PAYMENT</h3>
-            <button class="close" onclick="closeModal()">×</button>
+            <h3>&#128179; &#128179; VERIFY PLATFORM SUBSCRIPTION PAYMENT
+</h3>
+            <button class="close" onclick="closeModal()">&times;</button>
         </div>
 
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;color:#166534;">
@@ -1061,7 +1313,7 @@ function itVerifyPayment(realtyId){
             <label>Payment Amount Received (PHP):</label>
             <input id="verifyPaidAmount"
                 type="number"
-                value="${branch.monthlyFee || 2500}">
+                value="${pendingPayment?.amount || branch.monthlyFee || 2500}">
         </div>
 
         <div class="form-group">
@@ -1089,9 +1341,37 @@ function confirmVerifyPayment(realtyId){
 
     if(!branch) return;
 
+    const pendingPayment = Array.isArray(db.subscriptionPayments)
+        ? db.subscriptionPayments.find(p =>
+            p.realtyId === branch.id &&
+            p.status === "PENDING"
+        )
+        : null;
+
+    if(!pendingPayment){
+        alert("No pending subscription payment found for this branch.");
+        return;
+    }
+
+    const verifiedAmount = Number(
+        document.getElementById("verifyPaidAmount")?.value || pendingPayment.amount || 0
+    );
+
     const days = Number(
         document.getElementById("verifyDaysToAdd")?.value || 30
     );
+
+    if(!Number.isFinite(verifiedAmount) || verifiedAmount < 0){
+        alert("Please enter a valid verified payment amount.");
+        return;
+    }
+
+    pendingPayment.status = "VERIFIED";
+    pendingPayment.verifiedAmount = verifiedAmount;
+    pendingPayment.verifiedDays = days;
+    pendingPayment.verifiedAt = new Date().toISOString();
+    pendingPayment.verifiedBy = currentUser?.username || "IT";
+    pendingPayment.verifiedByName = currentUser?.name || "IT Administrator";
 
     let baseDate = new Date();
 
@@ -1116,12 +1396,11 @@ function confirmVerifyPayment(realtyId){
     closeModal();
 
     alert(
-        `Payment verified! New Due Date: ${formatDisplayDate(branch.dueDate)}`
+        "Payment verified! New Due Date: " + formatDisplayDate(branch.dueDate)
     );
 
     renderITRoom();
 }
-
 /* =========================================================
    EDIT BRANCH SUBSCRIPTION
 ========================================================= */
@@ -1133,18 +1412,18 @@ function openEditBranchSubscriptionModal(realtyId){
 
     if(!branch) return;
 
-    showModal(`
-        <div class="modal-header">
-            <h3>
-                🎨 EDIT REALTY NAME &amp; UPLOAD LOGO:
-                ${esc(branch.name)}
-            </h3>
+ showModal(`
+    <div class="modal-header">
+        <h3>
+            &#9999;&#65039; EDIT REALTY NAME &amp; UPLOAD LOGO:
+            ${esc(branch.name)}
+        </h3>
 
-            <button class="close"
-                onclick="closeModal()">
-                ×
-            </button>
-        </div>
+        <button class="close"
+            onclick="closeModal()">
+            &times;
+        </button>
+    </div>
 
         <div class="form-group">
             <label>Branch Name:</label>
@@ -1165,7 +1444,7 @@ function openEditBranchSubscriptionModal(realtyId){
             <label>Or Paste Logo URL / Emoji:</label>
 
             <input id="editBranchLogo"
-                value="${esc(branch.logo || "🏢")}"
+                value="${esc(branch.logo || "Ã°Å¸ÂÂ¢")}"
                 oninput="document.getElementById('modalBranchLogoPreview').innerHTML = renderLogoHTML(this.value)">
         </div>
 
@@ -1177,7 +1456,7 @@ function openEditBranchSubscriptionModal(realtyId){
 
             <div id="modalBranchLogoPreview"
                 style="width:48px;height:48px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;border:1px solid #cbd5e1;">
-                ${renderLogoHTML(branch.logo || "🏢")}
+                ${renderLogoHTML(branch.logo || "Ã°Å¸ÂÂ¢")}
             </div>
 
         </div>
@@ -1234,13 +1513,12 @@ function saveBranchSubscriptionEdit(realtyId){
         alert("Please complete the required fields.");
         return;
     }
+branch.name = name;
+branch.logo = logo || "&#127970;";
+branch.dueDate = dueDate;
+branch.monthlyFee = fee;
 
-    branch.name = name;
-    branch.logo = logo || "🏢";
-    branch.dueDate = dueDate;
-    branch.monthlyFee = fee;
-
-    saveDB();
+saveDB();
     closeModal();
 
     alert(
@@ -1262,14 +1540,14 @@ function saveBranchSubscriptionEdit(realtyId){
 
 function openITConfigModal(){
     showModal(`
-        <div class="modal-header">
-            <h3>⚙️ IT PLATFORM TECHNICAL CONFIG</h3>
+       <div class="modal-header">
+    <h3>&#9881;&#65039; IT PLATFORM TECHNICAL CONFIG</h3>
 
-            <button class="close"
-                onclick="closeModal()">
-                ×
-            </button>
-        </div>
+    <button class="close"
+        onclick="closeModal()">
+        &times;
+    </button>
+</div>
 
         <div class="form-group">
             <label>New IT Root Password:</label>
@@ -1331,9 +1609,8 @@ function renderResiboReport(){
                 style="background:#fef2f2;border:1px solid #fecaca;text-align:center;padding:35px;">
 
                 <h3 style="color:#b91c1c;font-size:22px;margin-bottom:8px;">
-                    🚫 ACCESS RESTRICTED
-                </h3>
-
+    &#128680; ACCESS RESTRICTED
+</h3>
                 <p style="color:#7f1d1d;font-size:14px;">
                     Ang pahinang ito ay para lamang sa Boss at IT.
                 </p>
@@ -1358,9 +1635,9 @@ function renderResiboReport(){
                 </span>
             </div>
 
-            <h2 style="font-size:24px;font-weight:900;color:#f8fafc;margin:0 0 4px 0;">
-                🧾 Acknowledgment Receipt Audit
-            </h2>
+           <h2 style="font-size:24px;font-weight:900;color:#f8fafc;margin:0 0 4px 0;">
+    &#129534; Acknowledgment Receipt Audit
+</h2>
 
             <p style="color:#94a3b8;font-size:13px;margin:0;">
                 Exclusive for BOSS & IT Root. Tingnan ang lahat ng na-print na Acknowledgment Receipt. Naka-save ito bilang PNG para iwas dayaan at hindi na mae-edit.
@@ -1373,16 +1650,15 @@ function renderResiboReport(){
             <div class="panel-header"
                 style="margin-bottom:14px;border-bottom:1px solid #e2e8f0;padding-bottom:12px;">
 
-                <div>
-                    <h4 style="margin:0;font-size:1.1rem;font-weight:900;color:#1e293b;">
-                        📑 ACKNOWLEDGMENT RECEIPT SERIES
-                    </h4>
+            <div>
+    <h4 style="margin:0;font-size:1.1rem;font-weight:900;color:#1e293b;">
+        &#128221; ACKNOWLEDGMENT RECEIPT SERIES
+    </h4>
 
-                    <small style="color:#64748b;">
-                        I-click ang Series / AR No. button para makita ang uneditable image preview ng resibo.
-                    </small>
-                </div>
-
+    <small style="color:#64748b;">
+        I-click ang Series / AR No. button para makita ang uneditable image preview ng resibo.
+    </small>
+</div>
             </div>
 
             <div class="table-wrap">
@@ -1445,17 +1721,17 @@ function renderResiboReport(){
             html += `
                 <tr>
 
-                    <td>
-                        <button
-                            style="background:#e2e8f0;color:#2563eb;font-weight:bold;padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;"
-                            onmouseover="this.style.background='#cbd5e1'"
-                            onmouseout="this.style.background='#e2e8f0'"
-                            onclick="viewResiboPreview(${originalIndex})">
+                   <td>
+    <button
+        style="background:#e2e8f0;color:#2563eb;font-weight:bold;padding:6px 14px;border-radius:6px;border:1px solid #cbd5e1;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;"
+        onmouseover="this.style.background='#cbd5e1'"
+        onmouseout="this.style.background='#e2e8f0'"
+        onclick="viewResiboPreview(${originalIndex})">
 
-                            🔍 ${esc(displaySeries)}
+        &#128269; ${esc(displaySeries)}
 
-                        </button>
-                    </td>
+    </button>
+</td>
 
                     <td>
                         ${formatDisplayDate(log.date)}
@@ -1481,7 +1757,7 @@ function renderResiboReport(){
                                 style="padding:6px 11px;font-size:12px;"
                                 onclick="deleteResiboLog(${originalIndex})">
 
-                                🗑️ Delete
+                                Ã°Å¸â€”â€˜Ã¯Â¸Â Delete
 
                             </button>
 
@@ -1537,21 +1813,21 @@ function viewResiboPreview(index){
         <div class="modal-header">
 
             <h3>
-                🔍 PREVIEW: ${esc(displaySeries)}
+                Ã°Å¸â€Â PREVIEW: ${esc(displaySeries)}
             </h3>
 
             <button class="close"
                 onclick="closeModal()">
-                ×
+                Ãƒâ€”
             </button>
 
         </div>
 
         <div style="text-align:center;background:#f8fafc;padding:15px;border-radius:12px;border:1px dashed #cbd5e1;">
 
-            <p style="margin-bottom:12px;color:#dc2626;font-size:12px;font-weight:bold;">
-                🔒 UNEDITABLE PNG CAPTURE (ACKNOWLEDGMENT RECEIPT)
-            </p>
+           <p style="margin-bottom:12px;color:#dc2626;font-size:12px;font-weight:bold;">
+    &#128274; UNEDITABLE PNG CAPTURE (ACKNOWLEDGMENT RECEIPT)
+</p>
 
             <div style="background:#fff;padding:10px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.05);display:inline-block;">
 
@@ -1583,7 +1859,7 @@ function deleteResiboLog(index){
         saveDB();
 
         alert(
-            "✅ Acknowledgment Receipt deleted successfully."
+            "Ã¢Å“â€¦ Acknowledgment Receipt deleted successfully."
         );
 
         renderResiboReport();
