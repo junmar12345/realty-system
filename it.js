@@ -94,6 +94,7 @@ function renderITRoom() {
         </div>
 
         <!-- KPI SUMMARY TILES -->
+<<<<<<< HEAD
         <!-- IT Master Control Panel -->
     <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; color: #fff; margin-top: 20px; border: 1px solid #333;">
         <h3 style="color: #ff4d4d; margin-top: 0;">🛠️ IT Master System Control</h3>
@@ -123,6 +124,8 @@ function renderITRoom() {
             💾 Save Master Settings
         </button>
     </div>
+=======
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         <div class="grid-4" style="margin-bottom:24px;">
             <div class="card-3d" style="border-top:4px solid #2563eb;">
                 <small style="color:#64748b; font-weight:bold; text-transform:uppercase;">Boss Room Status</small>
@@ -311,7 +314,11 @@ function renderCloudSubscription() {
                 <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:16px;">
                     <strong style="color:#1e40af; font-size:14px;">Verification Policy:</strong>
                     <p style="font-size:12px; color:#3b82f6; margin-top:4px; line-height:1.5;">
+<<<<<<< HEAD
                         "Approving a branch or Boss payment will automatically add +30 days to the account's due date and remove any lockout restriction."
+=======
+                        Ang pag-apruba sa bayad ng branch o ng Boss ay awtomatikong magdaragdag ng <strong>+30 araw</strong> sa due date ng account at magtatanggal sa anumang lockout restriction.
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
                     </p>
                 </div>
             </div>
@@ -666,7 +673,11 @@ function renderControl() {
                 <form onsubmit="saveITBrandingSettings(event)">
                     <div class="form-group">
                         <label>System Platform Name</label>
+<<<<<<< HEAD
                         <input id="itSysNameInput" value="${esc(db.settings.systemName || 'KHAINEJOSH REALTY')}" required>
+=======
+                        <input id="itSysNameInput" value="${esc(db.settings.systemName || 'REALTY SYSTEM')}" required>
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
                     </div>
                     <div class="form-group">
                         <label>Main Office Name</label>
@@ -750,7 +761,11 @@ function renderControl() {
 
 function saveITBrandingSettings(event) {
     event.preventDefault();
+<<<<<<< HEAD
     db.settings.systemName = document.getElementById("itSysNameInput")?.value.trim() || "KHAINEJOSH REALTY";
+=======
+    db.settings.systemName = document.getElementById("itSysNameInput")?.value.trim() || "REALTY SYSTEM";
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     db.settings.realtyName = document.getElementById("itMainRealtyInput")?.value.trim() || "Main Office";
     db.settings.logo = document.getElementById("itLogoInput")?.value.trim() || "??";
 
@@ -861,6 +876,7 @@ function resetDatabase() {
 
 
 
+<<<<<<< HEAD
 // --- IT MASTER CONTROL PANEL CODE ---
 function saveITMasterConfig() {
     const savedConfig = JSON.parse(localStorage.getItem("realty_system_config")) || {};
@@ -884,3 +900,5 @@ function saveITMasterConfig() {
     alert("Tagumpay! Na-update na ang master settings.");
     location.reload();
 }
+=======
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680

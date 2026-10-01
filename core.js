@@ -9,7 +9,11 @@ const SESSION_KEY = "REALTY_ACTIVE_SESSION";
 
 let db = {
    settings: {
+<<<<<<< HEAD
         systemName: "KHAINEJOSH REALTY",
+=======
+        systemName: "REALTY SYSTEM",
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         realtyName: "Main Office",
         realtyAddress: "Philippines",
         logo: "🏢",
@@ -117,22 +121,36 @@ function saveDB() {
 }
 
 function seedInitialData() {
+<<<<<<< HEAD
     const savedConfig = JSON.parse(localStorage.getItem("realty_system_config")) || {};
 
+=======
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     const futureDue = new Date();
     futureDue.setDate(futureDue.getDate() + 30);
     const dueStr = futureDue.toISOString().slice(0, 10);
 
     db.settings.bossSubscription = {
+<<<<<<< HEAD
         id: savedConfig.bossRoomId || "BOSS",
+=======
+        id: "BOSS",
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         status: "ACTIVE",
         dueDate: dueStr
     };
 
+<<<<<<< HEAD
     const initialBranchId = savedConfig.realtyRoomId || uid("R");
     db.realties.push({
         id: initialBranchId,
         name: savedConfig.realtyName || "KHAINEJOSH REALTY",
+=======
+    const initialBranchId = uid("R");
+    db.realties.push({
+        id: initialBranchId,
+        name: "TARLAC CENTRAL REALTY",
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         owner: "Branch Manager",
         contact: "09123456789",
         address: "Tarlac City, Tarlac",
@@ -143,6 +161,10 @@ function seedInitialData() {
         logo: "🏢",
         tempPassword: ""
     });
+<<<<<<< HEAD
+=======
+
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     db.staff.push({
         id: uid("S"),
         name: "Branch Admin",
@@ -319,6 +341,7 @@ function loginUser(usernameInput, passwordInput) {
         }
     } else {
         matchedBranch = db.realties.find(r => r.id === matchedStaff.realtyId);
+<<<<<<< HEAD
     }
 
     if (!matchedStaff || !matchedBranch) {
@@ -357,10 +380,45 @@ function finalizeLogin() {
             timestamp: new Date().toISOString()
         });
         saveDB();
+=======
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     }
     const loginPortal = document.getElementById("loginPortal");
     if (loginPortal) loginPortal.classList.add("hidden");
 
+<<<<<<< HEAD
+=======
+    if (!matchedStaff || !matchedBranch) {
+        alert("Invalid username or password.");
+        return;
+    }
+
+    const isValidPass = (password === matchedStaff.password) || 
+                        (matchedStaff.temporaryPassword && password === matchedStaff.temporaryPassword) ||
+                        (matchedBranch.tempPassword && password === matchedBranch.tempPassword);
+
+    if (!isValidPass) {
+        alert("Invalid username or password.");
+        return;
+    }
+
+    currentUser = {
+        id: matchedStaff.id,
+        name: matchedStaff.name,
+        username: matchedStaff.username,
+        role: matchedStaff.role,
+        realtyId: matchedBranch.id,
+        mustChangePassword: !!matchedStaff.mustChangePassword
+    };
+
+    finalizeLogin();
+}
+
+function finalizeLogin() {
+    const loginPortal = document.getElementById("loginPortal");
+    if (loginPortal) loginPortal.classList.add("hidden");
+
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     setupUserInterface();
 
     if (currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser)) {
@@ -425,7 +483,11 @@ function universalSwitchBranch(realtyId) {
 ========================================================= */
 
 function applyDynamicBranding() {
+<<<<<<< HEAD
     const sysName = db.settings.systemName || "KHAINEJOSH REALTY";
+=======
+    const sysName = db.settings.systemName || "REALTY SYSTEM";
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     const logo = db.settings.logo || "🏢";
 
     const portalName = document.getElementById("portalSystemName");
@@ -454,12 +516,19 @@ function setupUserInterface() {
     const isBoss = currentUser.role === "BOSS";
 
     const navITRoom = document.getElementById("navITRoom");
+<<<<<<< HEAD
     const navAddRealty = document.getElementById("navAddRealty");
     const navCloudSub = document.getElementById("navCloudSub");
     const navControl = document.getElementById("navControl");
     const navReports = document.getElementById("navReports");
 
     if (navReports) navReports.classList.toggle("hidden", !(isBoss || isIT));
+=======
+    const navCloudSub = document.getElementById("navCloudSub");
+    const navControl = document.getElementById("navControl");
+    const navAddRealty = document.getElementById("navAddRealty");
+
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     if (navITRoom) navITRoom.classList.toggle("hidden", !isIT);
     if (navCloudSub) navCloudSub.classList.toggle("hidden", !isIT);
     if (navControl) navControl.classList.toggle("hidden", !isIT);

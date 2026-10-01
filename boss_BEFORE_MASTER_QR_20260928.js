@@ -77,7 +77,11 @@ function renderBossDashboard() {
         ${(bossSub.state === "EXPIRED" || bossSub.state === "NEAR_EXPIRY" || dueRealties.length > 0) ? `
             <div style="background:#fffbeb; border:1px solid #fcd34d; border-radius:12px; padding:14px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div>
+<<<<<<< HEAD
                     <strong style="color:#b45309; font-size:14px;">⏱️️ SUBSCRIPTION ATTENTION REQUIRED</strong>
+=======
+                    <strong style="color:#b45309; font-size:14px;">â° SUBSCRIPTION ATTENTION REQUIRED</strong>
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
                     <p style="color:#92400e; font-size:12px; margin-top:2px;">
                         ${bossSub.state !== "ACTIVE" ? `Boss Room: <strong>${bossSub.state}</strong> (${bossSub.daysRemaining} days left). ` : ''}
                         ${dueRealties.length > 0 ? `May <strong>${dueRealties.length}</strong> branch na expired o malapit nang mag-due.` : ''}

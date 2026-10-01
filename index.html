@@ -4,6 +4,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>KHAINEJOSH REALTY</title>
     <style>
         :root {
@@ -15,6 +16,20 @@
         --border: #334155;
         --border-light: #475569;
           
+=======
+    <title>REALTY MANAGEMENT SYSTEM</title>
+    <style>
+        :root {
+            --primary: #991b1b;
+            --primary-hover: #b91c1c;
+            --bg: #090204;
+            --surface: #140407;
+            --surface-card: #1c060a;
+            --text-main: #ffffff;
+            --text-muted: #cbd5e1;
+            --border: #3f1019;
+            --border-light: #5c1822;
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         }
 
         * {
@@ -106,7 +121,11 @@
         }
 
         .nav-btn.active {
+<<<<<<< HEAD
             background: #608ef2;
+=======
+            background: #991b1b;
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
             color: #ffffff;
         }
 
@@ -163,7 +182,11 @@
         .btn-primary { background: #991b1b; color: #fff; border-color: #b91c1c; }
         .btn-primary:hover { background: #b91c1c; }
         .btn-success { background: #14532d; color: #fff; border-color: #166534; }
+<<<<<<< HEAD
         .btn-danger { background: #515e84; color: #fff; border-color: #991b1b; }
+=======
+        .btn-danger { background: #7f1d1d; color: #fff; border-color: #991b1b; }
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         .btn-secondary { background: #1e293b; color: #cbd5e1; border-color: #334155; }
         .btn.full { width: 100%; }
 
@@ -270,7 +293,11 @@
             font-weight: 700;
             letter-spacing: 0.5px;
         }
+<<<<<<< HEAD
         .badge-red { background: #3d4ca8; color: #fca5a5; }
+=======
+        .badge-red { background: #450a0a; color: #fca5a5; }
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         .badge-green { background: #052e16; color: #86efac; }
         .badge-blue { background: #172554; color: #93c5fd; }
         .badge-purple { background: #3b0764; color: #d8b4fe; }
@@ -315,6 +342,7 @@
     </style>
 </head>
 <body>
+<<<<<<< HEAD
     <script>
     // Suriin kung ito ay bagong tab o ibang browser gamit ang sessionStorage
     // Kapag binuksan sa bagong tab, ang sessionStorage ay laging blangko (null)
@@ -336,11 +364,19 @@
     
     <!-- 1. LOGIN PORTAL -->
   
+=======
+
+    <!-- 1. LOGIN PORTAL -->
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     <div id="loginPortal" style="width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; background: radial-gradient(circle at center, #2d0a10 0%, #120305 100%);">
         <div style="width:100%; max-width:400px; background:linear-gradient(145deg, #240a0f, #150407); border:1px solid #5c1822; border-top:1px solid #7d202e; border-radius:16px; padding:32px; box-shadow:0 25px 50px rgba(0,0,0,0.8);">
             <div style="text-align:center; margin-bottom:24px;">
                 <div id="portalLogo" style="width:64px; height:64px; margin:0 auto 12px auto; display:flex; align-items:center; justify-content:center; font-size:32px; background:#110305; border:1px solid #3f121a; border-radius:12px;">🏢</div>
+<<<<<<< HEAD
                 <h2 id="portalSystemName" style="font-size:20px; font-weight:800; color:#fca5a5;">KHAINEJOSH REALTY</h2>
+=======
+                <h2 id="portalSystemName" style="font-size:20px; font-weight:800; color:#fca5a5;">REALTY SYSTEM</h2>
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
                 <p style="font-size:13px; color:#cbd5e1;">Sign in to access your operations dashboard</p>
             </div>
             
@@ -357,6 +393,7 @@
             </form>
         </div>
     </div>
+<<<<<<< HEAD
 
     <!-- 2. OFFLINE RENEWAL ROOM -->
     <div id="expiredOfflineRoom" class="hidden" style="width:100vw; height:100vh; background:#090d16; color:#ffffff; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
@@ -498,6 +535,95 @@
         </div>
     </div>
 
+=======
+
+    <!-- 2. OFFLINE RENEWAL ROOM -->
+    <div id="expiredOfflineRoom" class="hidden" style="width:100vw; height:100vh; background:#090d16; color:#ffffff; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
+        <div style="max-width:540px; width:100%; background:#131c2e; border:1px solid #1e293b; border-radius:16px; padding:32px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+            
+            <div class="blink-warning" style="display:inline-block; background:#dc2626; color:#ffffff; font-weight:900; font-size:12px; padding:6px 14px; border-radius:30px; letter-spacing:1px; margin-bottom:16px;">
+                ⚠️ CLOUD SUBSCRIPTION EXPIRED
+            </div>
+
+            <h2 id="expiredRoomTitle" style="font-size:22px; font-weight:800; margin-bottom:6px;">Subscription Expired</h2>
+            <p id="expiredRoomIdentity" style="font-size:14px; color:#94a3b8; margin-bottom:24px;">Permanent Room ID: <strong id="expiredRoomIdText" style="color:#38bdf8;">--</strong></p>
+
+            <div style="background:#1e293b; border-radius:12px; padding:20px; margin-bottom:24px; text-align:left;">
+                <h4 style="font-size:13px; color:#94a3b8; text-transform:uppercase; margin-bottom:8px;">Renewal Payment Instructions</h4>
+                <p style="font-size:13px; color:#cbd5e1; margin-bottom:12px;">"Select your preferred payment channel below and upload your transaction receipt for system verification."</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #334155; padding-top:10px;">
+                    <span style="font-size:13px; color:#94a3b8;">Subscription Rate:</span>
+                    <strong id="expiredRoomAmountText" style="font-size:16px; color:#34d399;">₱0.00</strong>
+                </div>
+            </div>
+
+            <div style="background:#ffffff; padding:16px; border-radius:12px; text-align:center; max-width:280px; margin:0 auto 20px auto; border:2px solid #2563eb;">
+                <span style="color:#0f172a; font-weight:800; font-size:13px; display:block; margin-bottom:8px; letter-spacing:0.5px;">
+                    💳 SCAN TO PAY 
+                </span>
+                <img src="QRCODE.png" alt="GoTyme QR Code" style="width:100%; max-height:240px; object-fit:contain; border-radius:6px; display:block; margin:0 auto;">
+            </div>
+
+            <div id="subscriptionPaymentStatus" style="margin-bottom:16px;"></div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn btn-primary full" style="padding:12px;" onclick="openSubmitProofModal()">📄 SUBMIT PROOF OF PAYMENT</button>
+                <button class="btn btn-secondary full" onclick="logoutUser()">LOGOUT PORTAL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAIN DASHBOARD APP -->
+    <div id="app" class="hidden">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span id="sideBrandLogo">🏢</span>
+                <span id="sideBrandName" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">REALTY SYSTEM</span>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <button class="nav-btn" data-page="dashboard" onclick="showPage('dashboard')">📊 Dashboard</button>
+                <button class="nav-btn" data-page="projects" onclick="showPage('projects')">🏗️ Projects / Sites</button>
+                <button class="nav-btn" data-page="reservation" onclick="showPage('reservation')">📝 Reservations</button>
+                <button class="nav-btn" data-page="buyers" onclick="showPage('buyers')">👥 Buyers Folder</button>
+                <button class="nav-btn" data-page="money" onclick="showPage('money')">💰 Money In / Out</button>
+                <button class="nav-btn" data-page="commission" onclick="showPage('commission')">💼 Commissions</button>
+                <button class="nav-btn" data-page="refund" onclick="showPage('refund')">↩️ Refunds</button>
+                <button class="nav-btn" data-page="expenses" onclick="showPage('expenses')">📉 Expenses</button>
+                <button class="nav-btn" data-page="reports" onclick="showPage('reports')">📈 Reports</button>
+                <button class="nav-btn" data-page="records" onclick="showPage('records')">📜 Audit Records</button>
+                <button class="nav-btn" data-page="staff" onclick="showPage('staff')">👷 Staff Team</button>
+                <button class="nav-btn" data-page="approvals" onclick="showPage('approvals')">⚖️ Approvals Hub</button>
+                
+                <button id="navAddRealty" class="nav-btn hidden" data-page="add-realty" onclick="showPage('add-realty')">🏢 Branch Realties</button>
+                <button id="navITRoom" class="nav-btn hidden" data-page="it-room" onclick="showPage('it-room')">🛡️ IT Operations</button>
+                <button id="navCloudSub" class="nav-btn hidden" data-page="cloud-subscription" onclick="showPage('cloud-subscription')">☁️ Cloud Billing</button>
+                <button id="navControl" class="nav-btn hidden" data-page="control" onclick="showPage('control')">⚙️ System Control</button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div style="font-size:12px; color:#cbd5e1; display:flex; justify-content:space-between; align-items:center;">
+                    <span id="userBadgeRole" class="badge badge-blue">STAFF</span>
+                    <span id="userBadgeName" style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">User</span>
+                </div>
+                <button class="btn btn-secondary full" style="padding:6px; font-size:12px;" onclick="logoutUser()">🚪 Log Out</button>
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="topbar">
+                <div>
+                    <h2 id="pageTitle" style="font-size:1.1rem; font-weight:800; color:#fca5a5;">Dashboard</h2>
+                    <p id="pageSubtitle" style="font-size:0.8rem; color:#cbd5e1;">Overview and records</p>
+                </div>
+                <div id="topbarBranchSelector" style="display:flex; align-items:center; gap:8px;"></div>
+            </header>
+
+            <main id="content" class="content-area"></main>
+        </div>
+    </div>
+
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     <!-- GLOBAL MODAL SHELL -->
     <div id="globalModal" class="modal-overlay hidden">
         <div class="modal-box" id="globalModalContent"></div>

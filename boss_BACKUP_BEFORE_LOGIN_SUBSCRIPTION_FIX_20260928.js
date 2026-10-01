@@ -59,7 +59,11 @@ function renderBossDashboard() {
                 <small style="color:#64748b;">Consolidated group realty oversight &amp; master billing controller</small>
             </div>
             <div style="display:flex; gap:8px;">
+<<<<<<< HEAD
                ${(JSON.parse(localStorage.getItem("realty_system_config") || "{}").hideRenewalEngine) ? '' : '<button class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>'}
+=======
+                <button class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
                 <button class="btn btn-primary" onclick="openBossPasswordModal()">🔒 Change Personal Password</button>
             </div>
         </div>

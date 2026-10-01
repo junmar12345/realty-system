@@ -2231,6 +2231,7 @@ function openAddStaffModal() {
         <div class="modal-header">
             <h3>👷 ADD STAFF MEMBER</h3>
             <button class="close" onclick="closeModal()">×</button>
+<<<<<<< HEAD
         </div>
         <form onsubmit="saveStaff(event)">
             <div class="form-group">
@@ -2467,3 +2468,270 @@ function switchReportFolder(folderId, btnElement) {
     const target = document.getElementById(folderId);
     if (target) target.style.display = 'block';
 }
+=======
+        </div>
+        <form onsubmit="saveStaff(event)">
+            <div class="form-group">
+                <label>Staff Full Name</label>
+                <input id="staffNameInput" required placeholder="e.g. Juan Perez">
+            </div>
+            <div class="form-group">
+                <label>Login Username</label>
+                <input id="staffUsernameInput" required placeholder="e.g. jperez">
+            </div>
+            <div class="form-group">
+                <label>System Role</label>
+                <select id="staffRoleInput">
+                    <option value="ADMIN">Branch Administrator</option>
+                    <option value="STAFF">Encoder / Cashier Staff</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Initial Temporary Password</label>
+                <input id="staffTempPassInput" value="${temp}" required style="font-weight:bold; color:#b91c1c;">
+                <small style="color:#64748b;">Aatasan ang staff na magpalit ng password pagka-login.</small>
+            </div>
+            <button class="btn btn-primary full" style="padding:10px; margin-top:6px;" type="submit">SAVE STAFF ACCOUNT</button>
+        </form>
+    `);
+}
+
+function saveStaff(event) {
+    event.preventDefault();
+    const activeRealtyId = getActiveRealtyId();
+    const name = document.getElementById("staffNameInput")?.value.trim();
+    const username = document.getElementById("staffUsernameInput")?.value.trim().toLowerCase();
+    const role = document.getElementById("staffRoleInput")?.value;
+    const pwd = document.getElementById("staffTempPassInput")?.value.trim();
+
+    if (!name || !username || !pwd) return;
+
+    const exists = (db.staff || []).some(s => s.username.toLowerCase() === username);
+    if (exists) {
+        alert("Username is already taken. Please choose another.");
+        return;
+    }
+
+    db.staff.push({
+        id: uid("S"),
+        realtyId: activeRealtyId,
+        name,
+        username,
+        password: pwd,
+        temporaryPassword: pwd,
+        role,
+        status: "ACTIVE",
+        mustChangePassword: true
+    });
+
+    logAuditEvent("ADD_STAFF", `Added staff account: ${username}`);
+    saveDB();
+    closeModal();
+    alert(`✅ Staff account "${name}" created!\nUsername: ${username}\nPassword: ${pwd}`);
+    renderStaff();
+}
+
+function resetStaffPassword(staffId) {
+    const staff = (db.staff || []).find(s => s.id === staffId);
+    if (!staff) return;
+
+    const temp = generateTempPassword();
+    staff.password = temp;
+    staff.temporaryPassword = temp;
+    staff.mustChangePassword = true;
+
+    logAuditEvent("RESET_STAFF_PASS", `Reset password for staff: ${staff.username}`);
+    saveDB();
+    alert(`✅ Temporary Password reset para kay ${staff.name}!\n\nBagong Temp Password: ${temp}`);
+}
+
+function toggleStaffStatus(staffId) {
+    const staff = (db.staff || []).find(s => s.id === staffId);
+    if (!staff) return;
+
+    staff.status = staff.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    logAuditEvent("TOGGLE_STAFF_STATUS", `Toggled status for ${staff.username} to ${staff.status}`);
+    saveDB();
+    renderStaff();
+}
+
+// =========================================================
+// 10. EXECUTIVE REPORTS & AUDIT TRAIL LOGS
+// =========================================================
+
+function renderReports() {
+    const activeRealtyId = getActiveRealtyId();
+    const moneyIn = (db.moneyIn || []).filter(m => !activeRealtyId || m.realtyId === activeRealtyId);
+    const moneyOut = (db.moneyOut || []).filter(m => !activeRealtyId || m.realtyId === activeRealtyId);
+    const reservations = (db.reservations || []).filter(r => !activeRealtyId || r.realtyId === activeRealtyId);
+
+    const totalIn = moneyIn.reduce((sum, m) => sum + Number(m.amount || 0), 0);
+    const totalOut = moneyOut.reduce((sum, m) => sum + Number(m.amount || 0), 0);
+    const net = totalIn - totalOut;
+
+    const content = document.getElementById("content");
+    if (!content) return;
+
+    content.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div>
+                <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b; margin:0;">📈 Executive Performance Reports</h3>
+                <small style="color:#64748b;">Consolidated ledger statements and financial health summary</small>
+            </div>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Statement</button>
+        </div>
+
+        <div class="card-3d" style="margin-bottom:24px;">
+            <h4 style="margin-bottom:14px; color:#1e293b;">Financial Statement Summary</h4>
+            <div class="table-wrap">
+                <table>
+                    <tbody>
+                        <tr><td><strong>Total Collections (Money In)</strong></td><td style="color:#16a34a; font-weight:bold; text-align:right;">${money(totalIn)}</td></tr>
+                        <tr><td><strong>Total Disbursements (Expenses + Commissions)</strong></td><td style="color:#dc2626; font-weight:bold; text-align:right;">${money(totalOut)}</td></tr>
+                        <tr style="background:#f8fafc; font-size:1.05rem;"><td><strong>Net Retained Capital</strong></td><td style="color:#2563eb; font-weight:bold; text-align:right;">${money(net)}</td></tr>
+                        <tr><td><strong>Outstanding Accounts Receivable</strong></td><td style="color:#d97706; font-weight:bold; text-align:right;">${money(reservations.reduce((sum, r) => sum + Number(r.balance || 0), 0))}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function renderRecords() {
+    let logs = (db.auditLogs || []).filter(item => {
+        if (currentUser && currentUser.role !== "IT") {
+            const logUser = String(item.user || "").trim().toUpperCase();
+            const logRole = String(item.role || "").trim().toUpperCase();
+            if (logUser === "IT" || logRole === "IT") {
+                return false;
+            }
+
+            if (currentUser.role !== "BOSS") {
+                const myBranchId = currentRealty ? currentRealty.id : currentUser.realtyId;
+                if (item.realtyId && item.realtyId !== myBranchId) {
+                    return false;
+                }
+            }
+        }
+        return true; 
+    });
+
+    const content = document.getElementById("content");
+    if (!content) return;
+
+    content.innerHTML = `
+        <div style="margin-bottom:16px;">
+            <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b; margin:0;">📜 System Audit Trail</h3>
+            <small style="color:#64748b;">Chronological audit of sensitive transactions and staff activities</small>
+        </div>
+        <div class="panel" style="overflow-x:auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action Type</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${logs.length === 0 ? `
+                        <tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">No audit records found.</td></tr>
+                    ` : logs.map(l => `
+                        <tr>
+                            <td style="font-size:12px; color:#64748b;">${new Date(l.timestamp).toLocaleString()}</td>
+                            <td style="font-weight:700; color:#0f172a;">${esc(l.user)}</td>
+                            <td><span class="badge badge-purple" style="font-size:11px;">${esc(l.actionType)}</span></td>
+                            <td style="font-size:13px; color:#334155;">${esc(l.details)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function logAuditEvent(type, details) {
+    if (!Array.isArray(db.auditLogs)) db.auditLogs = [];
+    db.auditLogs.unshift({
+        id: uid("LOG"),
+        actionType: type, // <--- Dito pinalitan natin para magtugma sa l.actionType ng table
+        details,
+        user: (currentUser ? (currentUser.name || currentUser.username || currentUser.role) : "ANONYMOUS"),
+        username: currentUser ? currentUser.username : "ANONYMOUS",
+        timestamp: new Date().toISOString()
+    });
+}
+
+    
+    // Gumawa ng natatanging serial number
+   
+    function handleSecurePrint(reportTitle, reportDataHtml) {
+    if (!db.printCounter) {
+        db.printCounter = 0;
+    }
+    db.printCounter++;
+    const serialNo = "PRINT-" + String(db.printCounter).padStart(5, '0');
+    
+    logAuditEvent("SECURE_PRINT", `User '${currentUser?.name || currentUser?.username || "System"}' printed official report '${reportTitle}' with Serial Number: ${serialNo}`);
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>${reportTitle} - ${serialNo}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; color: #000; background: #fff; }
+                .serial-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+            </style>
+        </head>
+        <body>
+            <div class="serial-header">
+                <h2>REALTY MANAGEMENT SYSTEM - OFFICIAL REPORT</h2>
+                <div><strong>Serial No:</strong> <span style="color:red; font-size:1.2rem;">${serialNo}</span></div>
+            </div>
+            <div><small>Printed by: ${currentUser?.name || currentUser?.username || "Unknown"} | Date: ${new Date().toLocaleString()}</small></div>
+            <hr style="margin: 15px 0;">
+            <div>${reportDataHtml}</div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                }
+            </script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+    // I-record agad sa Audit Trail kung sino ang nag-print at ang serial number nito
+    logAuditEvent("SECURE_PRINT", `User '${currentUser?.name || currentUser?.username || "System"}' printed official report '${reportTitle}' with Serial Number: ${serialNo}`);
+    
+    // Buksan ang window para sa pag-print na may kasamang Serial Number sa ibabaw
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>${reportTitle} - ${serialNo}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; color: #000; background: #fff; }
+                .serial-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+            </style>
+        </head>
+        <body>
+            <div class="serial-header">
+                <h2>REALTY MANAGEMENT SYSTEM - OFFICIAL REPORT</h2>
+                <div><strong>Serial No:</strong> <span style="color:red; font-size:1.2rem;">${serialNo}</span></div>
+            </div>
+            <div><small>Printed by: ${currentUser?.name || currentUser?.username || "Unknown"} | Date: ${new Date().toLocaleString()}</small></div>
+            <hr style="margin: 15px 0;">
+            <div>${reportDataHtml}</div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                }
+            </script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680

@@ -9,7 +9,11 @@ const SESSION_KEY = "REALTY_ACTIVE_SESSION";
 
 let db = {
    settings: {
+<<<<<<< HEAD
         systemName: "KHAINEJOSH REALTY",
+=======
+        systemName: "REALTY SYSTEM",
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         realtyName: "Main Office",
         realtyAddress: "Philippines",
         logo: "🏢",
@@ -420,7 +424,11 @@ function universalSwitchBranch(realtyId) {
 ========================================================= */
 
 function applyDynamicBranding() {
+<<<<<<< HEAD
     const sysName = db.settings.systemName || "KHAINEJOSH REALTY";
+=======
+    const sysName = db.settings.systemName || "REALTY SYSTEM";
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     const logo = db.settings.logo || "🏢";
 
     const portalName = document.getElementById("portalSystemName");

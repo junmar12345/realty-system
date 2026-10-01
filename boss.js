@@ -59,7 +59,11 @@ function renderBossDashboard() {
                 <small style="color:#64748b;">Consolidated group realty oversight &amp; master billing controller</small>
             </div>
             <div style="display:flex; gap:8px;">
+<<<<<<< HEAD
                 <button id="renewalEngineBtn" class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>
+=======
+                <button class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
                 <button class="btn btn-primary" onclick="openBossPasswordModal()">🔒 Change Personal Password</button>
             </div>
         </div>
@@ -77,7 +81,11 @@ function renderBossDashboard() {
         ${(bossSub.state === "EXPIRED" || bossSub.state === "NEAR_EXPIRY" || dueRealties.length > 0) ? `
             <div style="background:#fffbeb; border:1px solid #fcd34d; border-radius:12px; padding:14px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div>
+<<<<<<< HEAD
                     <strong style="color:#b45309; font-size:14px;">⏱️️ SUBSCRIPTION ATTENTION REQUIRED</strong>
+=======
+                    <strong style="color:#b45309; font-size:14px;">â° SUBSCRIPTION ATTENTION REQUIRED</strong>
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
                     <p style="color:#92400e; font-size:12px; margin-top:2px;">
                         ${bossSub.state !== "ACTIVE" ? `Boss Room: <strong>${bossSub.state}</strong> (${bossSub.daysRemaining} days left). ` : ''}
                         ${dueRealties.length > 0 ? `May <strong>${dueRealties.length}</strong> branch na expired o malapit nang mag-due.` : ''}
@@ -524,7 +532,11 @@ function openIssueRealtyTempPasswordModal(realtyId) {
             <small style="color:#64748b;">Ibigay ito sa realty admin. Papapalitan ito ng personal password pagka-login nila.</small>
         </div>
         <button class="btn btn-primary full" style="padding:12px; font-size:14px;" onclick="saveRealtyTempPassword('${branch.id}', '${adminStaff.id}')">
+<<<<<<< HEAD
            💾 SAVE &amp; ISSUE TEMPORARY PASSWORD
+=======
+            ðŸ’¾ SAVE &amp; ISSUE TEMPORARY PASSWORD
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         </button>
     `);
 }
@@ -628,7 +640,11 @@ function addRealty(event) {
     const futureDue = new Date();
     futureDue.setDate(futureDue.getDate() + 30);
 
+<<<<<<< HEAD
    const newRealtyId = (db.realties || []).length === 0 ? 'B0R1' : 'OR' + (db.realties.length);
+=======
+    const newRealtyId = uid("R"); // Permanent Unique Room ID (Checkpoint V2)
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     const defaultUsername = name.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 15) || ("admin" + Math.floor(100 + Math.random() * 900));
     const initialTempPwd = generateTempPassword();
 
@@ -665,7 +681,11 @@ function addRealty(event) {
     showPage("staff");
 }
 
+<<<<<<< HEAD
 // =========================================================d
+=======
+// =========================================================
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
 // 5. APPROVALS HUB (EXECUTIVE CLEARANCE FOR REFUNDS)
 // =========================================================
 
@@ -821,6 +841,7 @@ function rejectExecutiveRefund(refundId) {
 }
 
 
+<<<<<<< HEAD
 window.addEventListener('load', () => {
     const config = JSON.parse(localStorage.getItem("realty_system_config") || "{}");
     const btn = document.getElementById("renewalEngineBtn");
@@ -832,3 +853,5 @@ window.addEventListener('load', () => {
         }
     }
 });
+=======
+>>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
