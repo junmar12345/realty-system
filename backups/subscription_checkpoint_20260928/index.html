@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHAINEJOSH REALTY</title>
+    <title>REALTY MANAGEMENT SYSTEM</title>
     <style>
         :root {
-           --bg: #0f172a;
-        --surface: #1e293b;
-        --surface-card: #1e293b;
-        --text-main: #f8fafc;
-        --text-muted: #cbd5e1;
-        --border: #334155;
-        --border-light: #475569;
-          
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #f59e0b;
         }
 
         * {
@@ -26,7 +27,7 @@
 
         body {
             background-color: var(--bg);
-            color: var(--text-main);
+            color: var(--text);
             display: flex;
             height: 100vh;
             overflow: hidden;
@@ -56,11 +57,11 @@
 
         .sidebar {
             width: 260px;
-            background: #060102;
-            color: #ffffff;
+            background: #0f172a;
+            color: #f8fafc;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid var(--border);
+            border-right: 1px solid #1e293b;
         }
 
         .sidebar-brand {
@@ -70,8 +71,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            border-bottom: 1px solid var(--border);
-            color: #fca5a5;
+            border-bottom: 1px solid #1e293b;
         }
 
         .sidebar-menu {
@@ -85,34 +85,34 @@
 
         .nav-btn {
             background: transparent;
-            color: #cbd5e1;
+            color: #94a3b8;
             border: none;
             padding: 10px 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: left;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 10px;
             width: 100%;
-            transition: all 0.15s;
+            transition: all 0.2s;
         }
 
         .nav-btn:hover {
-            background: #240a0f;
-            color: #ffffff;
+            background: #1e293b;
+            color: #f8fafc;
         }
 
         .nav-btn.active {
-            background: #608ef2;
+            background: var(--primary);
             color: #ffffff;
         }
 
         .sidebar-footer {
             padding: 16px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid #1e293b;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -123,7 +123,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: var(--bg);
+            background: #f1f5f9;
         }
 
         .topbar {
@@ -140,31 +140,30 @@
             flex: 1;
             overflow-y: auto;
             padding: 24px;
-            background: var(--bg);
         }
 
-        /* Pormal at Malinis na Buttons */
+        /* Buttons & Utility Styles */
         .btn {
             padding: 8px 16px;
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid var(--border-light);
+            border: none;
             font-size: 0.875rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
             text-decoration: none;
-            transition: all 0.15s;
+            transition: opacity 0.2s;
         }
 
-        .btn:hover { opacity: 0.9; }
-        .btn-primary { background: #991b1b; color: #fff; border-color: #b91c1c; }
-        .btn-primary:hover { background: #b91c1c; }
-        .btn-success { background: #14532d; color: #fff; border-color: #166534; }
-        .btn-danger { background: #515e84; color: #fff; border-color: #991b1b; }
-        .btn-secondary { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+        .btn:hover { opacity: 0.95; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-secondary { background: #64748b; color: #fff; }
         .btn.full { width: 100%; }
 
         .form-group {
@@ -175,34 +174,38 @@
         }
 
         .form-group label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            color: #fca5a5;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .form-group input, .form-group select, .form-group textarea {
             padding: 10px;
-            background: #050102;
-            border: 1px solid var(--border-light);
-            color: #ffffff;
+            border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 0.9rem;
             outline: none;
         }
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: #ef4444;
+            border-color: var(--primary);
         }
 
-        /* Business Cards at Panels */
-        .card-3d, .panel, div[style*="background:#ffffff"], div[style*="background: #ffffff"], div[style*="background:white"] {
-            background: var(--surface-card) !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 8px !important;
+        /* Panels & Cards */
+        .card-3d {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             padding: 20px;
-            color: #ffffff !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 20px;
         }
 
         .panel-header {
@@ -228,58 +231,35 @@
         }
 
         table th {
-            background: #0d0204;
-            padding: 10px 12px;
+            background: #f8fafc;
+            padding: 10px;
             font-weight: 700;
-            color: #fca5a5;
+            color: var(--text-muted);
             border-bottom: 1px solid var(--border);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
         }
 
         table td {
-            padding: 12px;
+            padding: 12px 10px;
             border-bottom: 1px solid var(--border);
-            color: #f8fafc !important;
-        }
-
-        /* SAPILITANG PAG-OVERRIDE SA MGA PUTING TABLE ROWS PARA LAGING MADILIM */
-        table tr, table tr *, table td, table td * {
-            background-color: #1c060a !important;
-            color: #ffffff !important;
-        }
-
-        table tr:hover, table tr:hover td, table tr:hover * {
-            background-color: #280a10 !important;
-            color: #ffffff !important;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            color: #ffffff !important;
-        }
-        
-        p, span, small, label {
-            color: #cbd5e1;
         }
 
         .badge {
-            padding: 3px 8px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
-        .badge-red { background: #3d4ca8; color: #fca5a5; }
-        .badge-green { background: #052e16; color: #86efac; }
-        .badge-blue { background: #172554; color: #93c5fd; }
-        .badge-purple { background: #3b0764; color: #d8b4fe; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        .badge-purple { background: #f3e8ff; color: #6b21a8; }
 
         /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -287,15 +267,14 @@
         }
 
         .modal-box {
-            background: var(--surface-card);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
+            background: var(--surface);
+            border-radius: 12px;
             width: 90%;
             max-width: 520px;
             max-height: 90vh;
             overflow-y: auto;
             padding: 24px;
-            color: #ffffff;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
         }
 
         .modal-header {
@@ -315,33 +294,14 @@
     </style>
 </head>
 <body>
-    <script>
-    // Suriin kung ito ay bagong tab o ibang browser gamit ang sessionStorage
-    // Kapag binuksan sa bagong tab, ang sessionStorage ay laging blangko (null)
-    const activeSession = sessionStorage.getItem("currentUser");
-    
-    if (!activeSession) {
-        // Kung walang session sa tab na ito, siguraduhing burahin din natin ang pangkalahatang login para sa bagong tab
-        // o i-force agad na lumabas ang Login Portal at itago ang dashboard
-        window.addEventListener('DOMContentLoaded', () => {
-            const loginPortal = document.getElementById("loginPortal");
-            if (loginPortal) {
-                loginPortal.style.display = "flex";
-                loginPortal.style.visibility = "visible";
-                loginPortal.style.opacity = "1";
-            }
-        });
-    }
-</script>
-    
-    <!-- 1. LOGIN PORTAL -->
-  
-    <div id="loginPortal" style="width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; background: radial-gradient(circle at center, #2d0a10 0%, #120305 100%);">
-        <div style="width:100%; max-width:400px; background:linear-gradient(145deg, #240a0f, #150407); border:1px solid #5c1822; border-top:1px solid #7d202e; border-radius:16px; padding:32px; box-shadow:0 25px 50px rgba(0,0,0,0.8);">
+
+    <!-- 1. LOGIN PORTAL (NORMAL, CLEAN — WALANG QR/LOCK SA BUNGAD) -->
+    <div id="loginPortal" style="width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; background:#0f172a;">
+        <div style="width:100%; max-width:400px; background:#ffffff; border-radius:12px; padding:32px; box-shadow:0 10px 25px rgba(0,0,0,0.3);">
             <div style="text-align:center; margin-bottom:24px;">
-                <div id="portalLogo" style="width:64px; height:64px; margin:0 auto 12px auto; display:flex; align-items:center; justify-content:center; font-size:32px; background:#110305; border:1px solid #3f121a; border-radius:12px;">🏢</div>
-                <h2 id="portalSystemName" style="font-size:20px; font-weight:800; color:#fca5a5;">KHAINEJOSH REALTY</h2>
-                <p style="font-size:13px; color:#cbd5e1;">Sign in to access your operations dashboard</p>
+                <div id="portalLogo" style="width:64px; height:64px; margin:0 auto 12px auto; display:flex; align-items:center; justify-content:center; font-size:32px; background:#f1f5f9; border-radius:12px;">🏢</div>
+                <h2 id="portalSystemName" style="font-size:20px; font-weight:800; color:#0f172a;">KHAINEJOSH REALTY</h2>
+                <p style="font-size:13px; color:#64748b;">Sign in to access your operations dashboard</p>
             </div>
             
             <form onsubmit="handleLoginSubmit(event)">
@@ -358,10 +318,11 @@
         </div>
     </div>
 
-    <!-- 2. OFFLINE RENEWAL ROOM -->
+    <!-- 2. OFFLINE RENEWAL ROOM (POST-LOGIN EXPIRED REDIRECTION) -->
     <div id="expiredOfflineRoom" class="hidden" style="width:100vw; height:100vh; background:#090d16; color:#ffffff; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
         <div style="max-width:540px; width:100%; background:#131c2e; border:1px solid #1e293b; border-radius:16px; padding:32px; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
             
+            <!-- Slow Blinking Visual Warning -->
             <div class="blink-warning" style="display:inline-block; background:#dc2626; color:#ffffff; font-weight:900; font-size:12px; padding:6px 14px; border-radius:30px; letter-spacing:1px; margin-bottom:16px;">
                 ⚠️ CLOUD SUBSCRIPTION EXPIRED
             </div>
@@ -371,18 +332,20 @@
 
             <div style="background:#1e293b; border-radius:12px; padding:20px; margin-bottom:24px; text-align:left;">
                 <h4 style="font-size:13px; color:#94a3b8; text-transform:uppercase; margin-bottom:8px;">Renewal Payment Instructions</h4>
-                <p style="font-size:13px; color:#cbd5e1; margin-bottom:12px;">"Select your preferred payment channel below and upload your transaction receipt for system verification."</p>
+                <p style="font-size:13px; color:#cbd5e1; margin-bottom:12px;">"Select your preferred payment channel below and upload your transaction receipt for system verification. Note that processing and account provisioning may take up to 1 business day."</p>
                 <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #334155; padding-top:10px;">
                     <span style="font-size:13px; color:#94a3b8;">Subscription Rate:</span>
                     <strong id="expiredRoomAmountText" style="font-size:16px; color:#34d399;">₱0.00</strong>
                 </div>
             </div>
 
+           <!-- PERMANENT GOTYME QR DISPLAY -->
             <div style="background:#ffffff; padding:16px; border-radius:12px; text-align:center; max-width:280px; margin:0 auto 20px auto; border:2px solid #2563eb;">
                 <span style="color:#0f172a; font-weight:800; font-size:13px; display:block; margin-bottom:8px; letter-spacing:0.5px;">
                     💳 SCAN TO PAY 
                 </span>
                 <img src="QRCODE.png" alt="GoTyme QR Code" style="width:100%; max-height:240px; object-fit:contain; border-radius:6px; display:block; margin:0 auto;">
+                <small style="color:#64748b; font-size:11px; display:block; margin-top:8px;">To maintain uninterrupted access to your cloud database, application hosting, custom domain routing, and secure API gateways, please settle your renewal. Scan the service QR code below and submit your transaction reference for System verification.</small>
             </div>
 
             <div id="subscriptionPaymentStatus" style="margin-bottom:16px;"></div>
@@ -396,6 +359,7 @@
 
     <!-- 3. MAIN DASHBOARD APP -->
     <div id="app" class="hidden">
+        <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-brand">
                 <span id="sideBrandLogo">🏢</span>
@@ -411,11 +375,12 @@
                 <button class="nav-btn" data-page="commission" onclick="showPage('commission')">💼 Commissions</button>
                 <button class="nav-btn" data-page="refund" onclick="showPage('refund')">↩️ Refunds</button>
                 <button class="nav-btn" data-page="expenses" onclick="showPage('expenses')">📉 Expenses</button>
-               <button id="navReports" class="nav-btn hidden" data-page="reports" onclick="showPage('reports')">📁 Reports Room</button>
+                <button class="nav-btn" data-page="reports" onclick="showPage('reports')">📈 Reports</button>
                 <button class="nav-btn" data-page="records" onclick="showPage('records')">📜 Audit Records</button>
                 <button class="nav-btn" data-page="staff" onclick="showPage('staff')">👷 Staff Team</button>
                 <button class="nav-btn" data-page="approvals" onclick="showPage('approvals')">⚖️ Approvals Hub</button>
                 
+                <!-- Role Specific Buttons -->
                 <button id="navAddRealty" class="nav-btn hidden" data-page="add-realty" onclick="showPage('add-realty')">🏢 Branch Realties</button>
                 <button id="navITRoom" class="nav-btn hidden" data-page="it-room" onclick="showPage('it-room')">🛡️ IT Operations</button>
                 <button id="navCloudSub" class="nav-btn hidden" data-page="cloud-subscription" onclick="showPage('cloud-subscription')">☁️ Cloud Billing</button>
@@ -423,7 +388,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div style="font-size:12px; color:#277de6; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:12px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">
                     <span id="userBadgeRole" class="badge badge-blue">STAFF</span>
                     <span id="userBadgeName" style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">User</span>
                 </div>
@@ -431,70 +396,17 @@
             </div>
         </aside>
 
+        <!-- Main Workspace Wrapper -->
         <div class="main-wrapper">
             <header class="topbar">
                 <div>
-                    <h2 id="pageTitle" style="font-size:1.1rem; font-weight:800; color:#fca5a5;">Dashboard</h2>
-                    <p id="pageSubtitle" style="font-size:0.8rem; color:#cbd5e1;">Overview and records</p>
+                    <h2 id="pageTitle" style="font-size:1.1rem; font-weight:800; color:#0f172a;">Dashboard</h2>
+                    <p id="pageSubtitle" style="font-size:0.8rem; color:#64748b;">Overview and records</p>
                 </div>
                 <div id="topbarBranchSelector" style="display:flex; align-items:center; gap:8px;"></div>
             </header>
 
-            <main id="content" class="content-area">
-                <main id="content" class="content-area">
-    <!-- SYSTEM REPORTS ROOM (BOSS EXCLUSIVE) -->
-    <div id="reports-view" class="view-container" style="display: none; padding: 25px; background: #0f172a; color: #2f87de; min-height: 100vh;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #1e293b; padding: 15px 20px; border-radius: 8px; border: 1px solid #334155;">
-            <div>
-                <h2>📁 System Reports Room</h2>
-                <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Eksklusibong silid ng Boss para sa monitoring ng mga transaksiyon.</p>
-            </div>
-            <div style="text-align: right; font-size: 13px; color: #cbd5e1; background: #0f172a; padding: 8px 12px; border-radius: 6px; border: 1px solid #475569;">
-                <div>🏢 <strong id="report-realty-name" style="color: #60a5fa;">IVORY PROPERTIES CORP.</strong></div>
-                <div style="margin-top: 3px; font-size: 11px; color: #94a3b8;">User: <span id="report-active-user" style="color: #f8fafc; font-weight: bold;">Boss Executive</span></div>
-                <div style="font-size: 11px; color: #94a3b8;">Time/Date: <span id="report-current-time">-</span></div>
-            </div>
-        </div>
-
-        <!-- Folder Tabs Navigation -->
-        <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 10px; overflow-x: auto;">
-            <button class="report-tab-btn active" onclick="switchReportFolder('print-folder', this)" style="background: #1e293b; color: #fff; padding: 10px 20px; border: 1px solid #475569; cursor: pointer; border-radius: 6px; font-weight: 600;">🖨️ Print & Receipt Reports</button>
-            <button class="report-tab-btn" onclick="switchReportFolder('login-folder', this)" style="background: #1e293b; color: #fff; padding: 10px 20px; border: 1px solid #475569; cursor: pointer; border-radius: 6px; font-weight: 600;">🔑 Login Reports</button>
-            <button class="report-tab-btn" onclick="switchReportFolder('action-folder', this)" style="background: #1e293b; color: #fff; padding: 10px 20px; border: 1px solid #475569; cursor: pointer; border-radius: 6px; font-weight: 600;">⚡ Action Reports (Audit Trail)</button>
-        </div>
-
-        <!-- Folder 1: Print & Receipt Reports -->
-        <div id="print-folder" class="report-folder-content">
-            <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                <h3 style="margin-bottom: 15px; color: #f8fafc;">Print & Receipt History</h3>
-                <div id="print-reports-table-container">
-                    <p style="text-align: center; color: #94a3b8; padding: 20px;">Wala pang naka-record na print history.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Folder 2: Login Reports -->
-        <div id="login-folder" class="report-folder-content" style="display: none;">
-            <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                <h3 style="margin-bottom: 15px; color: #f8fafc;">Staff & Boss Login Records</h3>
-                <div id="login-reports-table-container">
-                    <p style="text-align: center; color: #94a3b8; padding: 20px;">Wala pang login records.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Folder 3: Action Reports (Audit Trail) -->
-        <div id="action-folder" class="report-folder-content" style="display: none;">
-            <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                <h3 style="margin-bottom: 15px; color: #f8fafc;">Action Audit Trail (Mga Binura, Binago, at Transaksiyon)</h3>
-                <div id="action-reports-table-container">
-                    <!-- Dito awtomatikong lalabas ang kumpletong table -->
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-            </main>
+            <main id="content" class="content-area"></main>
         </div>
     </div>
 

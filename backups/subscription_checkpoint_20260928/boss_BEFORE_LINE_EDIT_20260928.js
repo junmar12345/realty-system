@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    BOSS.JS - EXECUTIVE COMMAND CENTER & BRANCH MANAGEMENT
    Checkpoint V2 Implementation: 2026-09-27
    Consolidated Parts 1 - 6 (Dashboard, Multi-Pay, Branch Provisioning, Approvals)
@@ -59,7 +59,7 @@ function renderBossDashboard() {
                 <small style="color:#64748b;">Consolidated group realty oversight &amp; master billing controller</small>
             </div>
             <div style="display:flex; gap:8px;">
-                <button id="renewalEngineBtn" class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>
+                <button class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>
                 <button class="btn btn-primary" onclick="openBossPasswordModal()">🔒 Change Personal Password</button>
             </div>
         </div>
@@ -67,7 +67,7 @@ function renderBossDashboard() {
         ${pendingRefunds.length > 0 ? `
             <div style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1px solid #f87171; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                    <strong style="color:#991b1b; font-size:14px;">âš ï¸ PENDING REFUND CLEARANCE REQUESTS (${pendingRefunds.length})</strong>
+                    <strong style="color:#991b1b; font-size:14px;">⚠️ PENDING REFUND CLEARANCE REQUESTS (${pendingRefunds.length})</strong>
                     <p style="color:#7f1d1d; font-size:12px; margin-top:2px;">Branch administrators submitted refund requests awaiting executive clearance.</p>
                 </div>
                 <button class="btn btn-danger" onclick="showPage('approvals')">Review Clearances</button>
@@ -77,7 +77,7 @@ function renderBossDashboard() {
         ${(bossSub.state === "EXPIRED" || bossSub.state === "NEAR_EXPIRY" || dueRealties.length > 0) ? `
             <div style="background:#fffbeb; border:1px solid #fcd34d; border-radius:12px; padding:14px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div>
-                    <strong style="color:#b45309; font-size:14px;">⏱️️ SUBSCRIPTION ATTENTION REQUIRED</strong>
+                    <strong style="color:#b45309; font-size:14px;">⏰ SUBSCRIPTION ATTENTION REQUIRED</strong>
                     <p style="color:#92400e; font-size:12px; margin-top:2px;">
                         ${bossSub.state !== "ACTIVE" ? `Boss Room: <strong>${bossSub.state}</strong> (${bossSub.daysRemaining} days left). ` : ''}
                         ${dueRealties.length > 0 ? `May <strong>${dueRealties.length}</strong> branch na expired o malapit nang mag-due.` : ''}
@@ -116,7 +116,7 @@ function renderBossDashboard() {
         <div class="card-3d">
             <div class="panel-header" style="margin-bottom:12px;">
                 <div>
-                    <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">(🏢). Managed Realty Branches</h4>
+                    <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">🏢 Managed Realty Branches</h4>
                     <small style="color:#64748b;">Permanent ID tracking, subscription status, and branch operations.</small>
                 </div>
                 <button class="btn btn-primary" onclick="showPage('add-realty')">+ Add Realty Branch</button>
@@ -146,10 +146,10 @@ function renderBossDashboard() {
                                         <td>
                                             <div style="display:flex; align-items:center; gap:8px;">
                                                 <div style="width:32px; height:32px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #cbd5e1;">
-                                                    ${renderLogoHTML(r.logo || '(🏢).')}
+                                                    ${renderLogoHTML(r.logo || '🏢')}
                                                 </div>
                                                 <div>
-                                                    <strong>${i === 0 ? '📍 ' : ''}${esc(r.name)}</strong>
+                                                    <strong>${i === 0 ? '🏆 ' : ''}${esc(r.name)}</strong>
                                                     <br><small style="color:#64748b;">ID: <code>${r.id}</code> \vert{} Contact:${esc(r.owner)}</small>
                                                 </div>
                                             </div>
@@ -213,7 +213,7 @@ function openBossMultiPayModal() {
     showModal(`
         <div class="modal-header">
             <h3>👑 EXECUTIVE MULTI-BRANCH RENEWAL</h3>
-            <button class="close" onclick="closeModal()">Ã—</button>
+            <button class="close" onclick="closeModal()">×</button>
         </div>
         <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
             Select the accounts and billing term to renew. Active subscriptions are automatically excluded.
@@ -245,27 +245,24 @@ function openBossMultiPayModal() {
         <div id="bossRenewalSummary" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px; font-size:13px;">
             <!-- Dynamic calculation summary rendered here -->
         </div>
-        <div id="bossPaymentQR" style="background:#ffffff; border:2px solid #2563eb; border-radius:10px; padding:14px; text-align:center; margin-bottom:16px;">
-            <span style="font-size:12px; font-weight:800; color:#0f172a; display:block; margin-bottom:6px;">
-                💳 SUBSCRIPTION &amp; CLOUD SERVICES PAYMENT
+
+        <!-- SCAN TO PAY QR DISPLAY FOR BOSS -->
+        <div style="background:#ffffff; border:2px solid #2563eb; border-radius:10px; padding:14px; text-align:center; margin-bottom:16px;">
+            <span style="font-size:12px; font-weight:800; color:#0f172a; display:block; margin-bottom:6px; letter-spacing:0.5px;">
+                💳 SCAN TO SETTLE CLOUD &amp; HOSTING SERVICES
             </span>
-            <img src="QRCODE.png" alt="Subscription Payment QR" style="max-height:180px; width:auto; max-width:100%; object-fit:contain; border-radius:6px; display:block; margin:0 auto;">
+            <img src="QRCODE.png" alt="Cloud Subscription QR" style="max-height:180px; width:auto; max-width:100%; object-fit:contain; border-radius:6px; display:block; margin:0 auto;">
             <small style="color:#64748b; font-size:11px; display:block; margin-top:6px; font-weight:600;">
-                SCAN TO PAY
+                Hosting • Domain • API Gateway • Cloud Maintenance
             </small>
         </div>
 
         <div class="form-group">
-            <label>Payment Method Used</label>
+            <label>Payment Channel</label>
             <select id="bossPayChannel">
-                <option value="">-- Select Payment Method --</option>
-                <option value="GCASH">GCash</option>
-                <option value="MAYA">Maya / PayMaya</option>
-                <option value="GOTYME">GoTyme</option>
-                <option value="PALAWAN">Palawan</option>
-                <option value="BANK_TRANSFER">Bank Transfer</option>
-                <option value="OTHER">Other</option>
-            </select>
+                <option value="CLOUD_QR">Cloud Services QR (Hosting, Domain, API &amp; Cloud)</option>
+                
+                </select>
         </div>
 
         <div class="form-group">
@@ -287,8 +284,8 @@ function openBossMultiPayModal() {
 }
 
 function calculateBossRenewalTotal() {
-    const scopeSelect = document.getElementById("bossPayScope");
-    const scopes = scopeSelect ? Array.from(scopeSelect.selectedOptions).map(o => o.value) : [];
+    const scope = document.getElementById("bossPayScope")?.value;
+    const termMonths = Number(document.getElementById("bossPayTerm")?.value || 1);
     const summaryContainer = document.getElementById("bossRenewalSummary");
     if (!summaryContainer) return;
 
@@ -305,37 +302,35 @@ function calculateBossRenewalTotal() {
     let items = [];
     let grandTotal = 0;
 
-    if (scopes.includes("ALL_DUE")) {
+    if (scope === "BOSS_ONLY") {
+        const total = bossRate * termMonths;
+        items.push({ id: "BOSS", name: `Executive Suite (BOSS) [${termMonths === 12 ? '1 Year' : '1 Month'}]`, amount: total });
+        grandTotal += total;
+    } else if (scope === "ALL_DUE") {
         if (isBossDue) {
             const total = bossRate * termMonths;
-            items.push({ id: "BOSS", name: `Executive Suite (BOSS) [${termMonths === 12 ? "1 Year" : "1 Month"}]`, amount: total });
+            items.push({ id: "BOSS", name: `Executive Suite (BOSS) [${termMonths === 12 ? '1 Year' : '1 Month'}]`, amount: total });
             grandTotal += total;
         }
         dueRealties.forEach(r => {
             const fee = branchRate * termMonths;
-            items.push({ id: r.id, name: `Branch: ${r.name} [${termMonths === 12 ? "1 Year" : "1 Month"}]`, amount: fee });
+            items.push({ id: r.id, name: `Branch: ${r.name} [${termMonths === 12 ? '1 Year' : '1 Month'}]`, amount: fee });
             grandTotal += fee;
         });
-    } else if (scopes.includes("BOSS_ONLY") && scopes.length === 1) {
-        const total = bossRate * termMonths;
-        items.push({ id: "BOSS", name: `Executive Suite (BOSS) [${termMonths === 12 ? "1 Year" : "1 Month"}]`, amount: total });
-        grandTotal += total;
-    } else {
-        scopes.filter(v => v.startsWith("BRANCH_")).forEach(v => {
-            const bId = v.replace("BRANCH_", "");
-            const branch = db.realties.find(r => r.id === bId);
-            if (branch) {
-                const fee = branchRate * termMonths;
-                items.push({ id: branch.id, name: `Branch: ${branch.name} [${termMonths === 12 ? "1 Year" : "1 Month"}]`, amount: fee });
-                grandTotal += fee;
-            }
-        });
+    } else if (scope && scope.startsWith("BRANCH_")) {
+        const bId = scope.replace("BRANCH_", "");
+        const branch = db.realties.find(r => r.id === bId);
+        if (branch) {
+            const fee = branchRate * termMonths;
+            items.push({ id: branch.id, name: `Branch: ${branch.name} [${termMonths === 12 ? '1 Year' : '1 Month'}]`, amount: fee });
+            grandTotal += fee;
+        }
     }
 
     summaryContainer.innerHTML = `
         <strong style="color:#0f172a;">Coverage Breakdown (${termMonths === 12 ? 'Annual Plan' : 'Monthly Plan'}):</strong>
         <ul style="margin:8px 0 8px 20px; color:#475569;">
-            ${items.map(it => `<li>${esc(it.name)} (ID: <code>${it.id}</code>) â€” <strong>${money(it.amount)}</strong></li>`).join("")}
+            ${items.map(it => `<li>${esc(it.name)} (ID: <code>${it.id}</code>) — <strong>${money(it.amount)}</strong></li>`).join("")}
         </ul>
         <div style="border-top:1px solid #cbd5e1; padding-top:6px; display:flex; justify-content:space-between; align-items:center;">
             <span>Total Amount Due:</span>
@@ -345,8 +340,8 @@ function calculateBossRenewalTotal() {
 }
 
 function submitBossMultiPayment() {
-    const scopeSelect = document.getElementById("bossPayScope");
-    const scopes = scopeSelect ? Array.from(scopeSelect.selectedOptions).map(o => o.value) : [];
+    const scope = document.getElementById("bossPayScope")?.value;
+    const totalElem = document.getElementById("bossCalculatedGrandTotal");
     const amount = Number(totalElem?.getAttribute("data-total") || 0);
     const method = document.getElementById("bossPayChannel")?.value;
     const reference = document.getElementById("bossPayRef")?.value.trim();
@@ -379,23 +374,18 @@ function submitBossMultiPayment() {
     let coveredRoomIds = [];
     let coverageDescription = "";
 
-    if (scopes.includes("ALL_DUE")) {
+    if (scope === "BOSS_ONLY") {
+        coveredRoomIds = ["BOSS"];
+        coverageDescription = "Boss Room Renewal";
+    } else if (scope === "ALL_DUE") {
         if (isBossDue) coveredRoomIds.push("BOSS");
         dueRealties.forEach(r => coveredRoomIds.push(r.id));
         coverageDescription = `Bulk Renewal: ${coveredRoomIds.join(", ")}`;
-    } else if (scopes.includes("BOSS_ONLY") && scopes.length === 1) {
-        coveredRoomIds = ["BOSS"];
-        coverageDescription = "Boss Room Renewal";
-    } else {
-        const selectedBranchIds = scopes
-            .filter(v => v.startsWith("BRANCH_"))
-            .map(v => v.replace("BRANCH_", ""));
-        coveredRoomIds = selectedBranchIds;
-        const names = selectedBranchIds.map(id => {
-            const b = db.realties.find(r => r.id === id);
-            return b ? b.name : id;
-        });
-        coverageDescription = `Selected Realty Renewal: ${names.join(", ")}`;
+    } else if (scope && scope.startsWith("BRANCH_")) {
+        const bId = scope.replace("BRANCH_", "");
+        coveredRoomIds = [bId];
+        const b = db.realties.find(r => r.id === bId);
+        coverageDescription = `Single Branch: ${b ? b.name : bId}`;
     }
 
     const reader = new FileReader();
@@ -436,7 +426,7 @@ function openBossPasswordModal() {
     showModal(`
         <div class="modal-header">
             <h3>🔒 CHANGE BOSS PERSONAL PASSWORD</h3>
-            <button class="close" onclick="closeModal()">Ã—</button>
+            <button class="close" onclick="closeModal()">×</button>
         </div>
         <div class="form-group">
             <label>Current Password:</label>
@@ -476,7 +466,7 @@ function saveBossPersonalPassword() {
     db.settings.bossPassword = newPwd;
     saveDB();
     closeModal();
-    alert("âœ… Boss Personal Password updated successfully!");
+    alert("✅ Boss Personal Password updated successfully!");
 }
 
 function openIssueRealtyTempPasswordModal(realtyId) {
@@ -507,11 +497,11 @@ function openIssueRealtyTempPasswordModal(realtyId) {
 
     showModal(`
         <div class="modal-header">
-            <h3>⏳‘ ISSUE TEMPORARY PASSWORD TO REALTY</h3>
-            <button class="close" onclick="closeModal()">Ã—</button>
+            <h3>🔑 ISSUE TEMPORARY PASSWORD TO REALTY</h3>
+            <button class="close" onclick="closeModal()">×</button>
         </div>
         <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px; margin-bottom:16px;">
-            <p style="font-size:14px; color:#1e40af; font-weight:bold; margin-bottom:4px;">(🏢). Branch: ${esc(branch.name)}</p>
+            <p style="font-size:14px; color:#1e40af; font-weight:bold; margin-bottom:4px;">🏢 Branch: ${esc(branch.name)}</p>
             <p style="font-size:13px; color:#3b82f6;">Assigned Admin: <strong>${esc(adminStaff.name)}</strong></p>
             <p style="font-size:13px; color:#1e293b; margin-top:6px;">
                 Permanent Room ID: <strong style="color:#2563eb;">${branch.id}</strong><br>
@@ -524,7 +514,7 @@ function openIssueRealtyTempPasswordModal(realtyId) {
             <small style="color:#64748b;">Ibigay ito sa realty admin. Papapalitan ito ng personal password pagka-login nila.</small>
         </div>
         <button class="btn btn-primary full" style="padding:12px; font-size:14px;" onclick="saveRealtyTempPassword('${branch.id}', '${adminStaff.id}')">
-           💾 SAVE &amp; ISSUE TEMPORARY PASSWORD
+            💾 SAVE &amp; ISSUE TEMPORARY PASSWORD
         </button>
     `);
 }
@@ -550,7 +540,7 @@ function saveRealtyTempPassword(realtyId, staffId) {
 
     saveDB();
     closeModal();
-    alert(`âœ… Temporary Password naitala!\n\nBranch: ${branch ? branch.name : ''}\nRoom ID: ${realtyId}\nUsername: ${staff ? staff.username : ''}\nTemp Password: ${newPwd}`);
+    alert(`✅ Temporary Password naitala!\n\nBranch: ${branch ? branch.name : ''}\nRoom ID: ${realtyId}\nUsername: ${staff ? staff.username : ''}\nTemp Password: ${newPwd}`);
 
     if (currentPage === "dashboard") renderBossDashboard();
     else if (currentPage === "add-realty") renderAddRealty();
@@ -569,7 +559,7 @@ function renderAddRealty() {
     content.innerHTML = `
         <div class="grid-2">
             <div class="panel">
-                <div class="panel-header"><h3>(🏢). ADD NEW REALTY BRANCH</h3></div>
+                <div class="panel-header"><h3>🏢 ADD NEW REALTY BRANCH</h3></div>
                 <form onsubmit="addRealty(event)">
                     <div class="form-group"><label>Branch Name</label><input id="realtyName" required placeholder="e.g. TARLAC BRANCH"></div>
                     <div class="form-group"><label>Branch Manager / Admin Person</label><input id="realtyOwner" required placeholder="Manager Name"></div>
@@ -579,7 +569,7 @@ function renderAddRealty() {
                 </form>
             </div>
             <div class="panel">
-                <div class="panel-header"><h3>(🏢). ACTIVE BRANCHES</h3></div>
+                <div class="panel-header"><h3>🏢 ACTIVE BRANCHES</h3></div>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -592,7 +582,7 @@ function renderAddRealty() {
                                     <td>
                                         <div style="display:flex; align-items:center; gap:8px;">
                                             <div style="width:28px; height:28px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #cbd5e1;">
-                                                ${renderLogoHTML(r.logo || '(🏢).')}
+                                                ${renderLogoHTML(r.logo || '🏢')}
                                             </div>
                                             <div>
                                                 <strong>${esc(r.name)}</strong>
@@ -605,7 +595,7 @@ function renderAddRealty() {
                                     <td>
                                         <div style="display:flex; gap:4px;">
                                             <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="openIssueRealtyTempPasswordModal('${r.id}')">🔑 Temp Pwd</button>
-                                            <button class="btn btn-success" style="padding:4px 8px; font-size:11px;" onclick="universalSwitchBranch('${r.id}'); showPage('staff');">🚪ª Enter</button>
+                                            <button class="btn btn-success" style="padding:4px 8px; font-size:11px;" onclick="universalSwitchBranch('${r.id}'); showPage('staff');">🚪 Enter</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -628,7 +618,7 @@ function addRealty(event) {
     const futureDue = new Date();
     futureDue.setDate(futureDue.getDate() + 30);
 
-   const newRealtyId = (db.realties || []).length === 0 ? 'B0R1' : 'OR' + (db.realties.length);
+    const newRealtyId = uid("R"); // Permanent Unique Room ID (Checkpoint V2)
     const defaultUsername = name.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 15) || ("admin" + Math.floor(100 + Math.random() * 900));
     const initialTempPwd = generateTempPassword();
 
@@ -642,7 +632,7 @@ function addRealty(event) {
         dueDate: futureDue.toISOString().slice(0, 10),
         monthlyFee: db.settings.defaultMonthlyRate || 2500,
         isLocked: false,
-        logo: "(🏢).",
+        logo: "🏢",
         tempPassword: initialTempPwd
     });
 
@@ -665,7 +655,7 @@ function addRealty(event) {
     showPage("staff");
 }
 
-// =========================================================d
+// =========================================================
 // 5. APPROVALS HUB (EXECUTIVE CLEARANCE FOR REFUNDS)
 // =========================================================
 
@@ -680,7 +670,7 @@ function renderApprovals() {
     content.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
             <div>
-                <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">⚖️ Executive Approvals Hub</h3>
+                <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">⚖️ Executive Approvals Hub</h3>
                 <small style="color:#64748b;">Review and clear refund requests and financial adjustments across branches</small>
             </div>
             <span class="badge ${pendingRefunds.length > 0 ? 'badge-red' : 'badge-green'}" style="font-size:13px; padding:6px 12px;">
@@ -690,7 +680,7 @@ function renderApprovals() {
 
         <div class="card-3d" style="margin-bottom:24px;">
             <div class="panel-header">
-                <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">📅‹ Pending Refund Requests</h4>
+                <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">📋 Pending Refund Requests</h4>
             </div>
             <div class="table-wrap">
                 <table>
@@ -710,7 +700,7 @@ function renderApprovals() {
                                 const branch = db.realties.find(b => b.id === r.realtyId);
                                 return `
                                     <tr>
-                                        <td><strong>(🏢). ${esc(branch ? branch.name : r.realtyId)}</strong></td>
+                                        <td><strong>🏢 ${esc(branch ? branch.name : r.realtyId)}</strong></td>
                                         <td><strong>${esc(r.buyerName)}</strong></td>
                                         <td>${esc(r.reason || 'Client withdrawal')}</td>
                                         <td style="color:#dc2626; font-weight:bold;">${money(r.amount)}</td>
@@ -718,10 +708,10 @@ function renderApprovals() {
                                         <td>
                                             <div style="display:flex; gap:6px;">
                                                 <button class="btn btn-success" style="padding:5px 10px; font-size:12px;" onclick="approveExecutiveRefund('${r.id}')">
-                                                    âœ… Approve &amp; Release
+                                                    ✅ Approve &amp; Release
                                                 </button>
                                                 <button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="rejectExecutiveRefund('${r.id}')">
-                                                    âŒ Reject
+                                                    ❌ Reject
                                                 </button>
                                             </div>
                                         </td>
@@ -736,7 +726,7 @@ function renderApprovals() {
 
         <div class="card-3d">
             <div class="panel-header">
-                <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">📅œ Clearance History</h4>
+                <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">📜 Clearance History</h4>
             </div>
             <div class="table-wrap">
                 <table>
@@ -799,7 +789,7 @@ function approveExecutiveRefund(refundId) {
     });
 
     saveDB();
-    alert("âœ… Refund successfully approved and recorded in Money Out.");
+    alert("✅ Refund successfully approved and recorded in Money Out.");
     renderApprovals();
 }
 
@@ -816,19 +806,8 @@ function rejectExecutiveRefund(refundId) {
     refund.clearedBy = currentUser ? currentUser.name : "Boss Executive";
 
     saveDB();
-    alert("âŒ Refund marked as REJECTED.");
+    alert("❌ Refund marked as REJECTED.");
     renderApprovals();
 }
 
 
-window.addEventListener('load', () => {
-    const config = JSON.parse(localStorage.getItem("realty_system_config") || "{}");
-    const btn = document.getElementById("renewalEngineBtn");
-    if (btn) {
-        if (config.hideRenewalEngine) {
-            btn.style.display = 'none';
-        } else {
-            btn.style.display = 'inline-block';
-        }
-    }
-});

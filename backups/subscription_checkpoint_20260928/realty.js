@@ -163,6 +163,7 @@ function renderProjects() {
     `;
 }
 
+// Helper parser para sa range o comma list (hal. "1-5", "1,2,3,4,5,6")
 function parseRangeList(inputStr) {
     if (!inputStr) return [];
     const parts = String(inputStr).split(/[\s,]+/);
@@ -307,7 +308,6 @@ function saveNewProject(event) {
     alert(`Project "${name}" successfully registered with ${totalGeneratedLots} lots!`);
     renderProjects();
 }
-
 function deleteProject(projId) {
     const hasLots = (db.lots || []).some(l => l.projectId === projId);
     if (hasLots) {
@@ -321,6 +321,7 @@ function deleteProject(projId) {
     saveDB();
     renderProjects();
 }
+
 
 function openManageProjectLotsModal(projId) {
     const project = db.projects.find(function(p) { return p.id === projId; });
@@ -497,6 +498,10 @@ function deleteLot(lotId) {
     saveDB();
     openManageProjectLotsModal(lot.projectId);
 }
+
+
+
+
 
 function openAddLotModal(projId) {
     const project = db.projects.find(p => p.id === projId);
@@ -687,123 +692,124 @@ function openNewReservationModal() {
                 <label>Address</label>
                 <input id="resBuyerAddress" placeholder="Barangay, City, Province">
             </div>
-            <h4 style="font-size:13px; color:#475569; margin:14px 0 8px 0; text-transform:uppercase;">2. Property Selection (Multi-Lot)</h4>
+<h4 style="font-size:13px; color:#475569; margin:14px 0 8px 0; text-transform:uppercase;">2. Property Selection (Multi-Lot)</h4>
 
-            <div class="form-group">
-                <label>Select Project / Site</label>
-                <select id="selResProject" onchange="onProjectSelectChanged()">
-                    <option value="">-- Pumili ng Project (Hal. Jalung / Pampanga) --</option>
-                    ${(db.projects || []).filter(p => {
-                        const rid = typeof getActiveRealtyId === 'function' ? getActiveRealtyId() : null;
-                        return !rid || p.realtyId === rid;
-                    }).map(p => `
-                        <option value="${p.id}">${esc(p.name)} - ${esc(p.site || p.location || '')}</option>
-                    `).join("")}
-                </select>
-            </div>
+<!-- STEP 1: PROJECT SELECT -->
+<div class="form-group">
+    <label>Select Project / Site</label>
+  <select id="selResProject" onchange="onProjectSelectChanged()">
+    <option value="">-- Pumili ng Project (Hal. Jalung / Pampanga) --</option>
+    ${(db.projects || []).filter(p => {
+        const rid = typeof getActiveRealtyId === 'function' ? getActiveRealtyId() : null;
+        return !rid || p.realtyId === rid;
+    }).map(p => `
+        <option value="${p.id}">${esc(p.name)} - ${esc(p.site || p.location || '')}</option>
+    `).join("")}
+</select>
+</div>
 
-            <div class="form-group" id="blockSelectGroup" style="display:none;">
-                <label>Select Block</label>
-                <select id="selResBlock" onchange="onBlockSelectChanged()">
-                    <option value="">-- Select Block --</option>
-                </select>
-            </div>
+<!-- STEP 2: BLOCK SELECT (Kusang lilitaw pagkapili ng Project) -->
+<div class="form-group" id="blockSelectGroup" style="display:none;">
+    <label>Select Block</label>
+    <select id="selResBlock" onchange="onBlockSelectChanged()">
+        <option value="">${currentLang === 'TL' ? '-- Pumili ng Block --' : '-- Select Block --'}</option>
+    </select>
+</div>
 
-            <div class="form-group" id="lotSelectGroup" style="display:none;">
-                <label style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>Available Lots (Select multiple if applicable)</span>
-                    <small id="selectedLotsCount" style="color:#2563eb; font-weight:bold;">0 selected lot(s)</small>
-                </label>
-                <div id="lotCheckboxList" style="max-height:160px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; padding:8px; background:#ffffff; display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px;"></div>
-            </div>
+<!-- STEP 3: MULTI-LOT CHECKBOXES (Kusang lilitaw pagkapili ng Block) -->
+<div class="form-group" id="lotSelectGroup" style="display:none;">
+    <label style="display:flex; justify-content:space-between; align-items:center;">
+        <span>${currentLang === 'TL' ? 'Available Lots (Piliin kung maramihang lote)' : 'Available Lots (Select multiple if applicable)'}</span>
+        <small id="selectedLotsCount" style="color:#2563eb; font-weight:bold;">0 ${currentLang === 'TL' ? 'napiling lote' : 'selected lot(s)'}</small>
+    </label>
+    <div id="lotCheckboxList" style="max-height:160px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; padding:8px; background:#ffffff; display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px;"></div>
+</div>
 
-            <div id="selectedLotsSummary" style="display:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:10px; margin-bottom:12px;">
-                <div style="font-size:12px; color:#64748b; margin-bottom:4px;">Selected Lots to Reserve:</div>
-                <div id="selectedLotsTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
-            </div>
+<!-- SUMMARY BOX NG MGA NAPILING LOTE -->
+<div id="selectedLotsSummary" style="display:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:10px; margin-bottom:12px;">
+    <div style="font-size:12px; color:#64748b; margin-bottom:4px;">${currentLang === 'TL' ? 'Mga Lote na Kukunin:' : 'Selected Lots to Reserve:'}</div>
+    <div id="selectedLotsTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
+</div>
+<!-- SALES TEAM & DYNAMIC COMMISSION RATES (MANO-MANONG INPUT NI ADMIN) -->
+<h4 style="font-size:13px; color:#475569; margin:14px 0 8px 0; text-transform:uppercase;">Sales Team &amp; Commission Rates</h4>
+<div class="grid-2" style="margin-bottom:8px;">
+    <div class="form-group">
+        <label>Agent Name</label>
+        <input id="resAgentName" placeholder="${currentLang === 'TL' ? 'Pangalan ng Sales Agent' : 'Sales Agent Name'}">
+    </div>
+    <div class="form-group">
+        <label>Team Leader Name</label>
+        placeholder="${currentLang === 'TL' ? 'Pangalan ng Team Leader' : 'Team Leader Name'}"
+    </div>
+</div>
 
-            <h4 style="font-size:13px; color:#475569; margin:14px 0 8px 0; text-transform:uppercase;">Sales Team &amp; Commission Rates</h4>
-            <div class="grid-2" style="margin-bottom:8px;">
-                <div class="form-group">
-                    <label>Agent Name</label>
-                    <input id="resAgentName" placeholder="Sales Agent Name">
-                </div>
-                <div class="form-group">
-                    <label>Team Leader Name</label>
-                    <input id="resTeamLeader" placeholder="Team Leader Name">
-                </div>
-            </div>
+<div class="grid-2" style="margin-bottom:12px;">
+    <div class="form-group">
+        <label>Agent Rate / sqm (₱)</label>
+        <input type="number" id="resAgentRate" value="300" placeholder="Hal. 150, 200, 300, 500" oninput="calculateCommissionsAndFinance()">
+    </div>
+    <div class="form-group">
+        <label>TL Rate / sqm (₱)</label>
+        <input type="number" id="resTLRate" value="100" placeholder="Hal. 50, 100, 200" oninput="calculateCommissionsAndFinance()">
+    </div>
+</div>
 
-            <div class="grid-2" style="margin-bottom:12px;">
-                <div class="form-group">
-                    <label>Agent Rate / sqm (₱)</label>
-                    <input type="number" id="resAgentRate" value="300" placeholder="Hal. 300" oninput="calculateCommissionsAndFinance()">
-                </div>
-                <div class="form-group">
-                    <label>TL Rate / sqm (₱)</label>
-                    <input type="number" id="resTLRate" value="100" placeholder="Hal. 100" oninput="calculateCommissionsAndFinance()">
-                </div>
-            </div>
+<!-- NAKA-HIDE ANG PAYOUT TERMS (6/12 MOS) PARA MALINIS PERO BUO PA RIN SA SYSTEM -->
+<div style="display:none !important;">
+    <input type="number" id="resAgent1stRelease" value="3000">
+    <input type="number" id="resTL1stRelease" value="1000">
+    <select id="resAgentMonths">
+        <option value="6" selected>6 Months</option>
+        <option value="12">12 Months</option>
+    </select>
+    <select id="resTLMonths">
+        <option value="6" selected>6 Months</option>
+        <option value="12">12 Months</option>
+    </select>
+</div>
 
-            <!-- 3. FINANCIAL TERMS -->
-            <h4 style="font-size:13px; color:#475569; margin:14px 0 8px 0; text-transform:uppercase;">3. Financial Terms</h4>
-            <div class="grid-2" style="margin-bottom:8px;">
-                <div class="form-group">
-                    <label>Total Contract Price (TCP)</label>
-                    <input id="resTCP" readonly style="font-weight:bold; background:#f8fafc;">
-                </div>
-                <div class="form-group">
-                    <label>Reservation Fee (₱)</label>
-                    <input id="resFeeInput" type="number" required min="0" placeholder="e.g. 10000" oninput="calculateCommissionsAndFinance()">
-                </div>
-            </div>
+<!-- 3. FINANCIAL TERMS -->
+<h4 style="font-size:13px; color:#475569; margin:14px 0 8px 0; text-transform:uppercase;">3. Financial Terms</h4>
+<div class="grid-2" style="margin-bottom:8px;">
+    <div class="form-group">
+        <label>Total Contract Price (TCP)</label>
+        <input id="resTCP" readonly style="font-weight:bold; background:#f8fafc;">
+    </div>
+    <div class="form-group">
+        <label>Reservation Fee (₱)</label>
+        <input id="resFeeInput" type="number" required min="0" placeholder="e.g. 10000" oninput="calculateCommissionsAndFinance()">
+    </div>
+</div>
 
-            <div class="grid-2" style="margin-bottom:8px;">
-                <div class="form-group">
-                    <label>Terms / Months to Pay</label>
-                    <select id="resMonthsToPay" class="form-control" onchange="calculateCommissionsAndFinance()">
-                        <option value="12">12 Months (1 Year)</option>
-                        <option value="24">24 Months (2 Years)</option>
-                        <option value="36" selected>36 Months (3 Years)</option>
-                        <option value="60">60 Months (5 Years)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Title Fee (₱)</label>
-                    <input type="number" id="resTitleFee" min="0" value="0" placeholder="0.00" oninput="calculateCommissionsAndFinance()">
-                </div>
-            </div>
+<div class="grid-2" style="margin-bottom:12px;">
+    <div class="form-group">
+        <label>Title Fee (₱)</label>
+        <input type="number" id="resTitleFee" min="0" value="0" placeholder="0.00" oninput="calculateCommissionsAndFinance()">
+        <small style="color:#64748b; font-size:11px;">Processing at transfer fee.</small>
+    </div>
+    <div class="form-group">
+        <label>Remaining Amortization Balance</label>
+        <input id="resCalculatedBalance" readonly style="font-weight:bold; color:#b91c1c; background:#f8fafc;">
+    </div>
+</div>
 
-            <div class="grid-2" style="margin-bottom:12px;">
-                <div class="form-group">
-                    <label>Monthly Amortization (₱)</label>
-                    <input id="resMonthlyAmort" readonly style="font-weight:bold; color:#16a34a; background:#f8fafc;">
-                </div>
-                <div class="form-group">
-                    <label>Remaining Amortization Balance</label>
-                    <input id="resCalculatedBalance" readonly style="font-weight:bold; color:#b91c1c; background:#f8fafc;">
-                </div>
-            </div>
-
-            <div id="liveSummaryBox" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px; font-size:12px;">
-                <div style="font-weight:bold; color:#0f172a; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📋 Live Computation Summary</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; color:#334155;">
-                    <div>Bilang ng Lote: <strong id="sumLotsCount">0 lote</strong></div>
-                    <div>Kabuuang Sukat: <strong id="sumTotalArea">0 sqm</strong></div>
-                    <div>Total Price (TCP): <strong id="sumTcp">₱0.00</strong></div>
-                    <div>Title Fee: <strong id="sumTitleFee">₱0.00</strong></div>
-                    <div>Agent Total Com: <strong id="sumAgentCom" style="color:#16a34a;">₱0.00</strong></div>
-                    <div>TL Total Com: <strong id="sumTlCom" style="color:#16a34a;">₱0.00</strong></div>
-                </div>
-            </div>
-
-            <button class="btn btn-primary full" style="padding:12px; margin-top:4px;" type="submit">CONFIRM RESERVATION &amp; ISSUE RECEIPT</button>
-        </form>
+<!-- LIVE SUMMARY BOX (DITO LALABAS ANG LAHAT NG TOTALS SA IBABA) -->
+<div id="liveSummaryBox" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px; font-size:12px;">
+    <div style="font-weight:bold; color:#0f172a; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📋 Live Computation Summary</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; color:#334155;">
+        <div>Bilang ng Lote: <strong id="sumLotsCount">0 lote</strong></div>
+        <div>Kabuuang Sukat: <strong id="sumTotalArea">0 sqm</strong></div>
+        <div>Total Price (TCP): <strong id="sumTcp">₱0.00</strong></div>
+        <div>Title Fee: <strong id="sumTitleFee">₱0.00</strong></div>
+        <div>Agent Total Com: <strong id="sumAgentCom" style="color:#16a34a;">₱0.00</strong></div>
+        <div>TL Total Com: <strong id="sumTlCom" style="color:#16a34a;">₱0.00</strong></div>
+    </div>
+    <button class="btn btn-primary full" style="padding:12px; margin-top:12px;" type="submit">CONFIRM RESERVATION &amp; ISSUE RECEIPT</button>
     `);
 }
 
 // =========================================================
-// CASCADING MULTI-LOT CONTROLLER & FINANCIAL ENGINE
+// CASCADING MULTI-LOT CONTROLLER & TITLE FEE ENGINE
 // =========================================================
 
 let currentSelectedLotIds = [];
@@ -930,8 +936,14 @@ function updateSelectedLotsDisplay() {
     calculateCommissionsAndFinance();
 }
 
+// ==========================================
+// UNIFIED REAL-TIME FINANCE & COMMISSION ENGINE
+// ==========================================
 function calculateCommissionsAndFinance() {
+    // 1. Kunin ang mga napiling lote
     const selectedLots = (db.lots || []).filter(l => (typeof currentSelectedLotIds !== 'undefined' && currentSelectedLotIds || []).includes(l.id));
+    
+    // 2. Sukat (sqm) at TCP
     const totalArea = selectedLots.reduce((sum, l) => sum + Number(l.area || 0), 0);
     
     let grandTcp = selectedLots.reduce((sum, l) => sum + Number(l.price || l.tcp || 0), 0);
@@ -943,12 +955,10 @@ function calculateCommissionsAndFinance() {
         tcpInput.setAttribute("data-raw", grandTcp);
     }
 
+    // 3. Fees at Balance
     const resFee = Number(document.getElementById("resFeeInput")?.value || 0);
     const titleFee = Number(document.getElementById("resTitleFee")?.value || 0);
-    const months = Number(document.getElementById("resMonthsToPay")?.value || 36);
-
     const balance = Math.max(0, grandTcp - resFee);
-    const monthlyAmort = months > 0 ? balance / months : 0;
 
     const balElem = document.getElementById("resCalculatedBalance");
     if (balElem) {
@@ -956,17 +966,14 @@ function calculateCommissionsAndFinance() {
         balElem.setAttribute("data-balance", balance);
     }
 
-    const amortElem = document.getElementById("resMonthlyAmort");
-    if (amortElem) {
-        amortElem.value = typeof money === 'function' ? money(monthlyAmort) : `₱${monthlyAmort.toLocaleString()}`;
-    }
-
+    // 4. Commission mula sa manual input ni Admin
     const agentRate = Number(document.getElementById("resAgentRate")?.value || 0);
     const tlRate = Number(document.getElementById("resTLRate")?.value || 0);
 
     const agentGross = totalArea * agentRate;
     const tlGross = totalArea * tlRate;
 
+    // 5. I-update ang Live Summary Box sa ibaba
     const setTxt = (id, val) => { 
         const el = document.getElementById(id); 
         if (el) el.textContent = val; 
@@ -982,8 +989,13 @@ function calculateCommissionsAndFinance() {
     setTxt("sumTlCom", fmt(tlGross));
 }
 
-function calculateReservationFinance() { calculateCommissionsAndFinance(); }
-function calculateBalance() { calculateCommissionsAndFinance(); }
+// Fallbacks para laging tumakbo kahit ano pa ang tumawag
+function calculateReservationFinance() {
+    calculateCommissionsAndFinance();
+}
+function calculateBalance() {
+    calculateCommissionsAndFinance();
+}
 
 function saveReservation(event) {
     event.preventDefault();
@@ -995,15 +1007,13 @@ function saveReservation(event) {
 
     const activeRealtyId = getActiveRealtyId();
     const buyerName = (document.getElementById("resBuyerName")?.value || "").trim().toUpperCase();
-    const buyerContact = (document.getElementById("resBuyerContact")?.value || "").trim();
+    const buyerContact = (document.getElementById("resBuyerContact")?.value || document.getElementById("resBuyerPhone")?.value || "").trim();
     const buyerAddress = (document.getElementById("resBuyerAddress")?.value || "").trim();
 
     const rawTCP = Number(document.getElementById("resTCP")?.getAttribute("data-raw") || 0);
     const resFee = Number(document.getElementById("resFeeInput")?.value || 0);
     const titleFee = Number(document.getElementById("resTitleFee")?.value || 0);
-    const months = Number(document.getElementById("resMonthsToPay")?.value || 36);
     const balance = Math.max(0, rawTCP - resFee);
-    const monthlyAmort = months > 0 ? balance / months : 0;
 
     const selectedLots = (db.lots || []).filter(l => currentSelectedLotIds.includes(l.id));
     const firstLot = selectedLots[0];
@@ -1040,8 +1050,6 @@ function saveReservation(event) {
         tcp: rawTCP,
         resFee: resFee,
         titleFee: titleFee,
-        terms: months,
-        monthlyAmortization: monthlyAmort,
         balance: balance,
         date: new Date().toISOString().slice(0, 10),
         status: "ACTIVE"
@@ -1077,7 +1085,6 @@ function saveReservation(event) {
     alert(`✅ Reservation Matagumpay na Naitala!\n\nBuyer: ${buyerName}\nRef Code: ${resId}`);
     renderReservation();
 }
-
 function openReservationDetailsModal(resId) {
     const res = (db.reservations || []).find(r => r.id === resId);
     if (!res) return;
@@ -1229,9 +1236,8 @@ function saveNewBuyer(event) {
 }
 
 // =========================================================
-// WIDE BUYER DOSSIER: TRUE FULL SCREEN (NO SCROLL NEEDED)
+// WIDE BUYER DOSSIER: AGENT, AMORTIZATION SCHEDULE & DUES
 // =========================================================
-
 function openBuyerDossierModal(buyerId) {
     const buyer = (db.buyers || []).find(b => b.id === buyerId);
     if (!buyer) return;
@@ -1261,6 +1267,15 @@ function openBuyerDossierModal(buyerId) {
 
     const totalPaid = Math.max(0, totalTcp - totalBalance);
 
+    // Kuhanin ang mga transactions
+    let transactions = [];
+    (db.payments || []).forEach(p => {
+        if (p.buyerId === buyer.id || p.buyerName === buyer.name || contracts.some(c => c.id === p.reservationId)) {
+            transactions.push(p);
+        }
+    });
+
+    // 1. Talaan ng mga Lote at Kontrata
     let contractsHtml = '';
     if (contracts.length === 0) {
         contractsHtml = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#94a3b8;">Walang aktibong kontrata o lote.</td></tr>';
@@ -1285,9 +1300,10 @@ function openBuyerDossierModal(buyerId) {
         }).join('');
     }
 
+    // 2. Buwanang Amortization Schedule (Naka-breakdown bawat buwan na may Status & Pay Button)
     let scheduleHtml = '';
     if (contracts.length === 0) {
-        scheduleHtml = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#94a3b8;">Walang nakatakdang amortization schedule.</td></tr>';
+        scheduleHtml = '<tr><td colspan="7" style="text-align:center; padding:16px; color:#94a3b8;">Walang nakatakdang amortization schedule.</td></tr>';
     } else {
         contracts.forEach(c => {
             let cTcp = Number(c.tcp || c.price || c.totalPrice || 0);
@@ -1296,9 +1312,11 @@ function openBuyerDossierModal(buyerId) {
             const terms = Number(c.terms || c.months || 36); 
             const monthlyAmort = Number(c.monthlyAmortization || c.monthly || (terms > 0 ? cTcp / terms : 0));
             const startDate = c.firstDueDate || c.date || c.reservationDate || new Date().toISOString();
-            const paidCount = Number(c.paidMonthsCount || 0);
+            const payments = Array.isArray(c.payments) ? c.payments : [];
 
-            for (let i = 1; i <= Math.min(terms, 60); i++) {
+            const paidCount = Number(c.paidMonthsCount || payments.length || 0);
+
+            for (let i = 1; i <= Math.min(terms, 36); i++) {
                 const dueDate = new Date(startDate);
                 dueDate.setMonth(dueDate.getMonth() + i);
                 const dueStr = dueDate.toLocaleDateString();
@@ -1318,7 +1336,7 @@ function openBuyerDossierModal(buyerId) {
                     </td>
                     <td style="text-align:center;">
                         ${isPaid 
-                            ? `<button class="btn btn-secondary" style="padding:4px 10px; font-size:11px; font-weight:700;" onclick="showReceiptModal('${refCode}', '${esc(buyer.name)}', ${monthlyAmort}, 'Amortization Month${i} (Blk ${c.block} Lot${c.lot})', '${dueStr}', 'Cash', '${buyer.id}')">🖨️ Resibo</button>`
+                            ? `<button class="btn btn-secondary" style="padding:4px 10px; font-size:11px; font-weight:700;" onclick="showReceiptModal('${refCode}', '${esc(buyer.name)}', ${monthlyAmort}, 'Amortization Month ${i} (Blk ${c.block} Lot ${c.lot})', '${dueStr}', 'Cash', '${buyer.id}')">🖨️ Resibo</button>`
                             : `<button class="btn btn-primary" style="padding:4px 12px; font-size:11px; font-weight:800; background:#16a34a; border-color:#16a34a;" onclick="quickPayMonthlyAmort('${buyer.id}', '${c.id}',${i}, ${monthlyAmort}, '${dueStr}')">💳 Bayaran ang Due</button>`}
                     </td>
                 </tr>`;
@@ -1326,86 +1344,91 @@ function openBuyerDossierModal(buyerId) {
         });
     }
 
-    // Paggamit ng inline absolute/fixed positioning para sakupin ang buong screen nang walang hangganan ng lumang modal box
+    // Malapad na Window Layout (950px)
     showModal(`
-        <div style="position:fixed !important; top:10px !important; left:10px !important; right:10px !important; bottom:10px !important; width:calc(100vw - 20px) !important; height:calc(100vh - 20px) !important; max-width:none !important; max-height:none !important; background:#ffffff !important; z-index:999999 !important; border-radius:12px !important; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25) !important; display:flex !important; flex-direction:column !important; justify-content:space-between !important; padding:20px 24px !important; box-sizing:border-box !important; overflow:hidden !important;">
-            <div>
-                <div class="modal-header" style="border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <span style="font-size:32px;">📁</span>
-                        <div>
-                            <h3 style="margin:0; font-size:22px; font-weight:800; color:#0f172a; text-transform:uppercase;">BUYER DOSSIER: ${esc(buyer.name)}</h3>
-                            <small style="color:#64748b; font-size:13px;">Komprehensibong talaan ng kontrata, amortization dues, at transaksyon</small>
-                        </div>
-                    </div>
-                    <button class="close" onclick="closeModal()" style="font-size:24px; cursor:pointer; background:#f1f5f9; border:none; width:40px; height:40px; border-radius:50%; font-weight:bold;">✕</button>
-                </div>
-
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:14px; font-size:13px; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px;">
-                    <div><span style="color:#64748b;">Buyer ID:</span><br><code style="color:#2563eb; font-weight:700; font-size:13px;">${esc(buyer.id)}</code></div>
-                    <div><span style="color:#64748b;">Contact:</span><br><strong style="font-size:13px;">${esc(buyer.contact || 'Walang Contact')}</strong></div>
-                    <div><span style="color:#64748b;">Address:</span><br><strong style="font-size:13px;">${esc(buyer.address || 'Walang Address')}</strong></div>
-                    <div><span style="color:#64748b;">Assigned Agent / Team Leader:</span><br><span style="color:#1d4ed8; font-weight:700; font-size:13px;">${assignedAgents.length ? assignedAgents.map(esc).join(', ') : 'Walang Naka-assign'}</span></div>
-                </div>
-
-                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:16px; text-align:center;">
-                    <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:8px;">
-                        <small style="color:#1e40af; font-size:11px; font-weight:800; text-transform:uppercase;">Kabuuang Lote</small>
-                        <div style="font-size:20px; font-weight:800; color:#1d4ed8; margin-top:2px;">${contracts.length} Unit(s)</div>
-                    </div>
-                    <div style="background:#f1f5f9; border:1px solid #cbd5e1; padding:12px; border-radius:8px;">
-                        <small style="color:#475569; font-size:11px; font-weight:800; text-transform:uppercase;">Kabuuang TCP</small>
-                        <div style="font-size:20px; font-weight:800; color:#0f172a; margin-top:2px;">${money(totalTcp)}</div>
-                    </div>
-                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:8px;">
-                        <small style="color:#166534; font-size:11px; font-weight:800; text-transform:uppercase;">Kabuuang Naibayad</small>
-                        <div style="font-size:20px; font-weight:800; color:#16a34a; margin-top:2px;">${money(totalPaid)}</div>
-                    </div>
-                    <div style="background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px;">
-                        <small style="color:#991b1b; font-size:11px; font-weight:800; text-transform:uppercase;">Natitirang Balanse</small>
-                        <div style="font-size:20px; font-weight:800; color:#dc2626; margin-top:2px;">${money(totalBalance)}</div>
+        <div style="max-width:950px; width:95vw; margin:0 auto;">
+            <div class="modal-header" style="border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:24px;">📁</span>
+                    <div>
+                        <h3 style="margin:0; font-size:18px; font-weight:800; color:#0f172a; text-transform:uppercase;">BUYER DOSSIER: ${esc(buyer.name)}</h3>
+                        <small style="color:#64748b;">Komprehensibong talaan ng kontrata, amortization dues, at transaksyon</small>
                     </div>
                 </div>
+                <button class="close" onclick="closeModal()">✕</button>
+            </div>
 
-                <div style="margin-bottom:14px;">
-                    <h4 style="font-size:12px; color:#475569; text-transform:uppercase; margin-bottom:6px;">
-                        📑 Mga Pag-aaring Lote at Naka-assign na Sales Team
-                    </h4>
-                    <div class="table-wrap" style="max-height:130px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
-                        <table>
-                            <thead>
-                                <tr><th>Proyekto</th><th>Blk / Lot</th><th>TCP</th><th>Naibayad</th><th>Balanse</th><th>Assigned Agent</th></tr>
-                            </thead>
-                            <tbody>${contractsHtml}</tbody>
-                        </table>
-                    </div>
+            <!-- Profile & Agent -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:14px; font-size:13px; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+                <div><span style="color:#64748b;">Buyer ID:</span><br><code style="color:#2563eb; font-weight:700;">${esc(buyer.id)}</code></div>
+                <div><span style="color:#64748b;">Contact:</span><br><strong>${esc(buyer.contact || 'Walang Contact')}</strong></div>
+                <div><span style="color:#64748b;">Address:</span><br><strong>${esc(buyer.address || 'Walang Address')}</strong></div>
+                <div><span style="color:#64748b;">Assigned Agent / Team Leader:</span><br><span style="color:#1d4ed8; font-weight:700;">${assignedAgents.length ? assignedAgents.map(esc).join(', ') : 'Walang Naka-assign'}</span></div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:18px; text-align:center;">
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:8px;">
+                    <small style="color:#1e40af; font-size:11px; font-weight:800; text-transform:uppercase;">Kabuuang Lote</small>
+                    <div style="font-size:20px; font-weight:800; color:#1d4ed8; margin-top:2px;">${contracts.length} Unit(s)</div>
                 </div>
-
-                <div style="margin-bottom:10px;">
-                    <h4 style="font-size:12px; color:#475569; text-transform:uppercase; margin-bottom:6px;">
-                        📅 Monthly Amortization Schedule (Due Dates, Status &amp; Bayad)
-                    </h4>
-                    <div class="table-wrap" style="max-height:36vh; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
-                        <table>
-                            <thead style="position:sticky; top:0; background:#f8fafc; z-index:1;">
-                                <tr><th>Schedule</th><th>Lote</th><th>Due Date</th><th>Buwanang Hulog</th><th>Status</th><th style="text-align:center;">Aksyon</th></tr>
-                            </thead>
-                            <tbody>${scheduleHtml}</tbody>
-                        </table>
-                    </div>
+                <div style="background:#f1f5f9; border:1px solid #cbd5e1; padding:12px; border-radius:8px;">
+                    <small style="color:#475569; font-size:11px; font-weight:800; text-transform:uppercase;">Kabuuang TCP</small>
+                    <div style="font-size:20px; font-weight:800; color:#0f172a; margin-top:2px;">${money(totalTcp)}</div>
+                </div>
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:8px;">
+                    <small style="color:#166534; font-size:11px; font-weight:800; text-transform:uppercase;">Kabuuang Naibayad</small>
+                    <div style="font-size:20px; font-weight:800; color:#16a34a; margin-top:2px;">${money(totalPaid)}</div>
+                </div>
+                <div style="background:#fef2f2; border:1px solid #fecaca; padding:12px; border-radius:8px;">
+                    <small style="color:#991b1b; font-size:11px; font-weight:800; text-transform:uppercase;">Natitirang Balanse</small>
+                    <div style="font-size:20px; font-weight:800; color:#dc2626; margin-top:2px;">${money(totalBalance)}</div>
                 </div>
             </div>
 
-            <div style="display:flex; justify-content:flex-end; border-top:1px solid #e2e8f0; padding-top:12px; background:#ffffff;">
-                <button class="btn btn-secondary" style="padding:10px 28px; font-weight:700; font-size:14px;" onclick="closeModal()">Isara ang Folder</button>
+            <!-- Section 1: Contracts Table -->
+            <div style="margin-bottom:18px;">
+                <h4 style="font-size:12px; color:#475569; text-transform:uppercase; margin-bottom:8px;">
+                    📑 Mga Pag-aaring Lote at Naka-assign na Sales Team
+                </h4>
+                <div class="table-wrap" style="max-height:120px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+                    <table>
+                        <thead>
+                            <tr><th>Proyekto</th><th>Blk / Lot</th><th>TCP</th><th>Naibayad</th><th>Balanse</th><th>Assigned Agent</th></tr>
+                        </thead>
+                        <tbody>${contractsHtml}</tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 2: Amortization Schedule Table -->
+            <div style="margin-bottom:16px;">
+                <h4 style="font-size:12px; color:#475569; text-transform:uppercase; margin-bottom:8px;">
+                    📅 Monthly Amortization Schedule (Due Dates, Status &amp; Bayad)
+                </h4>
+                <div class="table-wrap" style="max-height:260px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+                    <table>
+                        <thead style="position:sticky; top:0; background:#f8fafc; z-index:1;">
+                            <tr><th>Schedule</th><th>Lote</th><th>Due Date</th><th>Buwanang Hulog</th><th>Status</th><th style="text-align:center;">Aksyon</th></tr>
+                        </thead>
+                        <tbody>${scheduleHtml}</tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end;">
+                <button class="btn btn-secondary" style="padding:8px 24px; font-weight:700;" onclick="closeModal()">Isara ang Folder</button>
             </div>
         </div>
     `);
 }
+
 // =========================================================
 // 1-CLICK DUE PAYMENT & RECEIPT LOGIC
 // =========================================================
-
+// =========================================================
+// 1-CLICK RECORD PAYMENT & AUTO SHOW RECEIPT MODAL
+// =========================================================
 function quickPayMonthlyAmort(buyerId, contractId, monthNumber, amount, dueStr) {
     const buyer = (db.buyers || []).find(b => b.id === buyerId);
     const contract = (db.reservations || []).find(r => r.id === contractId);
@@ -1430,49 +1453,39 @@ function quickPayMonthlyAmort(buyerId, contractId, monthNumber, amount, dueStr) 
     contract.payments.push(paymentRecord);
     contract.paidMonthsCount = Math.max(Number(contract.paidMonthsCount || 0), monthNumber);
 
+    // Bawasan ang balanse
     const currentBal = Number(contract.balance !== undefined ? contract.balance : (contract.tcp || 0));
     contract.balance = Math.max(0, currentBal - amount);
 
-    if (!Array.isArray(db.moneyIn)) db.moneyIn = [];
-    db.moneyIn.push({
-        id: uid("MIN"),
-        realtyId: contract.realtyId,
-        referenceId: contract.id,
-        payerName: buyer.name,
-        category: "MONTHLY_AMORTIZATION",
-        amount: amount,
-        date: new Date().toISOString().slice(0, 10),
-        remarks: descText
+    // I-log sa global payments db
+    if (!Array.isArray(db.payments)) db.payments = [];
+    db.payments.push({
+        ...paymentRecord,
+        buyerId: buyer.id,
+        buyerName: buyer.name,
+        reservationId: contract.id
     });
 
     logAuditEvent("COLLECT_PAYMENT", `Quick paid Amortization Month ${monthNumber} (${money(amount)}) for ${buyer.name}`);
     saveDB();
 
+    // Diretso nang bubuksan ang Acknowledgement Receipt sa mismong screen
     showReceiptModal(refNo, buyer.name, amount, descText, pDate, "Cash", buyer.id);
 }
 
 // =========================================================
-// IN-APP ACKNOWLEDGEMENT RECEIPT (FORCED CENTER BALANCE)
+// IN-APP ACKNOWLEDGEMENT RECEIPT MODAL
+// =========================================================
+// =========================================================
+// IN-APP ACKNOWLEDGEMENT RECEIPT (FIXED HALF A4 / A5 SIZE)
 // =========================================================
 function showReceiptModal(refNo, buyerName, amount, desc, date, method, buyerId) {
-    const buyerContracts = (db.reservations || []).filter(r => r.buyerId === buyerId || r.buyerName === buyerName);
-    let remainingBal = 0;
-    buyerContracts.forEach(c => {
-        remainingBal += Number(c.balance || 0);
-    });
-
     showModal(`
         <style>
             @media print {
                 @page {
                     size: A4 portrait;
-                    margin: 10mm 10mm 0 10mm; /* Naglalagay ng pantay na margin sa palibot para hindi dumikit sa gilid */
-                }
-                body, html {
-                    width: 100% !important;
-                    height: 100% !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
+                    margin: 8mm;
                 }
                 body * {
                     visibility: hidden !important;
@@ -1485,91 +1498,80 @@ function showReceiptModal(refNo, buyerName, amount, desc, date, method, buyerId)
                     left: 0 !important;
                     top: 0 !important;
                     width: 100% !important;
-                    display: block !important;
+                    max-width: 100% !important;
                     margin: 0 !important;
                     padding: 0 !important;
-                    background: #ffffff !important;
                 }
-                .receipt-card {
-                    width: 185mm !important;
-                    max-width: 185mm !important;
-                    height: 130mm !important;
+                .receipt-half-a4 {
+                    width: 100% !important;
+                    max-width: 190mm !important;
+                    height: 135mm !important; /* Eksaktong kalahati ng A4 paper */
                     box-sizing: border-box !important;
-                    border: 2px solid #000 !important;
-                    padding: 20px 24px !important;
-                    background: #ffffff !important;
+                    border: 1.5px solid #000 !important;
+                    padding: 16px 20px !important;
                     display: flex !important;
                     flex-direction: column !important;
                     justify-content: space-between !important;
                     page-break-inside: avoid !important;
-                    margin: 0 auto !important; /* Automatic na mag-iistrehab at magpapatanto sa gitna (balance) */
                 }
                 .no-print {
                     display: none !important;
                 }
             }
-            .no-print {
-                display: flex;
-            }
         </style>
 
-        <div id="printableReceiptArea" style="max-width:580px; margin:0 auto; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <div class="receipt-card" style="border: 2px solid #0f172a; border-radius: 8px; padding: 24px; background: #ffffff; width: 100%; box-sizing: border-box;">
-                <div>
-                    <!-- Header -->
-                    <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 14px;">
-                        <div style="font-size: 20px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">ACKNOWLEDGEMENT RECEIPT</div>
-                        <div style="font-size: 11px; color: #475569; font-weight: 600;">REALTY INVENTORY &amp; COLLECTION MANAGEMENT</div>
-                    </div>
+        <div id="printableReceiptArea" style="max-width:520px; margin:0 auto; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div class="receipt-half-a4" style="border: 2px dashed #94a3b8; border-radius: 10px; padding: 20px; background: #ffffff;">
+                <!-- Header -->
+                <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px;">
+                    <div style="font-size: 17px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">ACKNOWLEDGEMENT RECEIPT</div>
+                    <div style="font-size: 11px; color: #475569; font-weight: 600;">REALTY INVENTORY &amp; COLLECTION MANAGEMENT</div>
+                </div>
 
-                    <!-- Info Grid -->
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px 16px; font-size:13px; margin-bottom: 14px;">
-                        <div><span style="color:#64748b;">AR / Ref No:</span> <strong style="color:#1d4ed8; font-family:monospace; font-size:14px;">${refNo}</strong></div>
-                        <div style="text-align:right;"><span style="color:#64748b;">Petsa / Oras:</span> <strong>${date}</strong></div>
-                        <div style="grid-column: 1 / -1;"><span style="color:#64748b;">Natanggap Mula Kay:</span> <strong style="font-size:14px; text-transform:uppercase;">${esc(buyerName)}</strong></div>
-                        <div style="grid-column: 1 / -1;"><span style="color:#64748b;">Detalye ng Pagbabayad:</span> <strong style="font-size:13px;">${esc(desc)}</strong></div>
-                        <div><span style="color:#64748b;">Pamamaraan (Mode):</span> <strong style="text-transform:uppercase;">${esc(method)}</strong></div>
-                        <div style="text-align:right;"><span style="color:#64748b;">Natitirang Balanse:</span> <strong style="color:#b91c1c; font-size:14px;">${money(remainingBal)}</strong></div>
-                    </div>
+                <!-- Info Grid -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px 14px; font-size:12px; margin-bottom: 10px;">
+                    <div><span style="color:#64748b;">AR / Ref No:</span> <strong style="color:#1d4ed8; font-family:monospace; font-size:13px;">${refNo}</strong></div>
+                    <div style="text-align:right;"><span style="color:#64748b;">Petsa:</span> <strong>${date}</strong></div>
+                    <div style="grid-column: 1 / -1;"><span style="color:#64748b;">Natanggap Mula Kay:</span> <strong style="font-size:13px; text-transform:uppercase;">${esc(buyerName)}</strong></div>
+                    <div style="grid-column: 1 / -1;"><span style="color:#64748b;">Para Sa:</span> <strong>${esc(desc)}</strong></div>
+                    <div><span style="color:#64748b;">Pamamaraan:</span> <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px;">${esc(method)}</span></div>
+                </div>
 
-                    <!-- Amount Box -->
-                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 14px; text-align: center; margin: 12px 0;">
-                        <small style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase;">KABUUANG HALAGANG IBINAYAD (AMOUNT PAID)</small>
-                        <div style="font-size: 26px; font-weight: 900; color: #15803d; margin-top:4px;">${money(amount)}</div>
+                <!-- Amount Box -->
+                <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 6px; padding: 10px; text-align: center; margin: 8px 0;">
+                    <small style="font-size: 10px; font-weight: 800; color: #166534; text-transform: uppercase;">Kabuuang Halagang Ibinayad</small>
+                    <div style="font-size: 22px; font-weight: 900; color: #15803d; margin-top:2px;">${money(amount)}</div>
+                </div>
+
+                <!-- Signatures -->
+                <div style="margin-top:16px; display:flex; justify-content:space-between; font-size:11px; color:#334155;">
+                    <div style="text-align:center;">
+                        <br>____________________________<br>
+                        <strong>Authorized Cashier / Staff</strong>
+                    </div>
+                    <div style="text-align:center;">
+                        <br>____________________________<br>
+                        <strong>Lagda ng Buyer / Client</strong>
                     </div>
                 </div>
 
-                <div>
-                    <!-- Signatures -->
-                    <div style="margin-top:20px; display:flex; justify-content:space-between; font-size:12px; color:#334155;">
-                        <div style="text-align:center;">
-                            ____________________________<br>
-                            <strong>Authorized Cashier / Staff</strong>
-                        </div>
-                        <div style="text-align:center;">
-                            ____________________________<br>
-                            <strong>Lagda ng Buyer / Client</strong>
-                        </div>
-                    </div>
-
-                    <!-- Footer Note -->
-                    <div style="text-align: center; font-size: 10px; color: #94a3b8; margin-top: 14px; border-top: 1px dotted #cbd5e1; padding-top: 6px;">
-                        Opisyal na katibayan ng pagtanggap ng bayad • Valid without dry seal
-                    </div>
+                <!-- Footer Note -->
+                <div style="text-align: center; font-size: 9px; color: #94a3b8; margin-top: 10px; border-top: 1px dotted #cbd5e1; padding-top: 6px;">
+                    Opisyal na katibayan ng pagtanggap ng bayad • Valid without dry seal
                 </div>
             </div>
 
-            <!-- On-Screen Controls (Hindi kasama sa Print) -->
+            <!-- On-Screen Controls -->
             <div class="no-print" style="display: flex; gap: 10px; margin-top: 14px;">
-                <button class="btn btn-secondary full" onclick="openBuyerDossierModal('${buyerId}')">Bumalik sa Folder</button>
-                <button class="btn btn-primary full" style="background:#2563eb;" onclick="window.print()">I-print ang Resibo</button>
+                <button class="btn btn-secondary full" onclick="openBuyerDossierModal('${buyerId}')">⬅ Bumalik sa Folder</button>
+                <button class="btn btn-primary full" style="background:#2563eb;" onclick="window.print()">🖨️ I-print (Half A4)</button>
             </div>
         </div>
     `);
 }
 
 // =========================================================
-// 5. MONEY MOVEMENT & LEDGERS
+// 5. MONEY MOVEMENT (INFLOW & OUTFLOW LEDGER)
 // =========================================================
 
 function renderMoney() {
@@ -1667,7 +1669,7 @@ function openReceivePaymentModal() {
             </div>
             <div class="form-group">
                 <label>Acknowledgement Receipt / Remarks</label>
-                <input id="payRemarksInput" placeholder="e.g. AR #10492">
+<input id="payRemarksInput" placeholder="e.g. AR #10492">
             </div>
             <button class="btn btn-success full" style="padding:12px; margin-top:8px;" type="submit">RECORD PAYMENT &amp; UPDATE BALANCE</button>
         </form>
@@ -1696,6 +1698,7 @@ function saveReceivedPayment(event) {
 
     if (amount <= 0) return;
 
+    // Deduct balance
     res.balance = Math.max(0, Number(res.balance || 0) - amount);
 
     db.moneyIn.push({
@@ -1717,6 +1720,7 @@ function saveReceivedPayment(event) {
 }
 
 function openDisburseMoneyModal() {
+    const activeRealtyId = getActiveRealtyId();
     showModal(`
         <div class="modal-header">
             <h3>📤 RECORD DISBURSEMENT / PAYOUT</h3>
@@ -1846,6 +1850,7 @@ function renderCommission() {
 }
 
 function openAddCommissionModal() {
+    const activeRealtyId = getActiveRealtyId();
     showModal(`
         <div class="modal-header">
             <h3>💼 NEW COMMISSION VOUCHER</h3>
@@ -1922,6 +1927,7 @@ function markCommissionPaid(commId) {
     comm.status = "PAID";
     comm.paidDate = new Date().toISOString().slice(0, 10);
 
+    // Auto-record to Money Out
     db.moneyOut.push({
         id: uid("MOUT"),
         realtyId: comm.realtyId,
@@ -1988,6 +1994,7 @@ function renderRefund() {
 }
 
 function openRequestRefundModal() {
+    const activeRealtyId = getActiveRealtyId();
     showModal(`
         <div class="modal-header">
             <h3>↩️ FILE BUYER REFUND REQUEST</h3>
@@ -2149,6 +2156,7 @@ function saveExpense(event) {
         remarks
     });
 
+    // Auto-record to Money Out
     db.moneyOut.push({
         id: uid("MOUT"),
         realtyId: activeRealtyId,
@@ -2323,147 +2331,107 @@ function toggleStaffStatus(staffId) {
 
 function renderReports() {
     const activeRealtyId = getActiveRealtyId();
+    const moneyIn = (db.moneyIn || []).filter(m => !activeRealtyId || m.realtyId === activeRealtyId);
+    const moneyOut = (db.moneyOut || []).filter(m => !activeRealtyId || m.realtyId === activeRealtyId);
+    const reservations = (db.reservations || []).filter(r => !activeRealtyId || r.realtyId === activeRealtyId);
+
+    const totalIn = moneyIn.reduce((sum, m) => sum + Number(m.amount || 0), 0);
+    const totalOut = moneyOut.reduce((sum, m) => sum + Number(m.amount || 0), 0);
+    const net = totalIn - totalOut;
+
     const content = document.getElementById("content");
     if (!content) return;
 
-    let currentUser = "Boss Executive";
-    try {
-        if (typeof currentStaff !== 'undefined' && currentStaff) currentUser = currentStaff;
-        else if (localStorage.getItem('currentUser')) currentUser = localStorage.getItem('currentUser');
-    } catch (e) {}
-
-    const realtyName = (typeof db !== 'undefined' && db.realtyName) ? db.realtyName : "IVORY PROPERTIES CORP.";
-    const currentTime = new Date().toLocaleString();
-
     content.innerHTML = `
-        <div style="padding: 20px; background: #0f172a; color: #f8fafc; min-height: 100vh;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #1e293b; padding: 15px 20px; border-radius: 8px; border: 1px solid #334155;">
-                <div>
-                    <h2>📁 System Reports Room</h2>
-                    <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Eksklusibong silid ng Boss para sa monitoring ng mga transaksiyon.</p>
-                </div>
-                <div style="text-align: right; font-size: 13px; color: #cbd5e1; background: #0f172a; padding: 8px 12px; border-radius: 6px; border: 1px solid #475569;">
-                    <div>🏢 <strong style="color: #60a5fa;">${realtyName}</strong></div>
-                    <div style="margin-top: 3px; font-size: 11px; color: #94a3b8;">User: <span style="color: #f8fafc; font-weight: bold;">${currentUser}</span></div>
-                    <div style="font-size: 11px; color: #94a3b8;">Time/Date: <span>${currentTime}</span></div>
-                </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div>
+                <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b; margin:0;">📈 Executive Performance Reports</h3>
+                <small style="color:#64748b;">Consolidated ledger statements and financial health summary</small>
             </div>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print Statement</button>
+        </div>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 10px;">
-                <button onclick="switchReportFolder('print-folder', this)" class="report-tab-btn active" style="background: #3b82f6; color: #fff; padding: 10px 20px; border: 1px solid #60a5fa; cursor: pointer; border-radius: 6px; font-weight: 600;">🖨️ Print & Receipt Reports</button>
-                <button onclick="switchReportFolder('login-folder', this)" class="report-tab-btn" style="background: #1e293b; color: #fff; padding: 10px 20px; border: 1px solid #475569; cursor: pointer; border-radius: 6px; font-weight: 600;">🔑 Login Reports</button>
-                <button onclick="switchReportFolder('action-folder', this)" class="report-tab-btn" style="background: #1e293b; color: #fff; padding: 10px 20px; border: 1px solid #475569; cursor: pointer; border-radius: 6px; font-weight: 600;">⚡ Action Reports (Audit Trail)</button>
-            </div>
-
-            <div id="print-folder" class="report-folder-content" style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                <h3 style="margin-bottom: 15px; color: #f8fafc;">Print & Receipt History</h3>
-                <div id="print-reports-table-container">
-                    <p style="text-align: center; color: #94a3b8; padding: 20px;">Wala pang naka-record na print history.</p>
-                </div>
-            </div>
-
-            <div id="login-folder" class="report-folder-content" style="display: none; background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                <h3 style="margin-bottom: 15px; color: #f8fafc;">Staff & Boss Login Records</h3>
-                <div id="login-reports-table-container">
-                    <p style="text-align: center; color: #94a3b8; padding: 20px;">Wala pang login records.</p>
-                </div>
-            </div>
-
-            <div id="action-folder" class="report-folder-content" style="display: none; background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                <h3 style="margin-bottom: 15px; color: #f8fafc;">Action Audit Trail (Mga Binura, Binago, at Transaksiyon)</h3>
-                <div id="action-reports-table-container">
-                    ${renderAuditTableHTML()}
-                </div>
+        <div class="card-3d" style="margin-bottom:24px;">
+            <h4 style="margin-bottom:14px; color:#1e293b;">Financial Statement Summary</h4>
+            <div class="table-wrap">
+                <table>
+                    <tbody>
+                        <tr><td><strong>Total Collections (Money In)</strong></td><td style="color:#16a34a; font-weight:bold; text-align:right;">${money(totalIn)}</td></tr>
+                        <tr><td><strong>Total Disbursements (Expenses + Commissions)</strong></td><td style="color:#dc2626; font-weight:bold; text-align:right;">${money(totalOut)}</td></tr>
+                        <tr style="background:#f8fafc; font-size:1.05rem;"><td><strong>Net Retained Capital</strong></td><td style="color:#2563eb; font-weight:bold; text-align:right;">${money(net)}</td></tr>
+                        <tr><td><strong>Outstanding Accounts Receivable</strong></td><td style="color:#d97706; font-weight:bold; text-align:right;">${money(reservations.reduce((sum, r) => sum + Number(r.balance || 0), 0))}</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     `;
-    const loginContainer = document.getElementById("login-reports-table-container");
-    if (loginContainer) {
-        const logs = typeof db !== 'undefined' && db.loginReports ? db.loginReports : [];
-        if (logs.length === 0) {
-            loginContainer.innerHTML = `<p style="color: #94a3b8; text-align: center; padding: 20px;">Wala pang login records.</p>`;
-        } else {
-            loginContainer.innerHTML = `
-                <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 13px;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid #334155; text-align: left; color: #60a5fa;">
-                            <th style="padding: 10px;">Username</th>
-                            <th style="padding: 10px;">Role</th>
-                            <th style="padding: 10px;">Realty ID</th>
-                            <th style="padding: 10px;">Timestamp</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${logs.map(log => `
-                            <tr style="border-bottom: 1px solid #1e293b;">
-                                <td style="padding: 10px;">${esc(log.username)}</td>
-                                <td style="padding: 10px;">${esc(log.role)}</td>
-                                <td style="padding: 10px;">${esc(log.realtyId)}</td>
-                                <td style="padding: 10px;">${new Date(log.timestamp).toLocaleString()}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
-    }
 }
 
-function renderAuditTableHTML() {
-    const logs = db.auditLogs || [];
-    if (logs.length === 0) {
-        return `<p style="text-align: center; color: #94a3b8; padding: 20px;">No audit records found.</p>`;
-    }
+function renderRecords() {
+    let logs = (db.auditLogs || []).filter(item => {
+        // 1. Kung hindi IT ang naka-login, itago nang buo ang lahat ng galaw ni IT
+        if (currentUser && currentUser.role !== "IT") {
+            const logUser = String(item.user || "").trim().toUpperCase();
+            const logRole = String(item.role || "").trim().toUpperCase();
+            if (logUser === "IT" || logRole === "IT") {
+                return false;
+            }
 
-    let html = `
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; background: #0f172a; color: #f8fafc; font-size: 13px;">
+            // 2. Kung Realty Staff/Admin ang naka-login, sariling branch logs lang ang dapat makita
+            if (currentUser.role !== "BOSS") {
+                const myBranchId = currentRealty ? currentRealty.id : currentUser.realtyId;
+                if (item.realtyId && item.realtyId !== myBranchId) {
+                    return false;
+                }
+            }
+        }
+        
+        // 3. Kapag si IT ang naka-login, lulusot lahat (Boss + lahat ng Realty records)
+        return true; 
+    });
+
+    const content = document.getElementById("content");
+    if (!content) return;
+
+    content.innerHTML = `
+        <div style="margin-bottom:16px;">
+            <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b; margin:0;">📜 System Audit Trail</h3>
+            <small style="color:#64748b;">Chronological audit of sensitive transactions and staff activities</small>
+        </div>
+        <div class="panel" style="overflow-x:auto;">
+            <table class="table">
                 <thead>
-                    <tr style="border-bottom: 2px solid #334155; text-align: left;">
-                        <th style="padding: 12px; color: #94a3b8;">TIMESTAMP</th>
-                        <th style="padding: 12px; color: #94a3b8;">USER</th>
-                        <th style="padding: 12px; color: #94a3b8;">ACTION TYPE</th>
-                        <th style="padding: 12px; color: #94a3b8;">DETAILS</th>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action Type</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
+                    ${logs.length === 0 ? `
+                        <tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">No audit records found.</td></tr>
+                    ` : logs.map(l => `
+                        <tr>
+                            <td style="font-size:12px; color:#64748b;">${new Date(l.timestamp).toLocaleString()}</td>
+                            <td style="font-weight:700; color:#0f172a;">${esc(l.user)}</td>
+                            <td><span class="badge badge-purple" style="font-size:11px;">${esc(l.actionType)}</span></td>
+                            <td style="font-size:13px; color:#334155;">${esc(l.details)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
     `;
-
-    logs.forEach(l => {
-        let badgeColor = '#7c3aed';
-        const action = l.actionType || 'GENERAL_ACTION';
-        if (action.includes('DELETE')) badgeColor = '#ef4444';
-        else if (action.includes('EDIT') || action.includes('UPDATE')) badgeColor = '#f59e0b';
-        else if (action.includes('ADD') || action.includes('BOOK') || action.includes('PAID')) badgeColor = '#10b981';
-
-        html += `
-            <tr style="border-bottom: 1px solid #1e293b;">
-                <td style="padding: 12px; color: #94a3b8; white-space: nowrap;">${l.timestamp || '-'}</td>
-                <td style="padding: 12px; font-weight: 600; color: #f8fafc;">${l.user || 'Boss Executive'}</td>
-                <td style="padding: 12px;"><span style="background: ${badgeColor}; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${action}</span></td>
-                <td style="padding: 12px; color: #cbd5e1;">${l.details || '-'}</td>
-            </tr>
-        `;
-    });
-
-    html += `</tbody></table></div>`;
-    return html;
 }
 
-function switchReportFolder(folderId, btnElement) {
-    document.querySelectorAll('.report-folder-content').forEach(el => {
-        el.style.display = 'none';
+function logAuditEvent(type, details) {
+    if (!Array.isArray(db.auditLogs)) db.auditLogs = [];
+    db.auditLogs.unshift({
+        id: uid("LOG"),
+        type,
+        details,
+        username: currentUser ? currentUser.username : "ANONYMOUS",
+        timestamp: new Date().toISOString()
     });
-    document.querySelectorAll('.report-tab-btn').forEach(btn => {
-        btn.style.background = '#1e293b';
-        btn.style.borderColor = '#475569';
-    });
-    
-    if (btnElement) {
-        btnElement.style.background = '#3b82f6';
-        btnElement.style.borderColor = '#60a5fa';
-    }
-
-    const target = document.getElementById(folderId);
-    if (target) target.style.display = 'block';
 }

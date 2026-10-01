@@ -59,7 +59,7 @@ function renderBossDashboard() {
                 <small style="color:#64748b;">Consolidated group realty oversight &amp; master billing controller</small>
             </div>
             <div style="display:flex; gap:8px;">
-                <button id="renewalEngineBtn" class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>
+                <button class="btn btn-success" onclick="openBossMultiPayModal()">💳 Multi-Branch Renewal Engine</button>
                 <button class="btn btn-primary" onclick="openBossPasswordModal()">🔒 Change Personal Password</button>
             </div>
         </div>
@@ -524,7 +524,7 @@ function openIssueRealtyTempPasswordModal(realtyId) {
             <small style="color:#64748b;">Ibigay ito sa realty admin. Papapalitan ito ng personal password pagka-login nila.</small>
         </div>
         <button class="btn btn-primary full" style="padding:12px; font-size:14px;" onclick="saveRealtyTempPassword('${branch.id}', '${adminStaff.id}')">
-           💾 SAVE &amp; ISSUE TEMPORARY PASSWORD
+            ðŸ’¾ SAVE &amp; ISSUE TEMPORARY PASSWORD
         </button>
     `);
 }
@@ -628,7 +628,7 @@ function addRealty(event) {
     const futureDue = new Date();
     futureDue.setDate(futureDue.getDate() + 30);
 
-   const newRealtyId = (db.realties || []).length === 0 ? 'B0R1' : 'OR' + (db.realties.length);
+    const newRealtyId = uid("R"); // Permanent Unique Room ID (Checkpoint V2)
     const defaultUsername = name.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 15) || ("admin" + Math.floor(100 + Math.random() * 900));
     const initialTempPwd = generateTempPassword();
 
@@ -665,7 +665,7 @@ function addRealty(event) {
     showPage("staff");
 }
 
-// =========================================================d
+// =========================================================
 // 5. APPROVALS HUB (EXECUTIVE CLEARANCE FOR REFUNDS)
 // =========================================================
 
@@ -821,14 +821,3 @@ function rejectExecutiveRefund(refundId) {
 }
 
 
-window.addEventListener('load', () => {
-    const config = JSON.parse(localStorage.getItem("realty_system_config") || "{}");
-    const btn = document.getElementById("renewalEngineBtn");
-    if (btn) {
-        if (config.hideRenewalEngine) {
-            btn.style.display = 'none';
-        } else {
-            btn.style.display = 'inline-block';
-        }
-    }
-});

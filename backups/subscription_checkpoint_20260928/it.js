@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    IT.JS - PLATFORM VENDOR, SUBSCRIPTIONS & DATABASE BACKUPS
    Checkpoint V2 Implementation: 2026-09-27
    Consolidated Modules: Pricing, Verification, Lockouts, 
@@ -80,49 +80,20 @@ function renderITRoom() {
     content.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <div>
-                <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">👑 IT Platform Control Room</h3>
+                <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">?💲IT Platform Control Room</h3>
                 <small style="color:#64748b;">Global subscription identity enforcement, rate configuration &amp; verification engine</small>
             </div>
            <div style="display:flex; gap:8px; align-items:center;">
                 <select onchange="changeSystemLanguage(this.value)" style="padding:7px 12px; border-radius:6px; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#1e293b; cursor:pointer;">
-                    <option value="EN" ${currentLang === 'EN' ? 'selected' : ''}>🇺🇸 English</option>
-                    <option value="TL" ${currentLang === 'TL' ? 'selected' : ''}>tl­ Tagalog</option>
+                    <option value="EN" ${currentLang === 'EN' ? 'selected' : ''}>💲English</option>
+                    <option value="TL" ${currentLang === 'TL' ? 'selected' : ''}>??💲Tagalog</option>
                 </select>
-                <button class="btn btn-primary" onclick="showPage('cloud-subscription')">☁️ Cloud Billing &amp; Verification (${pendingCount})</button>
-                <button class="btn btn-secondary" onclick="showPage('control')">⚙️ System Control &amp; Backups</button>
+                <button class="btn btn-primary" onclick="showPage('cloud-subscription')">? Cloud Billing &amp; Verification (${pendingCount})</button>
+                <button class="btn btn-secondary" onclick="showPage('control')">? System Control &amp; Backups</button>
             </div>
         </div>
 
         <!-- KPI SUMMARY TILES -->
-        <!-- IT Master Control Panel -->
-    <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; color: #fff; margin-top: 20px; border: 1px solid #333;">
-        <h3 style="color: #ff4d4d; margin-top: 0;">🛠️ IT Master System Control</h3>
-        <p style="font-size: 13px; color: #aaa;">Dito binabago ni IT ang pangalan at permanent room IDs ng Boss at Realty.</p>
-        
-        <div style="margin-bottom: 12px;">
-            <label style="font-size: 12px; color: #ccc;">Realty Name:</label>
-            <input type="text" id="itRealtyNameInput" value="${db.realties[0] ? db.realties[0].name : 'TARLAC CENTRAL REALTY'}" style="width: 100%; padding: 8px; margin-top: 4px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="font-size: 12px; color: #ccc;">Realty Permanent Room ID:</label>
-            <input type="text" id="itRealtyIdInput" value="${db.realties[0] ? db.realties[0].id : ''}" style="width: 100%; padding: 8px; margin-top: 4px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-        </div>
-        <div style="margin-bottom: 15px;">
-            <label style="font-size: 12px; color: #ccc;">Boss Permanent Room ID:</label>
-            <input type="text" id="itBossIdInput" value="${db.settings.bossSubscription ? db.settings.bossSubscription.id : 'BOSS'}" style="width: 100%; padding: 8px; margin-top: 4px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-        </div>
-
-<div style="margin-top: 15px; margin-bottom: 15px; background: #222; padding: 10px; border-radius: 6px;">
-        <label style="font-size: 12px; color: #ccc; display: flex; align-items: center; cursor: pointer;">
-           <input type="checkbox" id="itHideRenewalEngine" ${JSON.parse(localStorage.getItem('realty_system_config') || '{}').hideRenewalEngine ? 'checked' : ''} style="margin-right: 8px; transform: scale(1.2);">
-            Hide Multi-Branch Renewal Engine (Repair Mode)
-        </label>
-    </div>
-
-        <button onclick="saveITMasterConfig()" style="background: #cc0000; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">
-            💾 Save Master Settings
-        </button>
-    </div>
         <div class="grid-4" style="margin-bottom:24px;">
             <div class="card-3d" style="border-top:4px solid #2563eb;">
                 <small style="color:#64748b; font-weight:bold; text-transform:uppercase;">Boss Room Status</small>
@@ -184,7 +155,7 @@ function renderITRoom() {
                             </td>
                             <td>
                                 <button class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="openITExtendRoomModal('BOSS')">
-                                    📅… Extend +30 Days
+                                    ? Extend +30 Days
                                 </button>
                             </td>
                         </tr>
@@ -209,13 +180,13 @@ function renderITRoom() {
                                     <td>
                                         <div style="display:flex; gap:4px; flex-wrap:wrap;">
                                             <button class="btn btn-primary" style="padding:4px 8px; font-size:11px;" onclick="openITExtendRoomModal('${r.id}')">
-                                               📅… Extend
+                                                ? Extend
                                             </button>
                                             <button class="btn ${r.isLocked ? 'btn-success' : 'btn-danger'}" style="padding:4px 8px; font-size:11px;" onclick="toggleBranchLock('${r.id}')">
-                                                ${r.isLocked ? '💲Unlock' : '🔒 Lock'}
+                                                ${r.isLocked ? '💲Unlock' : '💲Lock'}
                                             </button>
                                             <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="openITResetStaffPasswordModal('${r.id}')">
-                                                ⏳‘ Reset Pass
+                                                💲Reset Pass
                                             </button>
                                         </div>
                                     </td>
@@ -239,8 +210,6 @@ function renderCloudSubscription() {
     const realtyRate = Number(db.settings.defaultMonthlyRate || 2500);
     const mayaUrl = db.settings.mayaPaymentUrl || "";
     const gotymeUrl = db.settings.gotymePaymentUrl || "";
-    const subscriptionQR = db.settings.subscriptionPaymentQR || "";
-    const bossDueDate = db.settings?.bossSubscription?.dueDate || "";
 
     const content = document.getElementById("content");
     if (!content) return;
@@ -264,32 +233,13 @@ function renderCloudSubscription() {
                         <small style="color:#64748b;">Standard base price sa bawat branch account.</small>
                     </div>
                     <div class="form-group">
-                        <label>Boss Executive Room Expiration Date & Time</label>
-                        <input type="datetime-local" id="itBossExpirationInput" value="${bossDueDate ? bossDueDate.slice(0,16) : ""}">
-                        <small style="color:#64748b;">IT ang nagse-set ng exact expiration date at oras ng Boss. Puwedeng today mismo.</small>
+                        <label>Maya QR / Payment Link</label>
+                        <input type="url" id="itMayaUrlInput" value="${esc(mayaUrl)}" placeholder="https://maya.ph/...">
                     </div>
-                    <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #cbd5e1;">
-<div class="form-group">
-    <label>SELECT REALTY BRANCH</label>
-    <select id="itRealtySelectInput" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-        <option value="">-- Select Branch to Update --</option>
-        ${(db.realties || []).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
-    </select>
-</div>
-<div class="form-group">
-    <label>BRANCH EXPIRATION DATE & TIME</label>
-    <input type="datetime-local" id="itRealtyExpirationInput" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-    <p style="font-size: 11px; color: #64748b; margin-top: 4px;">Pumili ng branch sa itaas at i-set ang expiration date nito.</p>
-</div>
-<hr style="margin: 20px 0; border: 0; border-top: 1px dashed #cbd5e1;">
-
-<div class="form-group">
-    <label>Master Subscription Payment QR Code</label>
-                        <input type="file" id="itSubscriptionQRInput" accept="image/*">
-                        <small style="color:#64748b;">QR code image na gagamitin ng Boss at Realty para sa subscription payment.</small>
-                        ${subscriptionQR ? `<div style="margin-top:10px;"><img src="${subscriptionQR}" alt="Master Subscription QR" style="max-width:220px;max-height:220px;border:1px solid #e2e8f0;border-radius:8px;padding:6px;background:#fff;"></div>` : ""}
+                    <div class="form-group">
+                        <label>GoTyme Bank Payment Link</label>
+                        <input type="url" id="itGotymeUrlInput" value="${esc(gotymeUrl)}" placeholder="https://gotyme.com.ph/...">
                     </div>
-                    
                     <button class="btn btn-primary full" type="submit" style="padding:10px;">💲SAVE CONFIGURATION</button>
                 </form>
             </div>
@@ -395,47 +345,17 @@ function saveITSubscriptionPricing(event) {
     event.preventDefault();
     const bossRate = Number(document.getElementById("itBossRateInput")?.value || 3500);
     const realtyRate = Number(document.getElementById("itRealtyRateInput")?.value || 2500);
-    const mayaUrl = document.getElementById("itMayaUrlInput")?.value?.trim() || "";
-    const gotymeUrl = document.getElementById("itGotymeUrlInput")?.value?.trim() || "";
-    
-    const bossExpiration = document.getElementById("itBossExpirationInput")?.value || "";
-    const realtySelect = document.getElementById("itRealtySelectInput")?.value || "";
-    const realtyExpiration = document.getElementById("itRealtyExpirationInput")?.value || "";
-    const qrFile = document.getElementById("itSubscriptionQRInput")?.files?.[0];
+    const mayaUrl = document.getElementById("itMayaUrlInput")?.value.trim();
+    const gotymeUrl = document.getElementById("itGotymeUrlInput")?.value.trim();
 
-    function applyDatesAndSave() {
-        db.settings.bossMonthlyRate = bossRate;
-        db.settings.defaultMonthlyRate = realtyRate;
-        db.settings.mayaPaymentUrl = mayaUrl;
-        db.settings.gotymePaymentUrl = gotymeUrl;
+    db.settings.bossMonthlyRate = bossRate;
+    db.settings.defaultMonthlyRate = realtyRate;
+    db.settings.mayaPaymentUrl = mayaUrl;
+    db.settings.gotymePaymentUrl = gotymeUrl;
 
-        if (bossExpiration) {
-            if (!db.settings.bossSubscription) db.settings.bossSubscription = { id: "BOSS", status: "ACTIVE", dueDate: "" };
-            db.settings.bossSubscription.dueDate = bossExpiration;
-        }
-
-        if (realtySelect && realtyExpiration) {
-            const branch = db.realties.find(r => r.id === realtySelect);
-            if (branch) {
-                branch.dueDate = realtyExpiration;
-            }
-        }
-
-        saveDB();
-        alert("✅ Configuration and Expiration Dates updated successfully!");
-        renderCloudSubscription();
-    }
-
-    if (qrFile) {
-        const reader = new FileReader();
-        reader.onload = function() {
-            db.settings.subscriptionPaymentQR = reader.result;
-            applyDatesAndSave();
-        };
-        reader.readAsDataURL(qrFile);
-    } else {
-        applyDatesAndSave();
-    }
+    saveDB();
+    alert("? IT Subscription Pricing and Payment Links updated successfully!");
+    renderCloudSubscription();
 }
 
 // =========================================================
@@ -534,11 +454,11 @@ function openProofViewerModal(paymentId) {
     showModal(`
         <div class="modal-header">
             <h3>💲PAYMENT PROOF INSPECTION</h3>
-            <button class="close" onclick="closeModal()">ï¿½</button>
+            <button class="close" onclick="closeModal()">�</button>
         </div>
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:12px; font-size:13px;">
             <p><strong>Room Target:</strong> ${esc(payment.realtyName)} (ID: <code>${payment.realtyId}</code>)</p>
-            <p><strong>Channel &amp; Ref:</strong> ${payment.method} ï¿½ <code>${esc(payment.reference)}</code></p>
+            <p><strong>Channel &amp; Ref:</strong> ${payment.method} � <code>${esc(payment.reference)}</code></p>
             <p><strong>Amount:</strong> <span style="color:#16a34a; font-weight:bold;">${money(payment.amount)}</span></p>
         </div>
         <div style="text-align:center; max-height:420px; overflow-y:auto; background:#000; border-radius:8px; padding:10px; margin-bottom:14px;">
@@ -563,7 +483,7 @@ function openITExtendRoomModal(roomId) {
     showModal(`
         <div class="modal-header">
             <h3>? MANUAL EXTENSION: ${esc(name)}</h3>
-            <button class="close" onclick="closeModal()">ï¿½</button>
+            <button class="close" onclick="closeModal()">�</button>
         </div>
         <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
             Magdagdag ng subscription days para sa account na ito nang walang online payment.
@@ -611,7 +531,7 @@ function openITResetStaffPasswordModal(branchId) {
     showModal(`
         <div class="modal-header">
             <h3>💲IT OVERRIDE: RESET BRANCH PASSWORD</h3>
-            <button class="close" onclick="closeModal()">ï¿½</button>
+            <button class="close" onclick="closeModal()">�</button>
         </div>
         <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
             Branch: <strong>${esc(branch.name)}</strong> (Room ID: <code>${branch.id}</code>)
@@ -666,7 +586,7 @@ function renderControl() {
                 <form onsubmit="saveITBrandingSettings(event)">
                     <div class="form-group">
                         <label>System Platform Name</label>
-                        <input id="itSysNameInput" value="${esc(db.settings.systemName || 'KHAINEJOSH REALTY')}" required>
+                        <input id="itSysNameInput" value="${esc(db.settings.systemName || 'REALTY SYSTEM')}" required>
                     </div>
                     <div class="form-group">
                         <label>Main Office Name</label>
@@ -750,7 +670,7 @@ function renderControl() {
 
 function saveITBrandingSettings(event) {
     event.preventDefault();
-    db.settings.systemName = document.getElementById("itSysNameInput")?.value.trim() || "KHAINEJOSH REALTY";
+    db.settings.systemName = document.getElementById("itSysNameInput")?.value.trim() || "REALTY SYSTEM";
     db.settings.realtyName = document.getElementById("itMainRealtyInput")?.value.trim() || "Main Office";
     db.settings.logo = document.getElementById("itLogoInput")?.value.trim() || "??";
 
@@ -854,33 +774,3 @@ function resetDatabase() {
 }
 
 
-
-
-
-
-
-
-
-// --- IT MASTER CONTROL PANEL CODE ---
-function saveITMasterConfig() {
-    const savedConfig = JSON.parse(localStorage.getItem("realty_system_config")) || {};
-    
-    savedConfig.realtyName = document.getElementById('itRealtyNameInput').value;
-    savedConfig.realtyRoomId = document.getElementById('itRealtyIdInput').value;
-    savedConfig.bossRoomId = document.getElementById('itBossIdInput').value;
-    savedConfig.hideRenewalEngine = document.getElementById('itHideRenewalEngine').checked;
-
-    localStorage.setItem("realty_system_config", JSON.stringify(savedConfig));
-    
-    if(db.realties && db.realties.length > 0) {
-        db.realties[0].name = savedConfig.realtyName;
-        db.realties[0].id = savedConfig.realtyRoomId;
-    }
-    if(db.settings && db.settings.bossSubscription) {
-        db.settings.bossSubscription.id = savedConfig.bossRoomId;
-    }
-    
-    saveDB();
-    alert("Tagumpay! Na-update na ang master settings.");
-    location.reload();
-}
