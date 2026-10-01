@@ -204,7 +204,9 @@ function resolveUserRoomIdentity(user) {
 }
 
 function getSubscriptionState(roomId) {
-    if (roomId === "IT") return { state: "ACTIVE", daysRemaining: 9999, dueDate: "PERMANENT", isLocked: false };
+    if (roomId === "IT") {
+        return { state: "ACTIVE", daysRemaining: 9999, dueDate: "PERMANENT", isLocked: false };
+    }
 
     let dueDateStr = "";
     let isLocked = false;
@@ -219,19 +221,31 @@ function getSubscriptionState(roomId) {
         }
     }
 
-    if (isLocked) return { state: "EXPIRED", daysRemaining: 0, dueDate: dueDateStr, isLocked: true };
-    if (!dueDateStr) return { state: "EXPIRED", daysRemaining: 0, dueDate: "NOT_SET", isLocked: false };
+    if (isLocked) {
+        return { state: "EXPIRED", daysRemaining: 0, dueDate: dueDateStr, isLocked: true };
+    }
 
-    const now = new Date();
+    if (!dueDateStr) {
+        return { state: "EXPIRED", daysRemaining: 0, dueDate: "NOT_SET", isLocked: false };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const due = new Date(dueDateStr);
-    const diffMs = due.getTime() - now.getTime();
+    due.setHours(0, 0, 0, 0);
+
+    const diffMs = due.getTime() - today.getTime();
     const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMs <= 0) return { state: "EXPIRED", daysRemaining, dueDate: dueDateStr, isLocked: false };
-    if (daysRemaining <= 7) return { state: "NEAR_EXPIRY", daysRemaining, dueDate: dueDateStr, isLocked: false };
-    return { state: "ACTIVE", daysRemaining, dueDate: dueDateStr, isLocked: false };
+    if (daysRemaining <= 0) {
+        return { state: "EXPIRED", daysRemaining, dueDate: dueDateStr, isLocked: false };
+    } else if (daysRemaining <= 7) {
+        return { state: "NEAR_EXPIRY", daysRemaining, dueDate: dueDateStr, isLocked: false };
+    } else {
+        return { state: "ACTIVE", daysRemaining, dueDate: dueDateStr, isLocked: false };
+    }
 }
-
 
 function isCurrentUserSubscriptionExpired(user) {
     if (!user || user.role === "IT") return false;
@@ -382,10 +396,7 @@ function canAccessBossFeatures() {
 
 function getActiveRealtyId() {
     if (!currentUser) return null;
-    if (currentUser.role === "BOSS") {
-        if (currentUser.isRestrictedMode) return null; // Force consolidated view
-        return currentUser.bossBranchOverride || null;
-    }
+    if (currentUser.role === "BOSS") return currentUser.bossBranchOverride || null;
     return currentUser.realtyId || null;
 }
 
@@ -398,10 +409,6 @@ function getActiveBranchProfile() {
 function universalSwitchBranch(realtyId) {
     if (!currentUser) return;
     if (currentUser.role === "BOSS") {
-        if (currentUser.isRestrictedMode) {
-            alert("ACCESS DENIED: Cannot switch branch scopes while subscription is expired.");
-            return;
-        }
         currentUser.bossBranchOverride = realtyId === "ALL" ? null : realtyId;
         saveSession(currentUser, currentPage);
         setupUserInterface();
@@ -541,26 +548,7 @@ function renderExpiredOfflineRoom() {
         gotyme.href = gotymeUrl || "#";
         gotyme.style.display = gotymeUrl ? "inline-flex" : "none";
     }
-
-    let bypassContainer = document.getElementById("restrictedBypassContainer");
-    if (!bypassContainer) {
-        bypassContainer = document.createElement("div");
-        bypassContainer.id = "restrictedBypassContainer";
-        bypassContainer.style.marginTop = "20px";
-        bypassContainer.innerHTML = `<button class="btn" style="width:100%; padding:12px; background:#475569; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:14px;" onclick="enterRestrictedMode()">CONTINUE TO ROOM</button>`;
-        const room = document.getElementById("expiredOfflineRoom");
-        const actionsDiv = document.querySelector("#expiredOfflineRoom .actions") || room;
-        if(actionsDiv) actionsDiv.appendChild(bypassContainer);
-    }
 }
-
-window.enterRestrictedMode = function() {
-    if (!confirm("Your subscription is expired. You will enter Restricted Mode with limited access. Continue?")) return;
-    currentUser.isRestrictedMode = true;
-    saveSession(currentUser, "dashboard");
-    setupUserInterface();
-    showPage("dashboard");
-};
 
 function openSubmitProofModal() {
     const identity = resolveUserRoomIdentity(currentUser);
@@ -693,15 +681,7 @@ function submitSubscriptionPayment() {
 
 function showPage(page) {
     if (currentUser && currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser) && page !== "expired-room") {
-        if (currentUser.isRestrictedMode) {
-            const restrictedPages = ["reservation", "add-realty", "money", "expenses", "cloud-subscription", "it-room", "control"];
-            if (restrictedPages.includes(page)) {
-                alert("ACCESS DENIED: Transactional feature locked due to expired subscription.");
-                page = "dashboard";
-            }
-        } else {
-            page = "expired-room";
-        }
+        page = "expired-room";
     }
 
     // Role Security Guards
@@ -910,6 +890,5 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     };
 })();
-
 
 

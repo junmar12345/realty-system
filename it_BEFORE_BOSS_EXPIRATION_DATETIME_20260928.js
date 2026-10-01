@@ -86,7 +86,7 @@ function renderITRoom() {
            <div style="display:flex; gap:8px; align-items:center;">
                 <select onchange="changeSystemLanguage(this.value)" style="padding:7px 12px; border-radius:6px; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#1e293b; cursor:pointer;">
                     <option value="EN" ${currentLang === 'EN' ? 'selected' : ''}>🇺🇸 English</option>
-                    <option value="TL" ${currentLang === 'TL' ? 'selected' : ''}>tl­ Tagalog</option>
+                    <option value="TL" ${currentLang === 'TL' ? 'selected' : ''}>ðŸ‡µðŸ‡­ Tagalog</option>
                 </select>
                 <button class="btn btn-primary" onclick="showPage('cloud-subscription')">☁️ Cloud Billing &amp; Verification (${pendingCount})</button>
                 <button class="btn btn-secondary" onclick="showPage('control')">⚙️ System Control &amp; Backups</button>
@@ -211,7 +211,6 @@ function renderCloudSubscription() {
     const mayaUrl = db.settings.mayaPaymentUrl || "";
     const gotymeUrl = db.settings.gotymePaymentUrl || "";
     const subscriptionQR = db.settings.subscriptionPaymentQR || "";
-    const bossDueDate = db.settings?.bossSubscription?.dueDate || "";
 
     const content = document.getElementById("content");
     if (!content) return;
@@ -235,32 +234,19 @@ function renderCloudSubscription() {
                         <small style="color:#64748b;">Standard base price sa bawat branch account.</small>
                     </div>
                     <div class="form-group">
-                        <label>Boss Executive Room Expiration Date & Time</label>
-                        <input type="datetime-local" id="itBossExpirationInput" value="${bossDueDate ? bossDueDate.slice(0,16) : ""}">
-                        <small style="color:#64748b;">IT ang nagse-set ng exact expiration date at oras ng Boss. Puwedeng today mismo.</small>
-                    </div>
-                    <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #cbd5e1;">
-<div class="form-group">
-    <label>SELECT REALTY BRANCH</label>
-    <select id="itRealtySelectInput" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-        <option value="">-- Select Branch to Update --</option>
-        ${(db.realties || []).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
-    </select>
-</div>
-<div class="form-group">
-    <label>BRANCH EXPIRATION DATE & TIME</label>
-    <input type="datetime-local" id="itRealtyExpirationInput" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
-    <p style="font-size: 11px; color: #64748b; margin-top: 4px;">Pumili ng branch sa itaas at i-set ang expiration date nito.</p>
-</div>
-<hr style="margin: 20px 0; border: 0; border-top: 1px dashed #cbd5e1;">
-
-<div class="form-group">
-    <label>Master Subscription Payment QR Code</label>
+                        <label>Master Subscription Payment QR Code</label>
                         <input type="file" id="itSubscriptionQRInput" accept="image/*">
                         <small style="color:#64748b;">QR code image na gagamitin ng Boss at Realty para sa subscription payment.</small>
                         ${subscriptionQR ? `<div style="margin-top:10px;"><img src="${subscriptionQR}" alt="Master Subscription QR" style="max-width:220px;max-height:220px;border:1px solid #e2e8f0;border-radius:8px;padding:6px;background:#fff;"></div>` : ""}
                     </div>
-                    
+                    <div class="form-group">
+                        <label>Maya QR / Payment Link</label>
+                        <input type="url" id="itMayaUrlInput" value="${esc(mayaUrl)}" placeholder="https://maya.ph/...">
+                    </div>
+                    <div class="form-group">
+                        <label>GoTyme Bank Payment Link</label>
+                        <input type="url" id="itGotymeUrlInput" value="${esc(gotymeUrl)}" placeholder="https://gotyme.com.ph/...">
+                    </div>
                     <button class="btn btn-primary full" type="submit" style="padding:10px;">💲SAVE CONFIGURATION</button>
                 </form>
             </div>
@@ -366,47 +352,45 @@ function saveITSubscriptionPricing(event) {
     event.preventDefault();
     const bossRate = Number(document.getElementById("itBossRateInput")?.value || 3500);
     const realtyRate = Number(document.getElementById("itRealtyRateInput")?.value || 2500);
-    const mayaUrl = document.getElementById("itMayaUrlInput")?.value?.trim() || "";
-    const gotymeUrl = document.getElementById("itGotymeUrlInput")?.value?.trim() || "";
-    
-    const bossExpiration = document.getElementById("itBossExpirationInput")?.value || "";
-    const realtySelect = document.getElementById("itRealtySelectInput")?.value || "";
-    const realtyExpiration = document.getElementById("itRealtyExpirationInput")?.value || "";
-    const qrFile = document.getElementById("itSubscriptionQRInput")?.files?.[0];
-
-    function applyDatesAndSave() {
-        db.settings.bossMonthlyRate = bossRate;
-        db.settings.defaultMonthlyRate = realtyRate;
-        db.settings.mayaPaymentUrl = mayaUrl;
-        db.settings.gotymePaymentUrl = gotymeUrl;
-
-        if (bossExpiration) {
-            if (!db.settings.bossSubscription) db.settings.bossSubscription = { id: "BOSS", status: "ACTIVE", dueDate: "" };
-            db.settings.bossSubscription.dueDate = bossExpiration;
-        }
-
-        if (realtySelect && realtyExpiration) {
-            const branch = db.realties.find(r => r.id === realtySelect);
-            if (branch) {
-                branch.dueDate = realtyExpiration;
-            }
-        }
-
-        saveDB();
-        alert("✅ Configuration and Expiration Dates updated successfully!");
-        renderCloudSubscription();
-    }
+    const mayaUrl = document.getElementById("itMayaUrlInput")?.value.trim();
+    const gotymeUrl = document.getElementById("itGotymeUrlInput")?.value.trim();
+    const subscriptionQRInput = document.getElementById("itSubscriptionQRInput");
+    const qrFile = subscriptionQRInput?.files?.[0];
 
     if (qrFile) {
+        if (qrFile.size > 5 * 1024 * 1024) {
+            alert("Master QR image must not exceed 5 MB.");
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function() {
             db.settings.subscriptionPaymentQR = reader.result;
-            applyDatesAndSave();
+            db.settings.bossMonthlyRate = bossRate;
+            db.settings.defaultMonthlyRate = realtyRate;
+            db.settings.mayaPaymentUrl = mayaUrl;
+            db.settings.gotymePaymentUrl = gotymeUrl;
+            saveDB();
+            alert("? IT Subscription Pricing and Master QR updated successfully!");
+            renderCloudSubscription();
         };
+
+        reader.onerror = function() {
+            alert("Error reading Master QR image.");
+        };
+
         reader.readAsDataURL(qrFile);
-    } else {
-        applyDatesAndSave();
+        return;
     }
+
+    db.settings.bossMonthlyRate = bossRate;
+    db.settings.defaultMonthlyRate = realtyRate;
+    db.settings.mayaPaymentUrl = mayaUrl;
+    db.settings.gotymePaymentUrl = gotymeUrl;
+
+    saveDB();
+    alert("? IT Subscription Pricing and Payment Links updated successfully!");
+    renderCloudSubscription();
 }
 
 // =========================================================
@@ -823,12 +807,6 @@ function resetDatabase() {
     alert("? Na-reset na ang database sa default seed data.");
     location.reload();
 }
-
-
-
-
-
-
 
 
 
