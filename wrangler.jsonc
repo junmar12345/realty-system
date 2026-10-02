@@ -1,11 +1,12 @@
 ﻿{
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "realty-v2",
+  "name": "realty-system",
   "compatibility_date": "2026-09-03",
   "observability": {
     "enabled": true
   },
   "assets": {
-    "directory": "./public"
+    "directory": "."
   }
 }
+
