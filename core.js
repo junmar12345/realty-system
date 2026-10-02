@@ -154,7 +154,7 @@ function seedInitialData() {
         role: "ADMIN",
         status: "ACTIVE",
         realtyId: initialBranchId,
-        mustChangePassword: false
+        mustChangePassword: true
     });
 }
 
