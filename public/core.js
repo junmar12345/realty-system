@@ -1,24 +1,21 @@
-/* =========================================================
+﻿/* =
    CORE.JS - REALTY MULTI-TENANT SYSTEM ENGINE
    Checkpoint V2 Implementation: 2026-09-27
-   Consolidated Parts 1 - 9 (Storage, Auth, Subscriptions, Router)
-========================================================= */
+   Consolidated Parts 1 - 10 (Storage, Auth, Subscriptions, Router, Audit Protection)
+= */
 
 const DB_KEY = "REALTY_SYSTEM_V1";
 const SESSION_KEY = "REALTY_ACTIVE_SESSION";
 
 let db = {
-   settings: {
-<<<<<<< HEAD
+    settings: {
         systemName: "KHAINEJOSH REALTY",
-=======
-        systemName: "REALTY SYSTEM",
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
         realtyName: "Main Office",
         realtyAddress: "Philippines",
         logo: "🏢",
         mayaPaymentUrl: "",
         gotymePaymentUrl: "QRCODE.png",
+        subscriptionPaymentQR: "",
         defaultMonthlyRate: 2500,
         bossMonthlyRate: 3500,
         bossPassword: "boss123",
@@ -43,15 +40,16 @@ let db = {
     expenses: [],
     staff: [],
     subscriptionPayments: [],
-    auditLogs: []
+    auditLogs: [],
+    loginReports: []
 };
 
 let currentUser = null;
 let currentPage = "dashboard";
 
-/* =========================================================
+/* =
    1. UTILITIES & GLOBAL STRING/NUMBER HELPERS
-========================================================= */
+= */
 
 function uid(prefix = "ID") {
     return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 7);
@@ -89,9 +87,9 @@ function renderLogoHTML(logo) {
     return `<span style="font-size:18px;">${logo}</span>`;
 }
 
-/* =========================================================
+/* =
    2. STORAGE LAYER & DATABASE NORMALIZATION
-========================================================= */
+= */
 
 function loadDB() {
     try {
@@ -120,20 +118,22 @@ function saveDB() {
 }
 
 function seedInitialData() {
+    const savedConfig = JSON.parse(localStorage.getItem("realty_system_config")) || {};
+
     const futureDue = new Date();
     futureDue.setDate(futureDue.getDate() + 30);
     const dueStr = futureDue.toISOString().slice(0, 10);
 
     db.settings.bossSubscription = {
-        id: "BOSS",
+        id: savedConfig.bossRoomId || "BOSS",
         status: "ACTIVE",
         dueDate: dueStr
     };
 
-    const initialBranchId = uid("R");
+    const initialBranchId = savedConfig.realtyRoomId || uid("R");
     db.realties.push({
         id: initialBranchId,
-        name: "TARLAC CENTRAL REALTY",
+        name: savedConfig.realtyName || "KHAINEJOSH REALTY",
         owner: "Branch Manager",
         contact: "09123456789",
         address: "Tarlac City, Tarlac",
@@ -173,7 +173,7 @@ function normalizeDBSchema() {
         "realties", "projects", "areas", "blocks", "lots",
         "buyers", "reservations", "moneyIn", "moneyOut",
         "commissions", "refunds", "expenses", "staff",
-        "subscriptionPayments", "auditLogs"
+        "subscriptionPayments", "auditLogs", "loginReports"
     ];
 
     collections.forEach(key => {
@@ -181,9 +181,9 @@ function normalizeDBSchema() {
     });
 }
 
-/* =========================================================
+/* =
    3. SUBSCRIPTION IDENTITY & 7-DAY ENGINE (CHECKPOINT V2)
-========================================================= */
+= */
 
 function resolveUserRoomIdentity(user) {
     if (!user) return null;
@@ -197,7 +197,7 @@ function resolveUserRoomIdentity(user) {
     const branch = db.realties.find(r => r.id === user.realtyId);
     if (branch) {
         return {
-            roomId: branch.id, // Permanent ID
+            roomId: branch.id,
             type: "REALTY",
             name: branch.name,
             branch: branch
@@ -207,9 +207,7 @@ function resolveUserRoomIdentity(user) {
 }
 
 function getSubscriptionState(roomId) {
-    if (roomId === "IT") {
-        return { state: "ACTIVE", daysRemaining: 9999, dueDate: "PERMANENT", isLocked: false };
-    }
+    if (roomId === "IT") return { state: "ACTIVE", daysRemaining: 9999, dueDate: "PERMANENT", isLocked: false };
 
     let dueDateStr = "";
     let isLocked = false;
@@ -224,30 +222,17 @@ function getSubscriptionState(roomId) {
         }
     }
 
-    if (isLocked) {
-        return { state: "EXPIRED", daysRemaining: 0, dueDate: dueDateStr, isLocked: true };
-    }
+    if (isLocked) return { state: "EXPIRED", daysRemaining: 0, dueDate: dueDateStr, isLocked: true };
+    if (!dueDateStr) return { state: "EXPIRED", daysRemaining: 0, dueDate: "NOT_SET", isLocked: false };
 
-    if (!dueDateStr) {
-        return { state: "EXPIRED", daysRemaining: 0, dueDate: "NOT_SET", isLocked: false };
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    const now = new Date();
     const due = new Date(dueDateStr);
-    due.setHours(0, 0, 0, 0);
-
-    const diffMs = due.getTime() - today.getTime();
+    const diffMs = due.getTime() - now.getTime();
     const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-    if (daysRemaining <= 0) {
-        return { state: "EXPIRED", daysRemaining, dueDate: dueDateStr, isLocked: false };
-    } else if (daysRemaining <= 7) {
-        return { state: "NEAR_EXPIRY", daysRemaining, dueDate: dueDateStr, isLocked: false };
-    } else {
-        return { state: "ACTIVE", daysRemaining, dueDate: dueDateStr, isLocked: false };
-    }
+    if (diffMs <= 0) return { state: "EXPIRED", daysRemaining, dueDate: dueDateStr, isLocked: false };
+    if (daysRemaining <= 7) return { state: "NEAR_EXPIRY", daysRemaining, dueDate: dueDateStr, isLocked: false };
+    return { state: "ACTIVE", daysRemaining, dueDate: dueDateStr, isLocked: false };
 }
 
 function isCurrentUserSubscriptionExpired(user) {
@@ -258,9 +243,9 @@ function isCurrentUserSubscriptionExpired(user) {
     return sub.state === "EXPIRED";
 }
 
-/* =========================================================
+/* =
    4. AUTHENTICATION & LOGIN FLOW
-========================================================= */
+= */
 
 function saveSession(user, page) {
     try {
@@ -364,20 +349,33 @@ function loginUser(usernameInput, passwordInput) {
 }
 
 function finalizeLogin() {
+    if (currentUser && currentUser.username !== "IT" && currentUser.id !== "IT_MASTER") {
+        db.loginReports = db.loginReports || [];
+        db.loginReports.unshift({
+            username: currentUser.username,
+            role: currentUser.role,
+            realtyId: currentUser.realtyId || (currentUser.role === 'BOSS' ? 'B0R1' : 'OR1'),
+            timestamp: new Date().toISOString()
+        });
+        saveDB();
+    }
+
     const loginPortal = document.getElementById("loginPortal");
     if (loginPortal) loginPortal.classList.add("hidden");
 
-    setupUserInterface();
+    if (typeof setupUserInterface === "function") {
+        setupUserInterface();
+    }
 
     if (currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser)) {
-        showPage("expired-room");
+        if (typeof showPage === "function") showPage("expired-room");
         return;
     }
 
     currentPage = getInitialPageForUser(currentUser);
-    showPage(currentPage);
+    if (typeof showPage === "function") showPage(currentPage);
 
-    if (currentUser.mustChangePassword) {
+    if (currentUser.mustChangePassword && typeof showMandatoryPasswordChangeModal === "function") {
         showMandatoryPasswordChangeModal();
     }
 }
@@ -399,7 +397,10 @@ function canAccessBossFeatures() {
 
 function getActiveRealtyId() {
     if (!currentUser) return null;
-    if (currentUser.role === "BOSS") return currentUser.bossBranchOverride || null;
+    if (currentUser.role === "BOSS") {
+        if (currentUser.isRestrictedMode) return null;
+        return currentUser.bossBranchOverride || null;
+    }
     return currentUser.realtyId || null;
 }
 
@@ -412,6 +413,10 @@ function getActiveBranchProfile() {
 function universalSwitchBranch(realtyId) {
     if (!currentUser) return;
     if (currentUser.role === "BOSS") {
+        if (currentUser.isRestrictedMode) {
+            alert("ACCESS DENIED: Cannot switch branch scopes while subscription is expired.");
+            return;
+        }
         currentUser.bossBranchOverride = realtyId === "ALL" ? null : realtyId;
         saveSession(currentUser, currentPage);
         setupUserInterface();
@@ -419,16 +424,12 @@ function universalSwitchBranch(realtyId) {
     }
 }
 
-/* =========================================================
+/* =
    5. UI STATE & BRANDING CONFIGURATION
-========================================================= */
+= */
 
 function applyDynamicBranding() {
-<<<<<<< HEAD
     const sysName = db.settings.systemName || "KHAINEJOSH REALTY";
-=======
-    const sysName = db.settings.systemName || "REALTY SYSTEM";
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
     const logo = db.settings.logo || "🏢";
 
     const portalName = document.getElementById("portalSystemName");
@@ -457,10 +458,12 @@ function setupUserInterface() {
     const isBoss = currentUser.role === "BOSS";
 
     const navITRoom = document.getElementById("navITRoom");
+    const navAddRealty = document.getElementById("navAddRealty");
     const navCloudSub = document.getElementById("navCloudSub");
     const navControl = document.getElementById("navControl");
-    const navAddRealty = document.getElementById("navAddRealty");
+    const navReports = document.getElementById("navReports");
 
+    if (navReports) navReports.classList.toggle("hidden", !(isBoss || isIT));
     if (navITRoom) navITRoom.classList.toggle("hidden", !isIT);
     if (navCloudSub) navCloudSub.classList.toggle("hidden", !isIT);
     if (navControl) navControl.classList.toggle("hidden", !isIT);
@@ -490,9 +493,9 @@ function renderBranchSelector() {
     }
 }
 
-/* =========================================================
+/* =
    6. OFFLINE RENEWAL ROOM & PROOF SUBMISSION (CHECKPOINT V2)
-========================================================= */
+= */
 
 function renderExpiredOfflineRoom() {
     const app = document.getElementById("app");
@@ -555,7 +558,26 @@ function renderExpiredOfflineRoom() {
         gotyme.href = gotymeUrl || "#";
         gotyme.style.display = gotymeUrl ? "inline-flex" : "none";
     }
+
+    let bypassContainer = document.getElementById("restrictedBypassContainer");
+    if (!bypassContainer) {
+        bypassContainer = document.createElement("div");
+        bypassContainer.id = "restrictedBypassContainer";
+        bypassContainer.style.marginTop = "20px";
+        bypassContainer.innerHTML = `<button class="btn" style="width:100%; padding:12px; background:#475569; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:14px;" onclick="enterRestrictedMode()">CONTINUE TO ROOM</button>`;
+        const expiredRoomDiv = document.getElementById("expiredOfflineRoom");
+        const actionsDiv = document.querySelector("#expiredOfflineRoom .actions") || expiredRoomDiv;
+        if(actionsDiv) actionsDiv.appendChild(bypassContainer);
+    }
 }
+
+window.enterRestrictedMode = function() {
+    if (!confirm("Your subscription is expired. You will enter Restricted Mode with limited access. Continue?")) return;
+    currentUser.isRestrictedMode = true;
+    saveSession(currentUser, "dashboard");
+    setupUserInterface();
+    showPage("dashboard");
+};
 
 function openSubmitProofModal() {
     const identity = resolveUserRoomIdentity(currentUser);
@@ -573,7 +595,7 @@ function openSubmitProofModal() {
 
     showModal(`
         <div class="modal-header">
-            <h3>📄 SUBMIT RENEWAL PAYMENT</h3>
+            <h3>📅 SUBMIT RENEWAL PAYMENT</h3>
             <button class="close" onclick="closeModal()">×</button>
         </div>
         <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:14px; font-size:13px; color:#1e40af;">
@@ -682,13 +704,21 @@ function submitSubscriptionPayment() {
     reader.readAsDataURL(file);
 }
 
-/* =========================================================
+/* =
    7. MASTER PAGE ROUTER & DISPATCHER
-========================================================= */
+= */
 
 function showPage(page) {
     if (currentUser && currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser) && page !== "expired-room") {
-        page = "expired-room";
+        if (currentUser.isRestrictedMode) {
+            const restrictedPages = ["reservation", "add-realty", "money", "expenses", "cloud-subscription", "it-room", "control"];
+            if (restrictedPages.includes(page)) {
+                alert("ACCESS DENIED: Transactional feature locked due to expired subscription.");
+                page = "dashboard";
+            }
+        } else {
+            page = "expired-room";
+        }
     }
 
     // Role Security Guards
@@ -778,9 +808,9 @@ function showPage(page) {
     else if (page === "control" && typeof renderControl === "function") renderControl();
 }
 
-/* =========================================================
+/* =
    8. MODAL ENGINE & MANDATORY SECURITY
-========================================================= */
+= */
 
 function showModal(html) {
     const modal = document.getElementById("globalModal");
@@ -839,9 +869,9 @@ function saveMandatoryPassword() {
     }
 }
 
-/* =========================================================
+/* =
    9. LIFECYCLE & INITIALIZATION
-========================================================= */
+= */
 
 window.addEventListener("DOMContentLoaded", () => {
     loadDB();
@@ -872,15 +902,13 @@ window.addEventListener("DOMContentLoaded", () => {
         clearSession();
     }
 });
-/* =========================================================
+
+/* =
    10. IT STEALTH AUDIT PROTECTION & MASTER LOGGING ENGINE
-========================================================= */
+= */
 
 // Proteksyon sa pag-render ng table: Awtomatikong alisin si IT sa paningin ni Boss at Realty
 (function injectAuditStealthFilter() {
-    const originalRenderAudit = window.renderAudit || window.renderAuditLogs || window.loadAuditTrail;
-    
-    // I-intercept ang render function kung mayroon na sa window
     window.filterAuditLogsForViewer = function(logs) {
         if (!logs || !Array.isArray(logs)) return [];
         
@@ -891,7 +919,7 @@ window.addEventListener("DOMContentLoaded", () => {
         
         // Kapag si Boss o Realty Staff ang nakatingin: ITAGO SI IT NANG BUO
         return logs.filter(item => {
-            const userName = String(item.user || "").toUpperCase();
+            const userName = String(item.user || item.username || "").toUpperCase();
             const userRole = String(item.role || "").toUpperCase();
             return userName !== "IT" && userRole !== "IT";
         });

@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "realty-v2",
   "compatibility_date": "2026-09-03",
@@ -6,6 +6,6 @@
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    "directory": "./public"
   }
 }

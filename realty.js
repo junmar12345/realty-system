@@ -1,12 +1,12 @@
-/* =========================================================
+/* =
    REALTY.JS - WORKSPACE, INVENTORY, TRANSACTIONS & LEDGERS
    Checkpoint V2 Implementation: 2026-09-27
    LOCKED ZONE: Preserved Computations, Ledgers & Workflows
-========================================================= */
+= */
 
-// =========================================================
+// =
 // 1. BRANCH ADMIN DASHBOARD
-// =========================================================
+// =
 
 function renderAdminDashboard() {
     const activeRealtyId = getActiveRealtyId();
@@ -110,9 +110,9 @@ function renderAdminDashboard() {
     `;
 }
 
-// =========================================================
+// =
 // 2. PROJECTS, AREAS, BLOCKS & LOTS INVENTORY
-// =========================================================
+// =
 
 function renderProjects() {
     const activeRealtyId = getActiveRealtyId();
@@ -583,9 +583,9 @@ function saveNewLot(event, projId) {
     openManageProjectLotsModal(projId);
 }
 
-// =========================================================
+// =
 // 3. PROPERTY RESERVATIONS (LOCKED TRANSACTION WORKFLOW)
-// =========================================================
+// =
 
 function renderReservation() {
     const activeRealtyId = getActiveRealtyId();
@@ -802,9 +802,9 @@ function openNewReservationModal() {
     `);
 }
 
-// =========================================================
+// =
 // CASCADING MULTI-LOT CONTROLLER & FINANCIAL ENGINE
-// =========================================================
+// =
 
 let currentSelectedLotIds = [];
 
@@ -1109,9 +1109,9 @@ function openReservationDetailsModal(resId) {
     `);
 }
 
-// =========================================================
+// =
 // 4. BUYERS FOLDER & CLIENT DOSSIERS
-// =========================================================
+// =
 
 function renderBuyers() {
     const activeRealtyId = typeof getActiveRealtyId === 'function' ? getActiveRealtyId() : null;
@@ -1228,9 +1228,9 @@ function saveNewBuyer(event) {
     renderBuyers();
 }
 
-// =========================================================
+// =
 // WIDE BUYER DOSSIER: TRUE FULL SCREEN (NO SCROLL NEEDED)
-// =========================================================
+// =
 
 function openBuyerDossierModal(buyerId) {
     const buyer = (db.buyers || []).find(b => b.id === buyerId);
@@ -1402,9 +1402,9 @@ function openBuyerDossierModal(buyerId) {
         </div>
     `);
 }
-// =========================================================
+// =
 // 1-CLICK DUE PAYMENT & RECEIPT LOGIC
-// =========================================================
+// =
 
 function quickPayMonthlyAmort(buyerId, contractId, monthNumber, amount, dueStr) {
     const buyer = (db.buyers || []).find(b => b.id === buyerId);
@@ -1451,9 +1451,9 @@ function quickPayMonthlyAmort(buyerId, contractId, monthNumber, amount, dueStr) 
     showReceiptModal(refNo, buyer.name, amount, descText, pDate, "Cash", buyer.id);
 }
 
-// =========================================================
+// =
 // IN-APP ACKNOWLEDGEMENT RECEIPT (FORCED CENTER BALANCE)
-// =========================================================
+// =
 function showReceiptModal(refNo, buyerName, amount, desc, date, method, buyerId) {
     const buyerContracts = (db.reservations || []).filter(r => r.buyerId === buyerId || r.buyerName === buyerName);
     let remainingBal = 0;
@@ -1568,9 +1568,9 @@ function showReceiptModal(refNo, buyerName, amount, desc, date, method, buyerId)
     `);
 }
 
-// =========================================================
+// =
 // 5. MONEY MOVEMENT & LEDGERS
-// =========================================================
+// =
 
 function renderMoney() {
     const activeRealtyId = getActiveRealtyId();
@@ -1781,9 +1781,9 @@ function saveDisbursement(event) {
     renderMoney();
 }
 
-// =========================================================
+// =
 // 6. COMMISSIONS LEDGER
-// =========================================================
+// =
 
 function renderCommission() {
     const activeRealtyId = getActiveRealtyId();
@@ -1938,9 +1938,9 @@ function markCommissionPaid(commId) {
     renderCommission();
 }
 
-// =========================================================
+// =
 // 7. REFUNDS & WITHDRAWALS
-// =========================================================
+// =
 
 function renderRefund() {
     const activeRealtyId = getActiveRealtyId();
@@ -2037,9 +2037,9 @@ function saveRefundRequest(event) {
     renderRefund();
 }
 
-// =========================================================
+// =
 // 8. OPERATIONAL EXPENSES
-// =========================================================
+// =
 
 function renderExpenses() {
     const activeRealtyId = getActiveRealtyId();
@@ -2166,9 +2166,9 @@ function saveExpense(event) {
     renderExpenses();
 }
 
-// =========================================================
+// =
 // 9. STAFF ADMINISTRATION & USER ROLES
-// =========================================================
+// =
 
 function renderStaff() {
     const activeRealtyId = getActiveRealtyId();
@@ -2231,7 +2231,7 @@ function openAddStaffModal() {
         <div class="modal-header">
             <h3>👷 ADD STAFF MEMBER</h3>
             <button class="close" onclick="closeModal()">×</button>
-<<<<<<< HEAD
+
         </div>
         <form onsubmit="saveStaff(event)">
             <div class="form-group">
@@ -2318,9 +2318,9 @@ function toggleStaffStatus(staffId) {
     renderStaff();
 }
 
-// =========================================================
+// =
 // 10. EXECUTIVE REPORTS & AUDIT TRAIL LOGS
-// =========================================================
+// =
 
 function renderReports() {
     const activeRealtyId = getActiveRealtyId();
@@ -2468,7 +2468,9 @@ function switchReportFolder(folderId, btnElement) {
     const target = document.getElementById(folderId);
     if (target) target.style.display = 'block';
 }
-=======
+function openAddStaffModal() {
+    const temp = generateTempPassword();
+    showModal(`
         </div>
         <form onsubmit="saveStaff(event)">
             <div class="form-group">
@@ -2555,9 +2557,9 @@ function toggleStaffStatus(staffId) {
     renderStaff();
 }
 
-// =========================================================
+// =
 // 10. EXECUTIVE REPORTS & AUDIT TRAIL LOGS
-// =========================================================
+// =
 
 function renderReports() {
     const activeRealtyId = getActiveRealtyId();
@@ -2703,35 +2705,3 @@ function logAuditEvent(type, details) {
     `);
     printWindow.document.close();
 }
-    // I-record agad sa Audit Trail kung sino ang nag-print at ang serial number nito
-    logAuditEvent("SECURE_PRINT", `User '${currentUser?.name || currentUser?.username || "System"}' printed official report '${reportTitle}' with Serial Number: ${serialNo}`);
-    
-    // Buksan ang window para sa pag-print na may kasamang Serial Number sa ibabaw
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>${reportTitle} - ${serialNo}</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; color: #000; background: #fff; }
-                .serial-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-            </style>
-        </head>
-        <body>
-            <div class="serial-header">
-                <h2>REALTY MANAGEMENT SYSTEM - OFFICIAL REPORT</h2>
-                <div><strong>Serial No:</strong> <span style="color:red; font-size:1.2rem;">${serialNo}</span></div>
-            </div>
-            <div><small>Printed by: ${currentUser?.name || currentUser?.username || "Unknown"} | Date: ${new Date().toLocaleString()}</small></div>
-            <hr style="margin: 15px 0;">
-            <div>${reportDataHtml}</div>
-            <script>
-                window.onload = function() {
-                    window.print();
-                }
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680

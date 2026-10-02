@@ -1,997 +1,2493 @@
-﻿/* =========================================================
-   CORE.JS - REALTY MULTI-TENANT SYSTEM ENGINE
+﻿/* =
+   BOSS.JS - EXECUTIVE COMMAND CENTER & BRANCH MANAGEMENT
    Checkpoint V2 Implementation: 2026-09-27
-   Consolidated Parts 1 - 9 (Storage, Auth, Subscriptions, Router)
-========================================================= */
+   Consolidated Parts 1 - 6 (Dashboard, Multi-Pay, Branch Provisioning, Approvals)
+= */
 
-const DB_KEY = "REALTY_SYSTEM_V1";
-const SESSION_KEY = "REALTY_ACTIVE_SESSION";
+// ============================================================
+// 1. EXECUTIVE DASHBOARD & GROUP FINANCIAL OVERVIEW
+// ============================================================
 
-let db = {
-   settings: {
-<<<<<<< HEAD
-        systemName: "KHAINEJOSH REALTY",
-=======
-        systemName: "REALTY SYSTEM",
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-        realtyName: "Main Office",
-        realtyAddress: "Philippines",
-        logo: "🏢",
-        mayaPaymentUrl: "",
-        gotymePaymentUrl: "QRCODE.png",
-        subscriptionPaymentQR: "",
-        defaultMonthlyRate: 2500,
-        bossMonthlyRate: 3500,
-        bossPassword: "boss123",
-        itPassword: "it123",
-        bossSubscription: {
-            id: "BOSS",
-            status: "ACTIVE",
-            dueDate: ""
-        }
-    },
-    realties: [],
-    projects: [],
-    areas: [],
-    blocks: [],
-    lots: [],
-    buyers: [],
-    reservations: [],
-    moneyIn: [],
-    moneyOut: [],
-    commissions: [],
-    refunds: [],
-    expenses: [],
-    staff: [],
-    subscriptionPayments: [],
-    auditLogs: []
-};
-
-let currentUser = null;
-let currentPage = "dashboard";
-
-/* =========================================================
-   1. UTILITIES & GLOBAL STRING/NUMBER HELPERS
-========================================================= */
-
-function uid(prefix = "ID") {
-    return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 7);
-}
-
-function money(val) {
-    const num = Number(val || 0);
-    return "₱" + num.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function esc(str) {
-    if (str === null || str === undefined) return "";
-    return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function generateTempPassword() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let pwd = "";
-    for (let i = 0; i < 8; i++) {
-        pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return pwd;
-}
-
-function renderLogoHTML(logo) {
-    if (!logo) return "🏢";
-    if (String(logo).startsWith("data:image/") || String(logo).startsWith("http")) {
-        return `<img src="${logo}" style="width:100%; height:100%; object-fit:contain; border-radius:inherit;" alt="Logo">`;
-    }
-    return `<span style="font-size:18px;">${logo}</span>`;
-}
-
-/* =========================================================
-   2. STORAGE LAYER & DATABASE NORMALIZATION
-========================================================= */
-
-function loadDB() {
+function isRenewalEngineHidden() {
     try {
-        const raw = localStorage.getItem(DB_KEY);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            db = { ...db, ...parsed };
-            normalizeDBSchema();
-        } else {
-            seedInitialData();
-            saveDB();
-        }
-    } catch (e) {
-        console.error("Storage error. Initializing default data.", e);
-        seedInitialData();
-        saveDB();
-    }
-}
-
-function saveDB() {
-    try {
-        localStorage.setItem(DB_KEY, JSON.stringify(db));
-    } catch (e) {
-        alert("CRITICAL WARNING: Storage quota exceeded! Please back up data and clear space.");
-    }
-}
-
-function seedInitialData() {
-<<<<<<< HEAD
-    const savedConfig = JSON.parse(localStorage.getItem("realty_system_config")) || {};
-
-=======
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-    const futureDue = new Date();
-    futureDue.setDate(futureDue.getDate() + 30);
-    const dueStr = futureDue.toISOString().slice(0, 10);
-
-    db.settings.bossSubscription = {
-<<<<<<< HEAD
-        id: savedConfig.bossRoomId || "BOSS",
-=======
-        id: "BOSS",
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-        status: "ACTIVE",
-        dueDate: dueStr
-    };
-
-<<<<<<< HEAD
-    const initialBranchId = savedConfig.realtyRoomId || uid("R");
-    db.realties.push({
-        id: initialBranchId,
-        name: savedConfig.realtyName || "KHAINEJOSH REALTY",
-=======
-    const initialBranchId = uid("R");
-    db.realties.push({
-        id: initialBranchId,
-        name: "TARLAC CENTRAL REALTY",
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-        owner: "Branch Manager",
-        contact: "09123456789",
-        address: "Tarlac City, Tarlac",
-        status: "ACTIVE",
-        dueDate: dueStr,
-        monthlyFee: 2500,
-        isLocked: false,
-        logo: "🏢",
-        tempPassword: ""
-    });
-<<<<<<< HEAD
-=======
-
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-    db.staff.push({
-        id: uid("S"),
-        name: "Branch Admin",
-        username: "admin",
-        password: "admin123",
-        temporaryPassword: "",
-        role: "ADMIN",
-        status: "ACTIVE",
-        realtyId: initialBranchId,
-        mustChangePassword: false
-    });
-}
-
-function normalizeDBSchema() {
-    if (!db.settings) db.settings = {};
-    if (!db.settings.bossMonthlyRate) db.settings.bossMonthlyRate = 3500;
-    if (!db.settings.defaultMonthlyRate) db.settings.defaultMonthlyRate = 2500;
-
-    if (!db.settings.bossSubscription) {
-        const d = new Date();
-        d.setDate(d.getDate() + 30);
-        db.settings.bossSubscription = { id: "BOSS", status: "ACTIVE", dueDate: d.toISOString().slice(0, 10) };
-    }
-
-    const collections = [
-        "realties", "projects", "areas", "blocks", "lots",
-        "buyers", "reservations", "moneyIn", "moneyOut",
-        "commissions", "refunds", "expenses", "staff",
-        "subscriptionPayments", "auditLogs"
-    ];
-
-    collections.forEach(key => {
-        if (!Array.isArray(db[key])) db[key] = [];
-    });
-}
-
-/* =========================================================
-   3. SUBSCRIPTION IDENTITY & 7-DAY ENGINE (CHECKPOINT V2)
-========================================================= */
-
-function resolveUserRoomIdentity(user) {
-    if (!user) return null;
-    if (user.role === "IT") {
-        return { roomId: "IT", type: "IT", name: "IT System Administrator" };
-    }
-    if (user.role === "BOSS") {
-        return { roomId: "BOSS", type: "BOSS", name: "Executive Suite" };
-    }
-
-    const branch = db.realties.find(r => r.id === user.realtyId);
-    if (branch) {
-        return {
-            roomId: branch.id, // Permanent ID
-            type: "REALTY",
-            name: branch.name,
-            branch: branch
-        };
-    }
-    return null;
-}
-
-function getSubscriptionState(roomId) {
-    if (roomId === "IT") return { state: "ACTIVE", daysRemaining: 9999, dueDate: "PERMANENT", isLocked: false };
-
-    let dueDateStr = "";
-    let isLocked = false;
-
-    if (roomId === "BOSS") {
-        dueDateStr = db.settings?.bossSubscription?.dueDate || "";
-    } else {
-        const branch = db.realties.find(r => r.id === roomId);
-        if (branch) {
-            dueDateStr = branch.dueDate || "";
-            isLocked = !!branch.isLocked;
-        }
-    }
-
-    if (isLocked) return { state: "EXPIRED", daysRemaining: 0, dueDate: dueDateStr, isLocked: true };
-    if (!dueDateStr) return { state: "EXPIRED", daysRemaining: 0, dueDate: "NOT_SET", isLocked: false };
-
-    const now = new Date();
-    const due = new Date(dueDateStr);
-    const diffMs = due.getTime() - now.getTime();
-    const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMs <= 0) return { state: "EXPIRED", daysRemaining, dueDate: dueDateStr, isLocked: false };
-    if (daysRemaining <= 7) return { state: "NEAR_EXPIRY", daysRemaining, dueDate: dueDateStr, isLocked: false };
-    return { state: "ACTIVE", daysRemaining, dueDate: dueDateStr, isLocked: false };
-}
-
-
-function isCurrentUserSubscriptionExpired(user) {
-    if (!user || user.role === "IT") return false;
-    const identity = resolveUserRoomIdentity(user);
-    if (!identity) return true;
-    const sub = getSubscriptionState(identity.roomId);
-    return sub.state === "EXPIRED";
-}
-
-/* =========================================================
-   4. AUTHENTICATION & LOGIN FLOW
-========================================================= */
-
-function saveSession(user, page) {
-    try {
-        localStorage.setItem(SESSION_KEY, JSON.stringify({ user, page }));
-    } catch (e) {}
-}
-
-function clearSession() {
-    try {
-        localStorage.removeItem(SESSION_KEY);
-    } catch (e) {}
-}
-
-function handleLoginSubmit(event) {
-    event.preventDefault();
-    const uInput = document.getElementById("loginUsername")?.value;
-    const pInput = document.getElementById("loginPassword")?.value;
-    loginUser(uInput, pInput);
-}
-
-function loginUser(usernameInput, passwordInput) {
-    const username = (usernameInput || "").trim();
-    const password = (passwordInput || "").trim();
-
-    if (!username || !password) {
-        alert("Please provide both username and password.");
-        return;
-    }
-
-    // 1. IT Vendor Account
-    if (username.toUpperCase() === "IT" && password === (db.settings.itPassword || "it123")) {
-        currentUser = {
-            id: "IT_MASTER",
-            name: "IT System Administrator",
-            username: "IT",
-            role: "IT",
-            realtyId: null
-        };
-        finalizeLogin();
-        return;
-    }
-
-    // 2. Boss Executive Account
-    if (username.toUpperCase() === "BOSS" && password === (db.settings.bossPassword || "boss123")) {
-        currentUser = {
-            id: "BOSS_EXEC",
-            name: "Boss Executive",
-            username: "BOSS",
-            role: "BOSS",
-            realtyId: null,
-            bossBranchOverride: null
-        };
-        finalizeLogin();
-        return;
-    }
-
-    // 3. Branch Staff or Branch Name Login
-    let matchedStaff = db.staff.find(s => 
-        s.username.toLowerCase() === username.toLowerCase() && 
-        s.status === "ACTIVE"
-    );
-
-    let matchedBranch = null;
-
-    if (!matchedStaff) {
-        matchedBranch = db.realties.find(r => 
-            r.name.toLowerCase() === username.toLowerCase() && 
-            r.status === "ACTIVE"
+        const config = JSON.parse(
+            localStorage.getItem("realty_system_config") || "{}"
         );
-        if (matchedBranch) {
-            matchedStaff = db.staff.find(s => s.realtyId === matchedBranch.id && s.role === "ADMIN");
+
+        return !!config.hideRenewalEngine;
+    } catch (e) {
+        return false;
+    }
+}
+
+
+function renderBossDashboard() {
+    const realties = db.realties || [];
+    const reservations = db.reservations || [];
+    const moneyIn = db.moneyIn || [];
+    const moneyOut = db.moneyOut || [];
+    const refunds = db.refunds || [];
+
+    const pendingRefunds = refunds.filter(r => r.status === "PENDING");
+    const totalGroupCollections = moneyIn.reduce((sum, m) => sum + Number(m.amount || 0), 0);
+    const totalGroupExpenses = moneyOut.reduce((sum, m) => sum + Number(m.amount || 0), 0);
+    const totalGroupNet = totalGroupCollections - totalGroupExpenses;
+    const totalGroupReceivables = reservations.reduce((sum, r) => sum + Number(r.balance || 0), 0);
+
+    // Filter branches needing renewal (Expired or Due within 7 days)
+    const dueRealties = realties.filter(r => {
+        const sub = getSubscriptionState(r.id);
+        return sub.state === "EXPIRED" || sub.state === "NEAR_EXPIRY";
+    });
+
+    const bossSub = getSubscriptionState("BOSS");
+
+    const realtyStats = realties.map(r => {
+        const rMoneyIn = moneyIn
+            .filter(x => x.realtyId === r.id)
+            .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+        const rMoneyOut = moneyOut
+            .filter(x => x.realtyId === r.id)
+            .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+        const rRes = reservations.filter(x => x.realtyId === r.id);
+        const rStaff = db.staff.filter(s => s.realtyId === r.id);
+        const rProj = db.projects.filter(p => p.realtyId === r.id);
+        const subState = getSubscriptionState(r.id);
+
+        return {
+            ...r,
+            moneyIn: rMoneyIn,
+            moneyOut: rMoneyOut,
+            net: rMoneyIn - rMoneyOut,
+            salesCount: rRes.length,
+            staffCount: rStaff.length,
+            projectCount: rProj.length,
+            subscriptionState: subState
+        };
+    }).sort((a, b) => b.moneyIn - a.moneyIn);
+
+    const content = document.getElementById("content");
+    if (!content) return;
+
+    // ============================================================
+    // READ IT ROOM SETTING EVERY TIME BOSS DASHBOARD IS RENDERED
+    // This makes the hide/unhide setting work without browser refresh.
+    // ============================================================
+
+    const hideRenewalEngine = isRenewalEngineHidden();
+
+    content.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">👑 Executive Command Center</h3>
+                <small style="color:#64748b;">Consolidated group realty oversight &amp; master billing controller</small>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+
+                ${
+                    !hideRenewalEngine
+                    ? `
+                        <button
+                            id="renewalEngineBtn"
+                            class="btn btn-success"
+                            onclick="openBossMultiPayModal()">
+                            💳 Multi-Branch Renewal Engine
+                        </button>
+                    `
+                    : ''
+                }
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openBossPasswordModal()">
+                    🔒 Change Personal Password
+                </button>
+
+            </div>
+        </div>
+
+        ${
+            pendingRefunds.length > 0
+            ? `
+                <div style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1px solid #f87171; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong style="color:#991b1b; font-size:14px;">
+                            ⚠️ PENDING REFUND CLEARANCE REQUESTS (${pendingRefunds.length})
+                        </strong>
+
+                        <p style="color:#7f1d1d; font-size:12px; margin-top:2px;">
+                            Branch administrators submitted refund requests awaiting executive clearance.
+                        </p>
+                    </div>
+
+                    <button
+                        class="btn btn-danger"
+                        onclick="showPage('approvals')">
+                        Review Clearances
+                    </button>
+                </div>
+            `
+            : ''
         }
-    } else {
-        matchedBranch = db.realties.find(r => r.id === matchedStaff.realtyId);
-<<<<<<< HEAD
-    }
 
-    if (!matchedStaff || !matchedBranch) {
-        alert("Invalid username or password.");
-        return;
-    }
+        ${
+            (
+                bossSub.state === "EXPIRED" ||
+                bossSub.state === "NEAR_EXPIRY" ||
+                dueRealties.length > 0
+            )
+            ? `
+                <div style="background:#fffbeb; border:1px solid #fcd34d; border-radius:12px; padding:14px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div>
 
-    const isValidPass = (password === matchedStaff.password) || 
-                        (matchedStaff.temporaryPassword && password === matchedStaff.temporaryPassword) ||
-                        (matchedBranch.tempPassword && password === matchedBranch.tempPassword);
+                        <strong style="color:#b45309; font-size:14px;">
+                            ⏱️ SUBSCRIPTION ATTENTION REQUIRED
+                        </strong>
 
-    if (!isValidPass) {
-        alert("Invalid username or password.");
-        return;
-    }
+                        <p style="color:#92400e; font-size:12px; margin-top:2px;">
+                            ${
+                                bossSub.state !== "ACTIVE"
+                                ? `Boss Room: <strong>${bossSub.state}</strong> (${bossSub.daysRemaining} days left). `
+                                : ''
+                            }
 
-    currentUser = {
-        id: matchedStaff.id,
-        name: matchedStaff.name,
-        username: matchedStaff.username,
-        role: matchedStaff.role,
-        realtyId: matchedBranch.id,
-        mustChangePassword: !!matchedStaff.mustChangePassword
-    };
+                            ${
+                                dueRealties.length > 0
+                                ? `May <strong>${dueRealties.length}</strong> branch na expired o malapit nang mag-due.`
+                                : ''
+                            }
+                        </p>
+                    </div>
 
-    finalizeLogin();
-}
-
-function finalizeLogin() {
-    if (currentUser && currentUser.username !== "IT" && currentUser.id !== "IT_MASTER") {
-        db.loginReports = db.loginReports || [];
-        db.loginReports.unshift({
-            username: currentUser.username,
-            role: currentUser.role,
-            realtyId: currentUser.realtyId || (currentUser.role === 'BOSS' ? 'B0R1' : 'OR1'),
-            timestamp: new Date().toISOString()
-        });
-        saveDB();
-=======
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-    }
-    const loginPortal = document.getElementById("loginPortal");
-    if (loginPortal) loginPortal.classList.add("hidden");
-
-<<<<<<< HEAD
-=======
-    if (!matchedStaff || !matchedBranch) {
-        alert("Invalid username or password.");
-        return;
-    }
-
-    const isValidPass = (password === matchedStaff.password) || 
-                        (matchedStaff.temporaryPassword && password === matchedStaff.temporaryPassword) ||
-                        (matchedBranch.tempPassword && password === matchedBranch.tempPassword);
-
-    if (!isValidPass) {
-        alert("Invalid username or password.");
-        return;
-    }
-
-    currentUser = {
-        id: matchedStaff.id,
-        name: matchedStaff.name,
-        username: matchedStaff.username,
-        role: matchedStaff.role,
-        realtyId: matchedBranch.id,
-        mustChangePassword: !!matchedStaff.mustChangePassword
-    };
-
-    finalizeLogin();
-}
-
-function finalizeLogin() {
-    const loginPortal = document.getElementById("loginPortal");
-    if (loginPortal) loginPortal.classList.add("hidden");
-
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-    setupUserInterface();
-
-    if (currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser)) {
-        showPage("expired-room");
-        return;
-    }
-
-    currentPage = getInitialPageForUser(currentUser);
-    showPage(currentPage);
-
-    if (currentUser.mustChangePassword) {
-        showMandatoryPasswordChangeModal();
-    }
-}
-
-function logoutUser() {
-    currentUser = null;
-    clearSession();
-    location.reload();
-}
-
-function getInitialPageForUser(user) {
-    if (!user) return "dashboard";
-    return "dashboard";
-}
-
-function canAccessBossFeatures() {
-    return currentUser && currentUser.role === "BOSS";
-}
-
-function getActiveRealtyId() {
-    if (!currentUser) return null;
-    if (currentUser.role === "BOSS") {
-        if (currentUser.isRestrictedMode) return null; // Force consolidated view
-        return currentUser.bossBranchOverride || null;
-    }
-    return currentUser.realtyId || null;
-}
-
-function getActiveBranchProfile() {
-    const rid = getActiveRealtyId();
-    if (!rid) return null;
-    return db.realties.find(r => r.id === rid) || null;
-}
-
-function universalSwitchBranch(realtyId) {
-    if (!currentUser) return;
-    if (currentUser.role === "BOSS") {
-        if (currentUser.isRestrictedMode) {
-            alert("ACCESS DENIED: Cannot switch branch scopes while subscription is expired.");
-            return;
+                    <button
+                        class="btn btn-primary"
+                        onclick="openBossMultiPayModal()">
+                        Pay Renewals Now
+                    </button>
+                </div>
+            `
+            : ''
         }
-        currentUser.bossBranchOverride = realtyId === "ALL" ? null : realtyId;
-        saveSession(currentUser, currentPage);
-        setupUserInterface();
-        showPage(currentPage);
-    }
+
+        <div class="grid-4" style="margin-bottom:24px;">
+
+            <div class="card-3d" style="border-top:4px solid #16a34a;">
+                <small style="color:#64748b; font-weight:bold; text-transform:uppercase;">
+                    Gross Inflow (Money In)
+                </small>
+
+                <h3 style="color:#15803d; font-size:26px; margin-top:8px;">
+                    ${money(totalGroupCollections)}
+                </h3>
+
+                <p style="font-size:11px; color:#16a34a; margin-top:4px;">
+                    All Branches Combined
+                </p>
+            </div>
+
+
+            <div class="card-3d" style="border-top:4px solid #dc2626;">
+                <small style="color:#64748b; font-weight:bold; text-transform:uppercase;">
+                    Gross Outflows (Expenses)
+                </small>
+
+                <h3 style="color:#b91c1c; font-size:26px; margin-top:8px;">
+                    ${money(totalGroupExpenses)}
+                </h3>
+
+                <p style="font-size:11px; color:#dc2626; margin-top:4px;">
+                    Expenses + Comm Payouts
+                </p>
+            </div>
+
+
+            <div class="card-3d" style="border-top:4px solid #2563eb;">
+                <small style="color:#64748b; font-weight:bold; text-transform:uppercase;">
+                    Net Retained Capital
+                </small>
+
+                <h3 style="color:#1d4ed8; font-size:26px; margin-top:8px;">
+                    ${money(totalGroupNet)}
+                </h3>
+
+                <p style="font-size:11px; color:#2563eb; margin-top:4px;">
+                    Actual Net Balance
+                </p>
+            </div>
+
+
+            <div class="card-3d" style="border-top:4px solid #f59e0b;">
+                <small style="color:#64748b; font-weight:bold; text-transform:uppercase;">
+                    Total Receivables
+                </small>
+
+                <h3 style="color:#d97706; font-size:26px; margin-top:8px;">
+                    ${money(totalGroupReceivables)}
+                </h3>
+
+                <p style="font-size:11px; color:#d97706; margin-top:4px;">
+                    Future Amortization
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="card-3d">
+
+            <div class="panel-header" style="margin-bottom:12px;">
+
+                <div>
+                    <h4 style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">
+                        🏢 Managed Realty Branches
+                    </h4>
+
+                    <small style="color:#64748b;">
+                        Permanent ID tracking, subscription status, and branch operations.
+                    </small>
+                </div>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="showPage('add-realty')">
+                    + Add Realty Branch
+                </button>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Branch / Room ID</th>
+                            <th>Status &amp; Due Date</th>
+                            <th>Projects &amp; Staff</th>
+                            <th>Collections</th>
+                            <th>Net Balance</th>
+                            <th>Executive Action</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+
+                        ${
+                            realtyStats.length === 0
+                            ? `
+                                <tr>
+                                    <td
+                                        colspan="6"
+                                        style="text-align:center; padding:15px; color:#888;">
+                                        No branches registered.
+                                    </td>
+                                </tr>
+                            `
+                            :
+                            realtyStats.map((r, i) => {
+
+                                const sub = r.subscriptionState;
+
+                                let badgeClass = "badge-green";
+
+                                if (sub.state === "EXPIRED") {
+                                    badgeClass = "badge-red";
+                                }
+                                else if (sub.state === "NEAR_EXPIRY") {
+                                    badgeClass = "badge-purple";
+                                }
+
+                                return `
+                                    <tr>
+
+                                        <td>
+
+                                            <div style="display:flex; align-items:center; gap:8px;">
+
+                                                <div
+                                                    style="width:32px; height:32px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #cbd5e1;">
+                                                    ${renderLogoHTML(r.logo || '🏢')}
+                                                </div>
+
+                                                <div>
+
+                                                    <strong>
+                                                        ${i === 0 ? '📍 ' : ''}${esc(r.name)}
+                                                    </strong>
+
+                                                    <br>
+
+                                                    <small style="color:#64748b;">
+                                                        ID:
+                                                        <code>${r.id}</code>
+                                                        | Contact:
+                                                        ${esc(r.owner)}
+                                                    </small>
+
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <span class="badge ${badgeClass}">
+                                                ${sub.state}
+                                            </span>
+
+                                            <br>
+
+                                            <small style="color:#64748b;">
+                                                Due: ${r.dueDate || 'N/A'}
+                                            </small>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <span
+                                                style="font-size:12px; font-weight:bold; color:#475569;">
+                                                ${r.projectCount} Projects
+                                            </span>
+
+                                            |
+
+                                            <span
+                                                style="font-size:12px; font-weight:bold; color:#475569;">
+                                                ${r.staffCount} Staff
+                                            </span>
+
+                                        </td>
+
+
+                                        <td style="color:#16a34a; font-weight:bold;">
+                                            ${money(r.moneyIn)}
+                                        </td>
+
+
+                                        <td style="color:#2563eb; font-weight:bold;">
+                                            ${money(r.net)}
+                                        </td>
+
+
+                                        <td>
+
+                                            <div
+                                                style="display:flex; gap:6px; flex-wrap:wrap;">
+
+                                                <button
+                                                    class="btn btn-secondary"
+                                                    style="padding:6px 10px; font-size:12px;"
+                                                    onclick="openIssueRealtyTempPasswordModal('${r.id}')">
+                                                    🔑 Temp Pwd
+                                                </button>
+
+                                                <button
+                                                    class="btn btn-success"
+                                                    style="padding:6px 12px; font-size:12px;"
+                                                    onclick="universalSwitchBranch('${r.id}')">
+                                                    🚪 Enter Room
+                                                </button>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+                                `;
+
+                            }).join("")
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    `;
 }
 
-/* =========================================================
-   5. UI STATE & BRANDING CONFIGURATION
-========================================================= */
 
-function applyDynamicBranding() {
-<<<<<<< HEAD
-    const sysName = db.settings.systemName || "KHAINEJOSH REALTY";
-=======
-    const sysName = db.settings.systemName || "REALTY SYSTEM";
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-    const logo = db.settings.logo || "🏢";
+// ============================================================
+// 2. BOSS MULTI-PAY SUBSCRIPTION RENEWAL ENGINE
+// ============================================================
 
-    const portalName = document.getElementById("portalSystemName");
-    if (portalName) portalName.textContent = sysName;
+function openBossMultiPayModal() {
 
-    const portalLogo = document.getElementById("portalLogo");
-    if (portalLogo) portalLogo.innerHTML = renderLogoHTML(logo);
+    const bossRate = Number(db.settings.bossMonthlyRate || 3500);
+    const branchRate = Number(db.settings.defaultMonthlyRate || 2500);
+    const bossSub = getSubscriptionState("BOSS");
 
-    const sideName = document.getElementById("sideBrandName");
-    if (sideName) sideName.textContent = sysName;
+    const dueRealties = (db.realties || []).filter(r => {
 
-    const sideLogo = document.getElementById("sideBrandLogo");
-    if (sideLogo) sideLogo.innerHTML = renderLogoHTML(logo);
-}
+        const sub = getSubscriptionState(r.id);
 
-function setupUserInterface() {
-    if (!currentUser) return;
+        return (
+            sub.state === "EXPIRED" ||
+            sub.state === "NEAR_EXPIRY"
+        );
 
-    const badgeRole = document.getElementById("userBadgeRole");
-    const badgeName = document.getElementById("userBadgeName");
+    });
 
-    if (badgeRole) badgeRole.textContent = currentUser.role;
-    if (badgeName) badgeName.textContent = currentUser.name;
+    const isBossDue =
+        bossSub.state === "EXPIRED" ||
+        bossSub.state === "NEAR_EXPIRY";
 
-    const isIT = currentUser.role === "IT";
-    const isBoss = currentUser.role === "BOSS";
-
-    const navITRoom = document.getElementById("navITRoom");
-<<<<<<< HEAD
-    const navAddRealty = document.getElementById("navAddRealty");
-    const navCloudSub = document.getElementById("navCloudSub");
-    const navControl = document.getElementById("navControl");
-    const navReports = document.getElementById("navReports");
-
-    if (navReports) navReports.classList.toggle("hidden", !(isBoss || isIT));
-=======
-    const navCloudSub = document.getElementById("navCloudSub");
-    const navControl = document.getElementById("navControl");
-    const navAddRealty = document.getElementById("navAddRealty");
-
->>>>>>> bc5cb87f01e2246a0e079ea0e16aabcfa7390680
-    if (navITRoom) navITRoom.classList.toggle("hidden", !isIT);
-    if (navCloudSub) navCloudSub.classList.toggle("hidden", !isIT);
-    if (navControl) navControl.classList.toggle("hidden", !isIT);
-    if (navAddRealty) navAddRealty.classList.toggle("hidden", !isBoss && !isIT);
-
-    renderBranchSelector();
-}
-
-function renderBranchSelector() {
-    const container = document.getElementById("topbarBranchSelector");
-    if (!container) return;
-
-    if (currentUser?.role === "BOSS") {
-        const branches = db.realties || [];
-        const currentActive = currentUser.bossBranchOverride || "ALL";
-
-        container.innerHTML = `
-            <label style="font-size:12px; font-weight:bold; color:#64748b;">Branch Workspace:</label>
-            <select style="padding:6px 12px; border-radius:6px; border:1px solid #cbd5e1; font-weight:bold; font-size:13px; color:#1e293b; outline:none;" onchange="universalSwitchBranch(this.value)">
-                <option value="ALL" ${currentActive === "ALL" ? "selected" : ""}>👑 Consolidated Group (All Branches)</option>
-                ${branches.map(b => `<option value="${b.id}" ${currentActive === b.id ? "selected" : ""}>🏢 ${esc(b.name)}</option>`).join("")}
-            </select>
-        `;
-    } else {
-        const branch = getActiveBranchProfile();
-        container.innerHTML = branch ? `<span class="badge badge-purple" style="font-size:13px;">🏢 ${esc(branch.name)}</span>` : "";
-    }
-}
-
-/* =========================================================
-   6. OFFLINE RENEWAL ROOM & PROOF SUBMISSION (CHECKPOINT V2)
-========================================================= */
-
-function renderExpiredOfflineRoom() {
-    const app = document.getElementById("app");
-    const room = document.getElementById("expiredOfflineRoom");
-    const loginPortal = document.getElementById("loginPortal");
-
-    if (loginPortal) loginPortal.classList.add("hidden");
-    if (app) app.classList.add("hidden");
-    if (room) room.classList.remove("hidden");
-
-    const identity = resolveUserRoomIdentity(currentUser);
-    const titleElem = document.getElementById("expiredRoomTitle");
-    const idTextElem = document.getElementById("expiredRoomIdText");
-    const amountElem = document.getElementById("expiredRoomAmountText");
-
-    let requiredFee = 0;
-    if (identity?.type === "BOSS") {
-        requiredFee = Number(db.settings.bossMonthlyRate || 3500);
-    } else {
-        requiredFee = Number(identity?.branch?.monthlyFee || db.settings.defaultMonthlyRate || 2500);
-    }
-
-    if (titleElem) {
-        titleElem.textContent = identity ? `${identity.name} â€” Subscription Expired` : "Subscription Expired";
-    }
-
-    if (idTextElem) {
-        idTextElem.textContent = identity ? identity.roomId : "UNKNOWN";
-    }
-
-    if (amountElem) {
-        amountElem.textContent = money(requiredFee);
-    }
-
-    const pendingPayment = identity
-        ? db.subscriptionPayments.find(p => p.realtyId === identity.roomId && p.status === "PENDING")
-        : null;
-
-    const statusContainer = document.getElementById("subscriptionPaymentStatus");
-    if (statusContainer) {
-        statusContainer.innerHTML = pendingPayment
-            ? `<div style="background:#451a03; border:1px solid #b45309; border-radius:8px; padding:10px;">
-                 <strong style="color:#fbbf24; font-size:13px;">PAYMENT VERIFICATION PENDING</strong><br>
-                 <span style="font-size:12px; color:#fde68a;">Ref: ${esc(pendingPayment.reference)} | Submitted: ${new Date(pendingPayment.submittedAt).toLocaleDateString()}</span>
-               </div>`
-            : "";
-    }
-
-    const maya = document.getElementById("mayaRenewalLink");
-    const gotyme = document.getElementById("gotymeRenewalLink");
-    const mayaUrl = db.settings?.mayaPaymentUrl || "";
-    const gotymeUrl = db.settings?.gotymePaymentUrl || "";
-
-    if (maya) {
-        maya.href = mayaUrl || "#";
-        maya.style.display = mayaUrl ? "inline-flex" : "none";
-    }
-
-    if (gotyme) {
-        gotyme.href = gotymeUrl || "#";
-        gotyme.style.display = gotymeUrl ? "inline-flex" : "none";
-    }
-
-    let bypassContainer = document.getElementById("restrictedBypassContainer");
-    if (!bypassContainer) {
-        bypassContainer = document.createElement("div");
-        bypassContainer.id = "restrictedBypassContainer";
-        bypassContainer.style.marginTop = "20px";
-        bypassContainer.innerHTML = `<button class="btn" style="width:100%; padding:12px; background:#475569; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:14px;" onclick="enterRestrictedMode()">CONTINUE TO ROOM</button>`;
-        const room = document.getElementById("expiredOfflineRoom");
-        const actionsDiv = document.querySelector("#expiredOfflineRoom .actions") || room;
-        if(actionsDiv) actionsDiv.appendChild(bypassContainer);
-    }
-}
-
-window.enterRestrictedMode = function() {
-    if (!confirm("Your subscription is expired. You will enter Restricted Mode with limited access. Continue?")) return;
-    currentUser.isRestrictedMode = true;
-    saveSession(currentUser, "dashboard");
-    setupUserInterface();
-    showPage("dashboard");
-};
-
-function openSubmitProofModal() {
-    const identity = resolveUserRoomIdentity(currentUser);
-    if (!identity) {
-        alert("Cannot resolve room identity.");
-        return;
-    }
-
-    let defaultAmount = 0;
-    if (identity.type === "BOSS") {
-        defaultAmount = Number(db.settings.bossMonthlyRate || 3500);
-    } else {
-        defaultAmount = Number(identity.branch?.monthlyFee || db.settings.defaultMonthlyRate || 2500);
-    }
 
     showModal(`
+
         <div class="modal-header">
-            <h3>📅„ SUBMIT RENEWAL PAYMENT</h3>
-            <button class="close" onclick="closeModal()">Ã—</button>
+
+            <h3>
+                👑 EXECUTIVE MULTI-BRANCH RENEWAL
+            </h3>
+
+            <button
+                class="close"
+                onclick="closeModal()">
+                ×
+            </button>
+
         </div>
-        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:14px; font-size:13px; color:#1e40af;">
-            Submitting payment for Room: <strong>${esc(identity.name)}</strong> (ID: <code>${identity.roomId}</code>)
-        </div>
+
+
+        <p
+            style="font-size:13px; color:#64748b; margin-bottom:14px;">
+            Select the accounts and billing term to renew.
+            Active subscriptions are automatically excluded.
+        </p>
+
+
         <div class="form-group">
-            <label>Payment Method</label>
-            <select id="subPayMethod">
-                <option value="MAYA">Maya Payment</option>
-                <option value="GOTYME">GoTyme Bank</option>
-                <option value="BANK_TRANSFER">Gcash</option>
-                <option value="BANK_TRANSFER">PalawanPay</option>
-                <option value="CASH">Bank</option>
+
+            <label>
+                Billing Cycle / Term
+            </label>
+
+            <select
+                id="bossPayTerm"
+                onchange="calculateBossRenewalTotal()">
+
+                <option value="1" selected>
+                    Monthly Plan (1 Month Extension)
+                </option>
+
+                <option value="12">
+                    Annual Plan (12 Months / 1 Year Full Coverage)
+                </option>
+
             </select>
+
         </div>
+
+
         <div class="form-group">
-            <label>Reference Number / Transaction Hash</label>
-            <input id="subPayRef" placeholder="e.g. 1029384756" required>
+
+            <label>
+                Select Renewal Scope
+            </label>
+
+            <select
+                id="bossPayScope"
+                multiple
+                size="6"
+                onchange="calculateBossRenewalTotal()"
+                style="min-height:140px;">
+
+                <option value="BOSS_ONLY">
+                    Boss Executive Suite Only
+                </option>
+
+                ${
+                    dueRealties.length > 0
+                    ? `
+                        <option value="ALL_DUE">
+                            All Expired/Due Accounts
+                            (${isBossDue ? 'Boss + ' : ''}${dueRealties.length} Branches)
+                        </option>
+                    `
+                    : ''
+                }
+
+                ${
+                    dueRealties.map(r => `
+                        <option value="BRANCH_${r.id}">
+                            Realty: ${esc(r.name)}
+                        </option>
+                    `).join("")
+                }
+
+            </select>
+
+            <small
+                style="display:block; margin-top:6px; color:#64748b;">
+                Hold Ctrl and click to select multiple Realty accounts.
+                Active accounts are excluded.
+            </small>
+
         </div>
+
+
+        <div
+            id="bossRenewalSummary"
+            style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:14px; font-size:13px;">
+        </div>
+
+
+        <div
+            id="bossPaymentQR"
+            style="background:#ffffff; border:2px solid #2563eb; border-radius:10px; padding:14px; text-align:center; margin-bottom:16px;">
+
+            <span
+                style="font-size:12px; font-weight:800; color:#0f172a; display:block; margin-bottom:6px;">
+                💳 SUBSCRIPTION &amp; CLOUD SERVICES PAYMENT
+            </span>
+
+            <img
+                src="QRCODE.png"
+                alt="Subscription Payment QR"
+                style="max-height:180px; width:auto; max-width:100%; object-fit:contain; border-radius:6px; display:block; margin:0 auto;">
+
+            <small
+                style="color:#64748b; font-size:11px; display:block; margin-top:6px; font-weight:600;">
+                SCAN TO PAY
+            </small>
+
+        </div>
+
+
         <div class="form-group">
-            <label>Amount Paid (₱)</label>
-            <input id="subPayAmount" type="number" value="${defaultAmount}" required>
+
+            <label>
+                Payment Method Used
+            </label>
+
+            <select id="bossPayChannel">
+
+                <option value="">
+                    -- Select Payment Method --
+                </option>
+
+                <option value="GCASH">
+                    GCash
+                </option>
+
+                <option value="MAYA">
+                    Maya / PayMaya
+                </option>
+
+                <option value="GOTYME">
+                    GoTyme
+                </option>
+
+                <option value="PALAWAN">
+                    Palawan
+                </option>
+
+                <option value="BANK_TRANSFER">
+                    Bank Transfer
+                </option>
+
+                <option value="OTHER">
+                    Other
+                </option>
+
+            </select>
+
         </div>
+
+
         <div class="form-group">
-            <label>Date of Payment</label>
-            <input id="subPayDate" type="date" value="${new Date().toISOString().slice(0, 10)}" required>
+
+            <label>
+                Transaction Reference Number
+            </label>
+
+            <input
+                id="bossPayRef"
+                placeholder="Enter Transaction Reference Number"
+                required>
+
         </div>
+
+
         <div class="form-group">
-            <label>Upload Receipt / Proof (Image File, max 5MB)</label>
-            <input id="subPayProof" type="file" accept="image/*" required>
+
+            <label>
+                Proof of Payment Receipt (Screenshot)
+            </label>
+
+            <input
+                id="bossPayProof"
+                type="file"
+                accept="image/*"
+                required>
+
         </div>
-        <button class="btn btn-success full" style="padding:12px; margin-top:8px;" onclick="submitSubscriptionPayment()">
-            SUBMIT FOR VERIFICATION
+
+
+        <button
+            class="btn btn-success full"
+            style="padding:12px; font-size:14px;"
+            onclick="submitBossMultiPayment()">
+
+            SUBMIT RENEWAL FOR IT VERIFICATION
+
         </button>
+
     `);
+
+
+    calculateBossRenewalTotal();
 }
 
-function submitSubscriptionPayment() {
-    const identity = resolveUserRoomIdentity(currentUser);
-    if (!identity) {
-        alert("Authorization failed: Room identity could not be verified.");
-        return;
-    }
 
-    const method = document.getElementById("subPayMethod")?.value;
-    const reference = document.getElementById("subPayRef")?.value.trim();
-    const amount = Number(document.getElementById("subPayAmount")?.value || 0);
-    const paymentDate = document.getElementById("subPayDate")?.value;
-    const proofInput = document.getElementById("subPayProof");
+function calculateBossRenewalTotal() {
 
-    if (!method || !reference || amount <= 0 || !paymentDate) {
-        alert("Please complete the payment method, reference number, amount, and payment date.");
-        return;
-    }
+    const scopeSelect =
+        document.getElementById("bossPayScope");
 
-    if (!proofInput || !proofInput.files || !proofInput.files[0]) {
-        alert("Please upload your payment proof screenshot.");
-        return;
-    }
+    const scopes =
+        scopeSelect
+        ? Array.from(scopeSelect.selectedOptions).map(o => o.value)
+        : [];
 
-    const existingPending = db.subscriptionPayments.find(p => 
-        p.realtyId === identity.roomId && 
-        p.status === "PENDING"
-    );
+    const summaryContainer =
+        document.getElementById("bossRenewalSummary");
 
-    if (existingPending) {
-        alert("A pending payment verification is already queued for this Room ID. Please allow IT to verify.");
-        return;
-    }
+    if (!summaryContainer) return;
 
-    const file = proofInput.files[0];
-    if (file.size > 5 * 1024 * 1024) {
-        alert("Receipt file must not exceed 5 MB.");
-        return;
-    }
 
-    const reader = new FileReader();
-    reader.onload = function() {
-        db.subscriptionPayments.unshift({
-            id: uid("SUBPAY"),
-            realtyId: identity.roomId,
-            realtyName: identity.name,
-            submittedBy: currentUser.username,
-            submittedByName: currentUser.name,
-            method,
-            reference,
-            amount,
-            paymentDate,
-            proofName: file.name,
-            proofType: file.type || "application/octet-stream",
-            proofData: reader.result,
-            status: "PENDING",
-            submittedAt: new Date().toISOString()
+    const bossRate =
+        Number(db.settings.bossMonthlyRate || 3500);
+
+    const branchRate =
+        Number(db.settings.defaultMonthlyRate || 2500);
+
+    const bossSub =
+        getSubscriptionState("BOSS");
+
+    const isBossDue =
+        bossSub.state === "EXPIRED" ||
+        bossSub.state === "NEAR_EXPIRY";
+
+
+    const dueRealties =
+        (db.realties || []).filter(r => {
+
+            const sub =
+                getSubscriptionState(r.id);
+
+            return (
+                sub.state === "EXPIRED" ||
+                sub.state === "NEAR_EXPIRY"
+            );
+
         });
 
+
+    let items = [];
+    let grandTotal = 0;
+
+
+    if (scopes.includes("ALL_DUE")) {
+
+        if (isBossDue) {
+
+            const total =
+                bossRate * termMonths;
+
+            items.push({
+                id: "BOSS",
+                name: `Executive Suite (BOSS) [${termMonths === 12 ? "1 Year" : "1 Month"}]`,
+                amount: total
+            });
+
+            grandTotal += total;
+        }
+
+
+        dueRealties.forEach(r => {
+
+            const fee =
+                branchRate * termMonths;
+
+            items.push({
+                id: r.id,
+                name: `Branch: ${r.name} [${termMonths === 12 ? "1 Year" : "1 Month"}]`,
+                amount: fee
+            });
+
+            grandTotal += fee;
+
+        });
+
+    }
+
+
+    else if (
+        scopes.includes("BOSS_ONLY") &&
+        scopes.length === 1
+    ) {
+
+        const total =
+            bossRate * termMonths;
+
+        items.push({
+            id: "BOSS",
+            name: `Executive Suite (BOSS) [${termMonths === 12 ? "1 Year" : "1 Month"}]`,
+            amount: total
+        });
+
+        grandTotal += total;
+
+    }
+
+
+    else {
+
+        scopes
+            .filter(v => v.startsWith("BRANCH_"))
+            .forEach(v => {
+
+                const bId =
+                    v.replace("BRANCH_", "");
+
+                const branch =
+                    db.realties.find(r => r.id === bId);
+
+                if (branch) {
+
+                    const fee =
+                        branchRate * termMonths;
+
+                    items.push({
+                        id: branch.id,
+                        name: `Branch: ${branch.name} [${termMonths === 12 ? "1 Year" : "1 Month"}]`,
+                        amount: fee
+                    });
+
+                    grandTotal += fee;
+
+                }
+
+            });
+
+    }
+
+
+    summaryContainer.innerHTML = `
+
+        <strong style="color:#0f172a;">
+            Coverage Breakdown
+            (${termMonths === 12 ? 'Annual Plan' : 'Monthly Plan'}):
+        </strong>
+
+        <ul
+            style="margin:8px 0 8px 20px; color:#475569;">
+
+            ${
+                items.map(it => `
+                    <li>
+                        ${esc(it.name)}
+                        (ID: <code>${it.id}</code>)
+                        — <strong>${money(it.amount)}</strong>
+                    </li>
+                `).join("")
+            }
+
+        </ul>
+
+
+        <div
+            style="border-top:1px solid #cbd5e1; padding-top:6px; display:flex; justify-content:space-between; align-items:center;">
+
+            <span>
+                Total Amount Due:
+            </span>
+
+            <strong
+                style="font-size:16px; color:#16a34a;"
+                id="bossCalculatedGrandTotal"
+                data-total="${grandTotal}"
+                data-term="${termMonths}">
+
+                ${money(grandTotal)}
+
+            </strong>
+
+        </div>
+    `;
+}
+
+
+function submitBossMultiPayment() {
+
+    const scopeSelect =
+        document.getElementById("bossPayScope");
+
+    const scopes =
+        scopeSelect
+        ? Array.from(scopeSelect.selectedOptions).map(o => o.value)
+        : [];
+
+
+    const amount =
+        Number(
+            totalElem?.getAttribute("data-total") || 0
+        );
+
+
+    const method =
+        document.getElementById("bossPayChannel")?.value;
+
+
+    const reference =
+        document.getElementById("bossPayRef")?.value.trim();
+
+
+    const proofInput =
+        document.getElementById("bossPayProof");
+
+
+    if (!reference || amount <= 0) {
+
+        alert(
+            "Please provide the transaction reference number."
+        );
+
+        return;
+    }
+
+
+    if (
+        !proofInput ||
+        !proofInput.files ||
+        !proofInput.files[0]
+    ) {
+
+        alert(
+            "Please upload the payment receipt screenshot."
+        );
+
+        return;
+    }
+
+
+    const file =
+        proofInput.files[0];
+
+
+    if (file.size > 5 * 1024 * 1024) {
+
+        alert(
+            "File size exceeds 5MB limit."
+        );
+
+        return;
+    }
+
+
+    // Determine target rooms covered
+
+    const bossSub =
+        getSubscriptionState("BOSS");
+
+
+    const isBossDue =
+        bossSub.state === "EXPIRED" ||
+        bossSub.state === "NEAR_EXPIRY";
+
+
+    const dueRealties =
+        (db.realties || []).filter(r => {
+
+            const sub =
+                getSubscriptionState(r.id);
+
+            return (
+                sub.state === "EXPIRED" ||
+                sub.state === "NEAR_EXPIRY"
+            );
+
+        });
+
+
+    let coveredRoomIds = [];
+    let coverageDescription = "";
+
+
+    if (scopes.includes("ALL_DUE")) {
+
+        if (isBossDue) {
+            coveredRoomIds.push("BOSS");
+        }
+
+        dueRealties.forEach(r =>
+            coveredRoomIds.push(r.id)
+        );
+
+        coverageDescription =
+            `Bulk Renewal: ${coveredRoomIds.join(", ")}`;
+
+    }
+
+
+    else if (
+        scopes.includes("BOSS_ONLY") &&
+        scopes.length === 1
+    ) {
+
+        coveredRoomIds = ["BOSS"];
+
+        coverageDescription =
+            "Boss Room Renewal";
+
+    }
+
+
+    else {
+
+        const selectedBranchIds =
+            scopes
+                .filter(v => v.startsWith("BRANCH_"))
+                .map(v => v.replace("BRANCH_", ""));
+
+
+        coveredRoomIds =
+            selectedBranchIds;
+
+
+        const names =
+            selectedBranchIds.map(id => {
+
+                const b =
+                    db.realties.find(
+                        r => r.id === id
+                    );
+
+                return b
+                    ? b.name
+                    : id;
+
+            });
+
+
+        coverageDescription =
+            `Selected Realty Renewal: ${names.join(", ")}`;
+
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function() {
+
+        db.subscriptionPayments.unshift({
+
+            id: uid("SUBPAY"),
+
+            realtyId:
+                coveredRoomIds[0] || "BOSS",
+
+            coveredRooms:
+                coveredRoomIds,
+
+            realtyName:
+                coverageDescription,
+
+            submittedBy:
+                currentUser.username,
+
+            submittedByName:
+                currentUser.name,
+
+            method,
+
+            reference,
+
+            amount,
+
+            paymentDate:
+                new Date().toISOString().slice(0, 10),
+
+            termMonths:
+                Number(
+                    document.getElementById("bossPayTerm")?.value || 1
+                ),
+
+            proofName:
+                file.name,
+
+            proofType:
+                file.type ||
+                "application/octet-stream",
+
+            proofData:
+                reader.result,
+
+            status:
+                "PENDING",
+
+            submittedAt:
+                new Date().toISOString()
+
+        });
+
+
         saveDB();
+
         closeModal();
-        alert("Payment submitted successfully! IT verification is required to unlock your room.");
-        renderExpiredOfflineRoom();
+
+
+        alert(
+            "Payment submitted successfully for verification! IT Platform Admin will verify."
+        );
+
+
+        renderBossDashboard();
+
     };
 
-    reader.onerror = function() {
-        alert("Error reading payment proof file.");
-    };
 
     reader.readAsDataURL(file);
 }
 
-/* =========================================================
-   7. MASTER PAGE ROUTER & DISPATCHER
-========================================================= */
 
-function showPage(page) {
-    if (currentUser && currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser) && page !== "expired-room") {
-        if (currentUser.isRestrictedMode) {
-            const restrictedPages = ["reservation", "add-realty", "money", "expenses", "cloud-subscription", "it-room", "control"];
-            if (restrictedPages.includes(page)) {
-                alert("ACCESS DENIED: Transactional feature locked due to expired subscription.");
-                page = "dashboard";
-            }
-        } else {
-            page = "expired-room";
-        }
-    }
+// ============================================================
+// 3. CREDENTIALS & PERSONAL SECURITY ENGINE
+// ============================================================
 
-    // Role Security Guards
-    if ((page === "cloud-subscription" || page === "control" || page === "it-room") && currentUser?.role !== "IT") {
-        alert("ACCESS RESTRICTED: Exclusively reserved for IT Platform Administrator.");
-        showPage("dashboard");
-        return;
-    }
+function openBossPasswordModal() {
 
-    if (page === "add-realty" && currentUser?.role !== "BOSS" && currentUser?.role !== "IT") {
-        alert("ACCESS RESTRICTED: Exclusively for Executive and IT Management.");
-        showPage("dashboard");
-        return;
-    }
-
-    if (page === "reservation" && currentUser?.role === "BOSS" && !currentUser.bossBranchOverride) {
-        alert("BRANCH SCOPE REQUIRED: Please select a specific branch workspace before creating reservations.");
-        showPage("dashboard");
-        return;
-    }
-
-    currentPage = page;
-
-    const app = document.getElementById("app");
-    const expiredRoom = document.getElementById("expiredOfflineRoom");
-
-    if (page === "expired-room") {
-        renderExpiredOfflineRoom();
-        return;
-    }
-
-    if (expiredRoom) expiredRoom.classList.add("hidden");
-    if (app) app.classList.remove("hidden");
-    if (currentUser) saveSession(currentUser, currentPage);
-
-    document.querySelectorAll(".sidebar .nav-btn").forEach(b => {
-        if (b.getAttribute("data-page") === page) b.classList.add("active");
-        else b.classList.remove("active");
-    });
-
-    const activeBranch = getActiveBranchProfile();
-
-    const titles = {
-        dashboard: ["Dashboard", currentUser?.role === "IT" ? "IT Operations & Cloud Management" : (currentUser?.role === "BOSS" && !getActiveRealtyId() ? "Consolidated Executive Overview" : (activeBranch ? `${activeBranch.name} Dashboard` : "Overview"))],
-        projects: ["Projects / Sites", activeBranch ? `${activeBranch.name} Projects` : "Consolidated Projects View"],
-        reservation: ["Reservation", activeBranch ? `New Reservation under ${activeBranch.name}` : "Property Reservation"],
-        buyers: ["Buyers Folder", "Buyer dossiers, payment schedules & amortization records"],
-        money: ["Money Movement", "Overall collections, remittances, and disbursements"],
-        commission: ["Commissions Ledger", "Agent, Broker & Team Leader Payout Tracker"],
-        refund: ["Refunds & Withdrawals", "Refund applications, releases, and executive approvals"],
-        expenses: ["Operational Expenses", "Branch overhead and development expenditures"],
-        reports: ["Executive Reports", "Consolidated monthly performance & ledger statements"],
-        records: ["System Audit Logs", "Staff daily actions, login records, and security trail"],
-        staff: ["Staff Administration", activeBranch ? `${activeBranch.name} Team` : "User Management"],
-        approvals: ["Approvals Hub", "Refund clearances and executive verification"],
-        "add-realty": ["Branch Realties", "Create and maintain branch realty units"],
-        "it-room": ["IT Operations", "Platform licenses and system billing engine"],
-        "cloud-subscription": ["Cloud Billing", "Rates, verification, and payment gateways"],
-        control: ["System Settings", "Branding, credentials, and configuration"]
-    };
-
-    if (titles[page]) {
-        document.getElementById("pageTitle").textContent = titles[page][0];
-        document.getElementById("pageSubtitle").textContent = titles[page][1];
-    }
-
-    // View Dispatches
-    if (page === "dashboard") {
-        if (currentUser?.role === "IT" && typeof renderITRoom === "function") renderITRoom();
-        else if (currentUser?.role === "BOSS" && !getActiveRealtyId() && typeof renderBossDashboard === "function") renderBossDashboard();
-        else if (typeof renderAdminDashboard === "function") renderAdminDashboard();
-    }
-    else if (page === "projects" && typeof renderProjects === "function") renderProjects();
-    else if (page === "reservation" && typeof renderReservation === "function") renderReservation();
-    else if (page === "buyers" && typeof renderBuyers === "function") renderBuyers();
-    else if (page === "money" && typeof renderMoney === "function") renderMoney();
-    else if (page === "commission" && typeof renderCommission === "function") renderCommission();
-    else if (page === "refund" && typeof renderRefund === "function") renderRefund();
-    else if (page === "expenses" && typeof renderExpenses === "function") renderExpenses();
-    else if (page === "reports" && typeof renderReports === "function") renderReports();
-    else if (page === "records" && typeof renderRecords === "function") renderRecords();
-    else if (page === "staff" && typeof renderStaff === "function") renderStaff();
-    else if (page === "approvals" && typeof renderApprovals === "function") renderApprovals();
-    else if (page === "add-realty" && typeof renderAddRealty === "function") renderAddRealty();
-    else if (page === "it-room" && typeof renderITRoom === "function") renderITRoom();
-    else if (page === "cloud-subscription" && typeof renderCloudSubscription === "function") renderCloudSubscription();
-    else if (page === "control" && typeof renderControl === "function") renderControl();
-}
-
-/* =========================================================
-   8. MODAL ENGINE & MANDATORY SECURITY
-========================================================= */
-
-function showModal(html) {
-    const modal = document.getElementById("globalModal");
-    const content = document.getElementById("globalModalContent");
-    if (!modal || !content) return;
-    content.innerHTML = html;
-    modal.classList.remove("hidden");
-}
-
-function closeModal() {
-    const modal = document.getElementById("globalModal");
-    if (modal) modal.classList.add("hidden");
-}
-
-function showMandatoryPasswordChangeModal() {
     showModal(`
+
         <div class="modal-header">
-            <h3>🔒 MANDATORY: SET PERMANENT PASSWORD</h3>
+
+            <h3>
+                🔒 CHANGE BOSS PERSONAL PASSWORD
+            </h3>
+
+            <button
+                class="close"
+                onclick="closeModal()">
+                ×
+            </button>
+
         </div>
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">You are currently logged in with a temporary password. You must set a permanent password to continue.</p>
+
+
         <div class="form-group">
-            <label>New Permanent Password (min 6 characters)</label>
-            <input type="password" id="mandNewPass" minlength="6" placeholder="Enter new password" required>
+
+            <label>
+                Current Password:
+            </label>
+
+            <input
+                id="bossOldPassword"
+                type="password"
+                placeholder="Enter current password">
+
         </div>
+
+
         <div class="form-group">
-            <label>Confirm Permanent Password</label>
-            <input type="password" id="mandConfirmPass" minlength="6" placeholder="Confirm new password" required>
+
+            <label>
+                New Personal Password (min 6 characters):
+            </label>
+
+            <input
+                id="bossNewPassword"
+                type="password"
+                minlength="6"
+                placeholder="Enter new password">
+
         </div>
-        <button class="btn btn-primary full" style="padding:12px;" onclick="saveMandatoryPassword()">SAVE &amp; CONTINUE</button>
+
+
+        <div class="form-group">
+
+            <label>
+                Confirm New Personal Password:
+            </label>
+
+            <input
+                id="bossConfirmPassword"
+                type="password"
+                minlength="6"
+                placeholder="Confirm new password">
+
+        </div>
+
+
+        <button
+            class="btn btn-primary full"
+            onclick="saveBossPersonalPassword()">
+
+            UPDATE BOSS PASSWORD
+
+        </button>
+
     `);
 }
 
-function saveMandatoryPassword() {
-    const nPass = document.getElementById("mandNewPass")?.value.trim();
-    const cPass = document.getElementById("mandConfirmPass")?.value.trim();
 
-    if (!nPass || nPass.length < 6) {
-        alert("Password must be at least 6 characters long.");
+function saveBossPersonalPassword() {
+
+    const current =
+        document.getElementById("bossOldPassword")?.value;
+
+    const newPwd =
+        document.getElementById("bossNewPassword")?.value.trim();
+
+    const confirm =
+        document.getElementById("bossConfirmPassword")?.value.trim();
+
+    const actualCurrent =
+        db.settings.bossPassword || "boss123";
+
+
+    if (current !== actualCurrent) {
+
+        alert(
+            "Incorrect Current Password! Please try again."
+        );
+
         return;
     }
-    if (nPass !== cPass) {
-        alert("Passwords do not match.");
+
+
+    if (!newPwd || newPwd.length < 6) {
+
+        alert(
+            "New password must be at least 6 characters long."
+        );
+
         return;
     }
 
-    const staff = db.staff.find(s => s.id === currentUser.id);
-    if (staff) {
-        staff.password = nPass;
-        staff.temporaryPassword = "";
-        staff.mustChangePassword = false;
-        currentUser.mustChangePassword = false;
+
+    if (newPwd !== confirm) {
+
+        alert(
+            "New passwords do not match!"
+        );
+
+        return;
+    }
+
+
+    db.settings.bossPassword =
+        newPwd;
+
+    saveDB();
+
+    closeModal();
+
+
+    alert(
+        "✅ Boss Personal Password updated successfully!"
+    );
+}
+
+
+function openIssueRealtyTempPasswordModal(realtyId) {
+
+    const branch =
+        db.realties.find(
+            r => r.id === realtyId
+        );
+
+    if (!branch) return;
+
+
+    let adminStaff =
+        db.staff.find(
+            s =>
+                s.realtyId === branch.id &&
+                s.role === "ADMIN"
+        )
+        ||
+        db.staff.find(
+            s =>
+                s.realtyId === branch.id
+        );
+
+
+    if (!adminStaff) {
+
+        const defaultUsername =
+            branch.name
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "")
+                .slice(0, 15)
+            ||
+            (
+                "admin" +
+                Math.floor(
+                    100 +
+                    Math.random() * 900
+                )
+            );
+
+
+        adminStaff = {
+
+            id:
+                uid("S"),
+
+            name:
+                branch.owner ||
+                `${branch.name} Admin`,
+
+            username:
+                defaultUsername,
+
+            password:
+                "admin123",
+
+            temporaryPassword:
+                "admin123",
+
+            role:
+                "ADMIN",
+
+            status:
+                "ACTIVE",
+
+            realtyId:
+                branch.id,
+
+            mustChangePassword:
+                false
+
+        };
+
+
+        db.staff.push(
+            adminStaff
+        );
+
         saveDB();
-        saveSession(currentUser, currentPage);
-        closeModal();
-        alert("Password updated successfully.");
+    }
+
+
+    const suggestedTemp =
+        generateTempPassword();
+
+
+    showModal(`
+
+        <div class="modal-header">
+
+            <h3>
+                ⏳ ISSUE TEMPORARY PASSWORD TO REALTY
+            </h3>
+
+            <button
+                class="close"
+                onclick="closeModal()">
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px; margin-bottom:16px;">
+
+            <p
+                style="font-size:14px; color:#1e40af; font-weight:bold; margin-bottom:4px;">
+
+                🏢 Branch:
+                ${esc(branch.name)}
+
+            </p>
+
+
+            <p
+                style="font-size:13px; color:#3b82f6;">
+
+                Assigned Admin:
+                <strong>
+                    ${esc(adminStaff.name)}
+                </strong>
+
+            </p>
+
+
+            <p
+                style="font-size:13px; color:#1e293b; margin-top:6px;">
+
+                Permanent Room ID:
+                <strong style="color:#2563eb;">
+                    ${branch.id}
+                </strong>
+
+                <br>
+
+                Authorized Login Username:
+
+                <code
+                    style="background:#fff; padding:2px 8px; border-radius:6px; border:1px solid #93c5fd; font-weight:bold;">
+
+                    ${esc(adminStaff.username)}
+
+                </code>
+
+            </p>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                New Temporary Password para sa Realty:
+            </label>
+
+            <input
+                id="realtyTempPwdInput"
+                value="${suggestedTemp}"
+                style="font-weight:bold; font-size:16px; color:#b91c1c;"
+                required>
+
+
+            <small
+                style="color:#64748b;">
+
+                Ibigay ito sa realty admin.
+                Papapalitan ito ng personal password pagka-login nila.
+
+            </small>
+
+        </div>
+
+
+        <button
+            class="btn btn-primary full"
+            style="padding:12px; font-size:14px;"
+            onclick="saveRealtyTempPassword('${branch.id}', '${adminStaff.id}')">
+
+            💾 SAVE &amp; ISSUE TEMPORARY PASSWORD
+
+        </button>
+
+    `);
+}
+
+
+function saveRealtyTempPassword(
+    realtyId,
+    staffId
+) {
+
+    const branch =
+        db.realties.find(
+            r => r.id === realtyId
+        );
+
+
+    let staff =
+        db.staff.find(
+            s => s.id === staffId
+        );
+
+
+    const newPwd =
+        document
+            .getElementById(
+                "realtyTempPwdInput"
+            )
+            ?.value.trim();
+
+
+    if (!newPwd) {
+
+        alert(
+            "Paki-lagay ang temporary password."
+        );
+
+        return;
+    }
+
+
+    if (staff) {
+
+        staff.password =
+            newPwd;
+
+        staff.temporaryPassword =
+            newPwd;
+
+        staff.mustChangePassword =
+            true;
+
+    }
+
+
+    if (branch) {
+
+        branch.tempPassword =
+            newPwd;
+
+    }
+
+
+    saveDB();
+
+    closeModal();
+
+
+    alert(
+        `✅ Temporary Password naitala!
+
+Branch: ${branch ? branch.name : ''}
+Room ID: ${realtyId}
+Username: ${staff ? staff.username : ''}
+Temp Password: ${newPwd}`
+    );
+
+
+    if (currentPage === "dashboard") {
+        renderBossDashboard();
+    }
+
+    else if (currentPage === "add-realty") {
+        renderAddRealty();
+    }
+
+    else if (currentPage === "staff") {
+        renderStaff();
+    }
+
+    else {
+        showPage(currentPage);
     }
 }
 
-/* =========================================================
-   9. LIFECYCLE & INITIALIZATION
-========================================================= */
 
-window.addEventListener("DOMContentLoaded", () => {
-    loadDB();
-    applyDynamicBranding();
+// ============================================================
+// 4. BRANCH PROVISIONING
+// ============================================================
+
+function renderAddRealty() {
+
+    const content =
+        document.getElementById("content");
+
+    if (!content) return;
+
+
+    content.innerHTML = `
+
+        <div class="grid-2">
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h3>
+                        🏢 ADD NEW REALTY BRANCH
+                    </h3>
+
+                </div>
+
+
+                <form onsubmit="addRealty(event)">
+
+                    <div class="form-group">
+
+                        <label>
+                            Branch Name
+                        </label>
+
+                        <input
+                            id="realtyName"
+                            required
+                            placeholder="e.g. TARLAC BRANCH">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Branch Manager / Admin Person
+                        </label>
+
+                        <input
+                            id="realtyOwner"
+                            required
+                            placeholder="Manager Name">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Contact Number
+                        </label>
+
+                        <input
+                            id="realtyContact"
+                            placeholder="09123456789">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Office Address
+                        </label>
+
+                        <textarea
+                            id="realtyAddress"
+                            rows="2"></textarea>
+
+                    </div>
+
+
+                    <button
+                        class="btn btn-primary full"
+                        type="submit">
+
+                        + SAVE BRANCH &amp;
+                        GENERATE ADMIN ACCOUNT
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h3>
+                        🏢 ACTIVE BRANCHES
+                    </h3>
+
+                </div>
+
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Branch / Room ID
+                                </th>
+
+                                <th>
+                                    Manager
+                                </th>
+
+                                <th>
+                                    Login Username
+                                </th>
+
+                                <th>
+                                    Actions
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            ${
+                                db.realties.map(r => {
+
+                                    const admin =
+                                        db.staff.find(
+                                            s =>
+                                                s.realtyId === r.id &&
+                                                s.role === "ADMIN"
+                                        )
+                                        ||
+                                        db.staff.find(
+                                            s =>
+                                                s.realtyId === r.id
+                                        );
+
+
+                                    return `
+
+                                        <tr>
+
+                                            <td>
+
+                                                <div
+                                                    style="display:flex; align-items:center; gap:8px;">
+
+                                                    <div
+                                                        style="width:28px; height:28px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #cbd5e1;">
+
+                                                        ${renderLogoHTML(r.logo || '🏢')}
+
+                                                    </div>
+
+
+                                                    <div>
+
+                                                        <strong>
+                                                            ${esc(r.name)}
+                                                        </strong>
+
+                                                        <br>
+
+                                                        <small
+                                                            style="color:#64748b;">
+
+                                                            ID:
+                                                            <code>
+                                                                ${r.id}
+                                                            </code>
+
+                                                        </small>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+
+                                            <td>
+                                                ${esc(r.owner)}
+                                            </td>
+
+
+                                            <td>
+
+                                                <code
+                                                    style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:bold;">
+
+                                                    ${esc(
+                                                        admin
+                                                        ? admin.username
+                                                        : 'admin'
+                                                    )}
+
+                                                </code>
+
+                                            </td>
+
+
+                                            <td>
+
+                                                <div
+                                                    style="display:flex; gap:4px;">
+
+                                                    <button
+                                                        class="btn btn-secondary"
+                                                        style="padding:4px 8px; font-size:11px;"
+                                                        onclick="openIssueRealtyTempPasswordModal('${r.id}')">
+
+                                                        🔑 Temp Pwd
+
+                                                    </button>
+
+
+                                                    <button
+                                                        class="btn btn-success"
+                                                        style="padding:4px 8px; font-size:11px;"
+                                                        onclick="universalSwitchBranch('${r.id}'); showPage('staff');">
+
+                                                        🚪 Enter
+
+                                                    </button>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    `;
+
+                                }).join("")
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+function addRealty(event) {
+
+    event.preventDefault();
+
+
+    const name =
+        document
+            .getElementById("realtyName")
+            .value
+            .trim()
+            .toUpperCase();
+
+
+    const owner =
+        document
+            .getElementById("realtyOwner")
+            .value
+            .trim();
+
+
+    const contact =
+        document
+            .getElementById("realtyContact")
+            .value
+            .trim();
+
+
+    const address =
+        document
+            .getElementById("realtyAddress")
+            .value
+            .trim();
+
+
+    const futureDue =
+        new Date();
+
+
+    futureDue.setDate(
+        futureDue.getDate() + 30
+    );
+
+
+    const newRealtyId =
+        uid("R");
+
+
+    const defaultUsername =
+        name
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "")
+            .slice(0, 15)
+        ||
+        (
+            "admin" +
+            Math.floor(
+                100 +
+                Math.random() * 900
+            )
+        );
+
+
+    const initialTempPwd =
+        generateTempPassword();
+
+
+    db.realties.push({
+
+        id:
+            newRealtyId,
+
+        name,
+
+        owner,
+
+        contact,
+
+        address,
+
+        status:
+            "ACTIVE",
+
+        dueDate:
+            futureDue
+                .toISOString()
+                .slice(0, 10),
+
+        monthlyFee:
+            db.settings.defaultMonthlyRate ||
+            2500,
+
+        isLocked:
+            false,
+
+        logo:
+            "🏢",
+
+        tempPassword:
+            initialTempPwd
+
+    });
+
+
+    db.staff.push({
+
+        id:
+            uid("S"),
+
+        name:
+            owner ||
+            `${name} Admin`,
+
+        username:
+            defaultUsername,
+
+        password:
+            initialTempPwd,
+
+        temporaryPassword:
+            initialTempPwd,
+
+        role:
+            "ADMIN",
+
+        status:
+            "ACTIVE",
+
+        realtyId:
+            newRealtyId,
+
+        mustChangePassword:
+            true
+
+    });
+
+
+    saveDB();
+
+
+    alert(
+        `Realty Branch "${name}" successfully created!
+
+Permanent Room ID: ${newRealtyId}
+Username: ${defaultUsername}
+Temp Password: ${initialTempPwd}`
+    );
+
+
+    universalSwitchBranch(
+        newRealtyId
+    );
+
+
+    showPage(
+        "staff"
+    );
+}
+
+
+// ============================================================
+// 5. APPROVALS HUB
+// ============================================================
+
+function renderApprovals() {
+
+    const refunds =
+        db.refunds || [];
+
+
+    const pendingRefunds =
+        refunds.filter(
+            r => r.status === "PENDING"
+        );
+
+
+    const resolvedRefunds =
+        refunds.filter(
+            r => r.status !== "PENDING"
+        );
+
+
+    const content =
+        document.getElementById("content");
+
+
+    if (!content) return;
+
+
+    content.innerHTML = `
+
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+
+            <div>
+
+                <h3
+                    style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">
+
+                    ⚖️ Executive Approvals Hub
+
+                </h3>
+
+
+                <small
+                    style="color:#64748b;">
+
+                    Review and clear refund requests
+                    and financial adjustments across branches
+
+                </small>
+
+            </div>
+
+
+            <span
+                class="badge ${
+                    pendingRefunds.length > 0
+                    ? 'badge-red'
+                    : 'badge-green'
+                }"
+                style="font-size:13px; padding:6px 12px;">
+
+                ${pendingRefunds.length}
+                Action(s) Required
+
+            </span>
+
+        </div>
+
+
+        <div
+            class="card-3d"
+            style="margin-bottom:24px;">
+
+            <div class="panel-header">
+
+                <h4
+                    style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">
+
+                    📅 Pending Refund Requests
+
+                </h4>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Branch
+                            </th>
+
+                            <th>
+                                Buyer Name
+                            </th>
+
+                            <th>
+                                Reason / Category
+                            </th>
+
+                            <th>
+                                Refund Amount
+                            </th>
+
+                            <th>
+                                Submitted Date
+                            </th>
+
+                            <th>
+                                Executive Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${
+                            pendingRefunds.length === 0
+                            ?
+                            `
+                                <tr>
+
+                                    <td
+                                        colspan="6"
+                                        style="text-align:center; padding:18px; color:#888;">
+
+                                        Walang nakabinbing refund request.
+
+                                    </td>
+
+                                </tr>
+                            `
+                            :
+                            pendingRefunds.map(r => {
+
+                                const branch =
+                                    db.realties.find(
+                                        b =>
+                                            b.id === r.realtyId
+                                    );
+
+
+                                return `
+
+                                    <tr>
+
+                                        <td>
+
+                                            <strong>
+                                                🏢
+                                                ${esc(
+                                                    branch
+                                                    ? branch.name
+                                                    : r.realtyId
+                                                )}
+                                            </strong>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <strong>
+                                                ${esc(r.buyerName)}
+                                            </strong>
+
+                                        </td>
+
+
+                                        <td>
+                                            ${esc(
+                                                r.reason ||
+                                                'Client withdrawal'
+                                            )}
+                                        </td>
+
+
+                                        <td
+                                            style="color:#dc2626; font-weight:bold;">
+
+                                            ${money(r.amount)}
+
+                                        </td>
+
+
+                                        <td>
+                                            ${r.date || 'N/A'}
+                                        </td>
+
+
+                                        <td>
+
+                                            <div
+                                                style="display:flex; gap:6px;">
+
+                                                <button
+                                                    class="btn btn-success"
+                                                    style="padding:5px 10px; font-size:12px;"
+                                                    onclick="approveExecutiveRefund('${r.id}')">
+
+                                                    ✅ Approve &amp;
+                                                    Release
+
+                                                </button>
+
+
+                                                <button
+                                                    class="btn btn-danger"
+                                                    style="padding:5px 10px; font-size:12px;"
+                                                    onclick="rejectExecutiveRefund('${r.id}')">
+
+                                                    ❌ Reject
+
+                                                </button>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                                `;
+
+                            }).join("")
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-3d">
+
+            <div class="panel-header">
+
+                <h4
+                    style="margin:0; font-size:1rem; font-weight:800; color:#1e293b;">
+
+                    📋 Clearance History
+
+                </h4>
+
+            </div>
+
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Branch
+                            </th>
+
+                            <th>
+                                Buyer Name
+                            </th>
+
+                            <th>
+                                Amount
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action Date
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${
+                            resolvedRefunds.length === 0
+                            ?
+                            `
+                                <tr>
+
+                                    <td
+                                        colspan="5"
+                                        style="text-align:center; padding:15px; color:#888;">
+
+                                        Walang nakaraang clearance history.
+
+                                    </td>
+
+                                </tr>
+                            `
+                            :
+                            resolvedRefunds.map(r => {
+
+                                const branch =
+                                    db.realties.find(
+                                        b =>
+                                            b.id === r.realtyId
+                                    );
+
+
+                                return `
+
+                                    <tr>
+
+                                        <td>
+
+                                            ${esc(
+                                                branch
+                                                ? branch.name
+                                                : r.realtyId
+                                            )}
+
+                                        </td>
+
+
+                                        <td>
+                                            ${esc(r.buyerName)}
+                                        </td>
+
+
+                                        <td>
+                                            ${money(r.amount)}
+                                        </td>
+
+
+                                        <td>
+
+                                            <span
+                                                class="badge ${
+                                                    r.status === 'APPROVED'
+                                                    ? 'badge-green'
+                                                    : 'badge-red'
+                                                }">
+
+                                                ${r.status}
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            ${
+                                                r.clearedAt
+                                                ? new Date(
+                                                    r.clearedAt
+                                                ).toLocaleDateString()
+                                                : r.date
+                                            }
+
+                                        </td>
+
+                                    </tr>
+
+                                `;
+
+                            }).join("")
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+function approveExecutiveRefund(
+    refundId
+) {
+
+    const refund =
+        (db.refunds || []).find(
+            r => r.id === refundId
+        );
+
+
+    if (!refund) return;
+
+
+    if (
+        !confirm(
+            `Are you sure you want to APPROVE and clear refund of ${money(refund.amount)} for ${refund.buyerName}?`
+        )
+    ) {
+        return;
+    }
+
+
+    refund.status =
+        "APPROVED";
+
+
+    refund.clearedAt =
+        new Date().toISOString();
+
+
+    refund.clearedBy =
+        currentUser
+        ? currentUser.name
+        : "Boss Executive";
+
+
+    // Auto-record to Money Out
+
+    db.moneyOut.push({
+
+        id:
+            uid("MOUT"),
+
+        realtyId:
+            refund.realtyId,
+
+        category:
+            "REFUND",
+
+        recipient:
+            refund.buyerName,
+
+        amount:
+            Number(
+                refund.amount || 0
+            ),
+
+        date:
+            new Date()
+                .toISOString()
+                .slice(0, 10),
+
+        remarks:
+            `Refund cleared by Boss: ${
+                refund.reason ||
+                'Client withdrawal'
+            }`
+
+    });
+
+
+    saveDB();
+
+
+    alert(
+        "✅ Refund successfully approved and recorded in Money Out."
+    );
+
+
+    renderApprovals();
+}
+
+
+function rejectExecutiveRefund(
+    refundId
+) {
+
+    const refund =
+        (db.refunds || []).find(
+            r => r.id === refundId
+        );
+
+
+    if (!refund) return;
+
+
+    const reason =
+        prompt(
+            "Enter reason for rejection:",
+            "Documentation incomplete"
+        );
+
+
+    if (!reason) return;
+
+
+    refund.status =
+        "REJECTED";
+
+
+    refund.rejectionReason =
+        reason;
+
+
+    refund.clearedAt =
+        new Date().toISOString();
+
+
+    refund.clearedBy =
+        currentUser
+        ? currentUser.name
+        : "Boss Executive";
+
+
+    saveDB();
+
+
+    alert(
+        "❌ Refund marked as REJECTED."
+    );
+
+
+    renderApprovals();
+}
+
+
+// ============================================================
+// BOSS RENEWAL ENGINE VISIBILITY SAFETY CHECK
+// ============================================================
+//
+// This remains as a fallback for pages where the button already
+// exists in the DOM. The main dashboard now handles the setting
+// directly during renderBossDashboard().
+//
+// ============================================================
+
+window.addEventListener("load", () => {
 
     try {
-        const saved = JSON.parse(localStorage.getItem(SESSION_KEY));
-        if (saved && saved.user) {
-            currentUser = saved.user;
-            const loginPortal = document.getElementById("loginPortal");
-            if (loginPortal) loginPortal.classList.add("hidden");
 
-            setupUserInterface();
+        const config =
+            JSON.parse(
+                localStorage.getItem(
+                    "realty_system_config"
+                ) || "{}"
+            );
 
-            if (currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser)) {
-                showPage("expired-room");
-            } else {
-                currentPage = saved.page || getInitialPageForUser(currentUser);
-                showPage(currentPage);
+
+        const btn =
+            document.getElementById(
+                "renewalEngineBtn"
+            );
+
+
+        if (btn) {
+
+            if (config.hideRenewalEngine) {
+
+                btn.style.display =
+                    "none";
+
+            }
+            else {
+
+                btn.style.display =
+                    "inline-block";
+
             }
 
-            if (currentUser.mustChangePassword) {
-                showMandatoryPasswordChangeModal();
-            }
-            return;
         }
-    } catch (e) {
-        clearSession();
+
     }
+    catch (e) {
+
+        console.warn(
+            "Unable to read renewal engine visibility setting.",
+            e
+        );
+
+    }
+
 });
-/* =========================================================
-   10. IT STEALTH AUDIT PROTECTION & MASTER LOGGING ENGINE
-========================================================= */
-
-// Proteksyon sa pag-render ng table: Awtomatikong alisin si IT sa paningin ni Boss at Realty
-(function injectAuditStealthFilter() {
-    const originalRenderAudit = window.renderAudit || window.renderAuditLogs || window.loadAuditTrail;
-    
-    // I-intercept ang render function kung mayroon na sa window
-    window.filterAuditLogsForViewer = function(logs) {
-        if (!logs || !Array.isArray(logs)) return [];
-        
-        // Kapag si IT ang nakatingin, ipakita ang LAHAT ng galaw ni Boss at ng mga Realty
-        if (window.currentUser && (window.currentUser.role === "IT" || window.currentUser.username === "IT")) {
-            return logs;
-        }
-        
-        // Kapag si Boss o Realty Staff ang nakatingin: ITAGO SI IT NANG BUO
-        return logs.filter(item => {
-            const userName = String(item.user || "").toUpperCase();
-            const userRole = String(item.role || "").toUpperCase();
-            return userName !== "IT" && userRole !== "IT";
-        });
-    };
-})();
-
-
-
