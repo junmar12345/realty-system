@@ -1,4 +1,4 @@
-﻿/* =
+/* =
    CORE.JS - REALTY MULTI-TENANT SYSTEM ENGINE
    Checkpoint V2 Implementation: 2026-09-27
    Consolidated Parts 1 - 10 (Storage, Auth, Subscriptions, Router, Audit Protection)
@@ -6,6 +6,8 @@
 
 const DB_KEY = "REALTY_SYSTEM_V1";
 const SESSION_KEY = "REALTY_ACTIVE_SESSION";
+const FINAL_LOGIN_MIGRATION_KEY = "REALTY_FINAL_LOGIN_CLEANUP_V2";
+const DB_CLEANUP_BACKUP_KEY = "REALTY_SYSTEM_V1_BACKUP_BEFORE_LOGIN_CLEANUP";
 
 let db = {
     settings: {
@@ -107,6 +109,7 @@ function loadDB() {
         seedInitialData();
         saveDB();
     }
+    applyFinalLoginCleanup();
 }
 
 function saveDB() {
@@ -154,7 +157,7 @@ function seedInitialData() {
         role: "ADMIN",
         status: "ACTIVE",
         realtyId: initialBranchId,
-        mustChangePassword: false
+        mustChangePassword: true
     });
 }
 
@@ -181,6 +184,110 @@ function normalizeDBSchema() {
     });
 }
 
+// One-time, recoverable cleanup for the requested login setup. No CSS or page layout is changed.
+function applyFinalLoginCleanup() {
+    const migrationVersion = "FINAL_LOGIN_PORTAL_20261009_V2";
+    try {
+        if (localStorage.getItem(FINAL_LOGIN_MIGRATION_KEY) === migrationVersion) return;
+
+        const originalDatabase = localStorage.getItem(DB_KEY);
+        if (originalDatabase && !localStorage.getItem(DB_CLEANUP_BACKUP_KEY)) {
+            try {
+                localStorage.setItem(DB_CLEANUP_BACKUP_KEY, originalDatabase);
+            } catch (backupError) {
+                console.error("Cleanup stopped because the safety backup could not be saved.", backupError);
+                alert("Hindi itinuloy ang account cleanup dahil hindi ma-save ang safety backup. Walang account na binago.");
+                return;
+            }
+        }
+
+        if (!db.settings) db.settings = {};
+        if (!Array.isArray(db.realties)) db.realties = [];
+        if (!Array.isArray(db.staff)) db.staff = [];
+
+        let permanentRealty = null;
+        if (db.settings.permanentRealtyId) {
+            permanentRealty = db.realties.find(r => r.id === db.settings.permanentRealtyId) || null;
+        }
+        if (!permanentRealty) {
+            permanentRealty = db.realties.find(r => String(r.name || "").trim().toUpperCase() === "TARLAC CENTRAL REALTY") || null;
+        }
+        if (!permanentRealty) {
+            permanentRealty = db.realties.find(r => String(r.status || "ACTIVE").toUpperCase() === "ACTIVE" && !r.tempPassword) || db.realties[0] || null;
+        }
+        if (!permanentRealty) {
+            const due = new Date();
+            due.setDate(due.getDate() + 30);
+            permanentRealty = {
+                id: "REALTY_PERMANENT",
+                name: "TARLAC CENTRAL REALTY",
+                owner: "Permanent Realty Administrator",
+                contact: "",
+                address: "Philippines",
+                status: "ACTIVE",
+                dueDate: due.toISOString().slice(0, 10),
+                monthlyFee: Number(db.settings.defaultMonthlyRate || 2500),
+                isLocked: false,
+                logo: "ðŸ¢",
+                tempPassword: ""
+            };
+            db.realties.push(permanentRealty);
+        }
+
+        db.settings.permanentRealtyId = permanentRealty.id;
+        permanentRealty.status = "ACTIVE";
+        permanentRealty.tempPassword = "";
+        delete permanentRealty.accountRemoved;
+
+        const removedRealtyIds = new Set();
+        db.realties.forEach(realty => {
+            if (realty.id !== permanentRealty.id) {
+                // Hide/disable Boss-created branch accounts but retain branch/history records for recovery.
+                realty.status = "INACTIVE";
+                realty.accountRemoved = true;
+                realty.tempPassword = "";
+                removedRealtyIds.add(realty.id);
+            }
+        });
+        db.realties = [permanentRealty].concat(db.realties.filter(r => r.id !== permanentRealty.id));
+        db.staff = db.staff.filter(staff => !removedRealtyIds.has(staff.realtyId));
+
+        let admin = db.staff.find(staff => staff.realtyId === permanentRealty.id && String(staff.role || "").toUpperCase() === "ADMIN");
+        if (!admin) {
+            admin = {
+                id: "S_PERMANENT_ADMIN",
+                name: permanentRealty.owner || "Permanent Realty Administrator",
+                username: "ADMIN",
+                password: "ADMIN123",
+                temporaryPassword: "",
+                role: "ADMIN",
+                status: "ACTIVE",
+                realtyId: permanentRealty.id,
+                mustChangePassword: false
+            };
+            db.staff.push(admin);
+        }
+        admin.name = admin.name || permanentRealty.owner || "Permanent Realty Administrator";
+        admin.username = "ADMIN";
+        admin.password = "ADMIN123";
+        admin.temporaryPassword = "";
+        admin.role = "ADMIN";
+        admin.status = "ACTIVE";
+        admin.realtyId = permanentRealty.id;
+        admin.mustChangePassword = false;
+
+        db.settings.itPassword = "IT123";
+        db.settings.bossPassword = "BOSS123";
+        saveDB();
+        localStorage.setItem(FINAL_LOGIN_MIGRATION_KEY, migrationVersion);
+    } catch (cleanupError) {
+        console.error("Final login cleanup stopped safely.", cleanupError);
+    }
+}
+
+function getActiveRealties() {
+    return (db.realties || []).filter(realty => String(realty.status || "ACTIVE").toUpperCase() === "ACTIVE");
+}
 /* =
    3. SUBSCRIPTION IDENTITY & 7-DAY ENGINE (CHECKPOINT V2)
 = */
@@ -249,13 +356,18 @@ function isCurrentUserSubscriptionExpired(user) {
 
 function saveSession(user, page) {
     try {
-        localStorage.setItem(SESSION_KEY, JSON.stringify({ user, page }));
+        // Keep the authenticated session in this tab only. It survives refresh,
+        // but a newly opened tab starts at the login portal.
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ user, page }));
+        // Remove any legacy shared session from the old implementation.
+        localStorage.removeItem(SESSION_KEY);
     } catch (e) {}
 }
 
 function clearSession() {
     try {
         localStorage.removeItem(SESSION_KEY);
+        sessionStorage.removeItem(SESSION_KEY);
     } catch (e) {}
 }
 
@@ -276,7 +388,7 @@ function loginUser(usernameInput, passwordInput) {
     }
 
     // 1. IT Vendor Account
-    if (username.toUpperCase() === "IT" && password === (db.settings.itPassword || "it123")) {
+    if (username.toUpperCase() === "IT" && password === (db.settings.itPassword || "IT123")) {
         currentUser = {
             id: "IT_MASTER",
             name: "IT System Administrator",
@@ -289,7 +401,7 @@ function loginUser(usernameInput, passwordInput) {
     }
 
     // 2. Boss Executive Account
-    if (username.toUpperCase() === "BOSS" && password === (db.settings.bossPassword || "boss123")) {
+    if (username.toUpperCase() === "BOSS" && password === (db.settings.bossPassword || "BOSS123")) {
         currentUser = {
             id: "BOSS_EXEC",
             name: "Boss Executive",
@@ -319,10 +431,10 @@ function loginUser(usernameInput, passwordInput) {
             matchedStaff = db.staff.find(s => s.realtyId === matchedBranch.id && s.role === "ADMIN");
         }
     } else {
-        matchedBranch = db.realties.find(r => r.id === matchedStaff.realtyId);
+        matchedBranch = db.realties.find(r => r.id === matchedStaff.realtyId && String(r.status || "ACTIVE").toUpperCase() === "ACTIVE");
     }
 
-    if (!matchedStaff || !matchedBranch) {
+    if (!matchedStaff || !matchedBranch || String(matchedBranch.status || "ACTIVE").toUpperCase() !== "ACTIVE") {
         alert("Invalid username or password.");
         return;
     }
@@ -477,7 +589,7 @@ function renderBranchSelector() {
     if (!container) return;
 
     if (currentUser?.role === "BOSS") {
-        const branches = db.realties || [];
+        const branches = getActiveRealties();
         const currentActive = currentUser.bossBranchOverride || "ALL";
 
         container.innerHTML = `
@@ -877,30 +989,46 @@ window.addEventListener("DOMContentLoaded", () => {
     loadDB();
     applyDynamicBranding();
 
+    // Restore only this tab's session. Reloading the same tab stays signed in;
+    // a newly opened tab has no session and must use the login portal.
+    let saved = null;
     try {
-        const saved = JSON.parse(localStorage.getItem(SESSION_KEY));
-        if (saved && saved.user) {
-            currentUser = saved.user;
-            const loginPortal = document.getElementById("loginPortal");
-            if (loginPortal) loginPortal.classList.add("hidden");
-
-            setupUserInterface();
-
-            if (currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser)) {
-                showPage("expired-room");
-            } else {
-                currentPage = saved.page || getInitialPageForUser(currentUser);
-                showPage(currentPage);
-            }
-
-            if (currentUser.mustChangePassword) {
-                showMandatoryPasswordChangeModal();
-            }
-            return;
-        }
+        saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
     } catch (e) {
         clearSession();
     }
+
+    // Delete only the old shared session value; never use it to sign in a new tab.
+    try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+
+    if (saved && saved.user) {
+        currentUser = saved.user;
+        const loginPortal = document.getElementById("loginPortal");
+        if (loginPortal) loginPortal.classList.add("hidden");
+
+        setupUserInterface();
+
+        if (currentUser.role !== "IT" && isCurrentUserSubscriptionExpired(currentUser)) {
+            showPage("expired-room");
+        } else {
+            currentPage = saved.page || getInitialPageForUser(currentUser);
+            showPage(currentPage);
+        }
+
+        if (currentUser.mustChangePassword) {
+            showMandatoryPasswordChangeModal();
+        }
+        return;
+    }
+
+    // No session in this tab: show the existing login portal.
+    currentUser = null;
+    const loginPortal = document.getElementById("loginPortal");
+    const app = document.getElementById("app");
+    const expiredRoom = document.getElementById("expiredOfflineRoom");
+    if (loginPortal) loginPortal.classList.remove("hidden");
+    if (app) app.classList.add("hidden");
+    if (expiredRoom) expiredRoom.classList.add("hidden");
 });
 
 /* =

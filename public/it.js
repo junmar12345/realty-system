@@ -1,4 +1,4 @@
-﻿/* =
+/* =
    IT.JS - PLATFORM VENDOR, SUBSCRIPTIONS & DATABASE BACKUPS
    Checkpoint V2 Implementation: 2026-09-27
    Consolidated Modules: Pricing, Verification, Lockouts, 
@@ -66,7 +66,7 @@ function changeSystemLanguage(lang) {
 
 
 function renderITRoom() {
-    const realties = db.realties || [];
+    const realties = getActiveRealties();
     const payments = db.subscriptionPayments || [];
     const pendingCount = payments.filter(p => p.status === "PENDING").length;
 
@@ -115,7 +115,7 @@ function renderITRoom() {
 
 <div style="margin-top: 15px; margin-bottom: 15px; background: #222; padding: 10px; border-radius: 6px;">
         <label style="font-size: 12px; color: #ccc; display: flex; align-items: center; cursor: pointer;">
-           <input type="checkbox" id="itHideRenewalEngine" ${JSON.parse(localStorage.getItem('realty_system_config') || '{}').hideRenewalEngine ? 'checked' : ''} style="margin-right: 8px; transform: scale(1.2);">
+           <input type="checkbox" id="itHideRenewalEngine" ${JSON.parse(localStorage.getItem('realty_system_config') || '{}').hideRenewalEngine ? 'checked' : ''} onchange="toggleRenewalEngineVisibility(this.checked)" style="margin-right: 8px; transform: scale(1.2);">
             Hide Multi-Branch Renewal Engine (Repair Mode)
         </label>
     </div>
@@ -276,7 +276,7 @@ function renderCloudSubscription() {
     <label>SELECT REALTY BRANCH</label>
     <select id="itRealtySelectInput" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
         <option value="">-- Select Branch to Update --</option>
-        ${(db.realties || []).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
+        ${getActiveRealties().map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
     </select>
 </div>
 <div class="form-group">
@@ -878,6 +878,23 @@ function resetDatabase() {
 
 
 // --- IT MASTER CONTROL PANEL CODE ---
+function toggleRenewalEngineVisibility(hide) {
+    let savedConfig = {};
+    try {
+        savedConfig = JSON.parse(localStorage.getItem("realty_system_config") || "{}");
+        if (!savedConfig || typeof savedConfig !== "object" || Array.isArray(savedConfig)) savedConfig = {};
+    } catch (e) {
+        savedConfig = {};
+    }
+
+    savedConfig.hideRenewalEngine = !!hide;
+    localStorage.setItem("realty_system_config", JSON.stringify(savedConfig));
+
+    // Keep the current tab in sync too, if the Boss dashboard is open in this tab.
+    if (typeof applyRenewalEngineVisibility === "function") {
+        applyRenewalEngineVisibility();
+    }
+}
 function saveITMasterConfig() {
     const savedConfig = JSON.parse(localStorage.getItem("realty_system_config")) || {};
     

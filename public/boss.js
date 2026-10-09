@@ -1,4 +1,4 @@
-﻿/* =
+/* =
    BOSS.JS - EXECUTIVE COMMAND CENTER & BRANCH MANAGEMENT
    Checkpoint V2 Implementation: 2026-09-27
    Consolidated Parts 1 - 6 (Dashboard, Multi-Pay, Branch Provisioning, Approvals)
@@ -8,8 +8,30 @@
 // 1. EXECUTIVE DASHBOARD & GROUP FINANCIAL OVERVIEW
 // =
 
+function applyRenewalEngineVisibility() {
+    const button = document.getElementById("renewalEngineBtn");
+    if (!button) return;
+
+    let hide = false;
+    try {
+        const config = JSON.parse(localStorage.getItem("realty_system_config") || "{}");
+        hide = !!(config && config.hideRenewalEngine);
+    } catch (e) {
+        hide = false;
+    }
+
+    button.style.display = hide ? "none" : "";
+}
+
+// localStorage emits this event in other tabs on the same origin, so the Boss
+// button responds immediately when IT changes the checkbox without a refresh.
+window.addEventListener("storage", function (event) {
+    if (event.key === "realty_system_config" || event.key === null) {
+        applyRenewalEngineVisibility();
+    }
+});
 function renderBossDashboard() {
-    const realties = db.realties || [];
+    const realties = getActiveRealties();
     const reservations = db.reservations || [];
     const moneyIn = db.moneyIn || [];
     const moneyOut = db.moneyOut || [];
@@ -191,6 +213,7 @@ function renderBossDashboard() {
             </div>
         </div>
     `;
+    applyRenewalEngineVisibility();
 }
 
 // =
@@ -211,7 +234,7 @@ function openBossMultiPayModal() {
     const bossSub = getSubscriptionState("BOSS");
 
     // Filter branches: ONLY due or expired branches
-    const dueRealties = (db.realties || []).filter(r => {
+    const dueRealties = getActiveRealties().filter(r => {
         const sub = getSubscriptionState(r.id);
         return sub.state === "EXPIRED" || sub.state === "NEAR_EXPIRY";
     });
@@ -305,7 +328,7 @@ function calculateBossRenewalTotal() {
     const bossSub = getSubscriptionState("BOSS");
     const isBossDue = bossSub.state === "EXPIRED" || bossSub.state === "NEAR_EXPIRY";
 
-    const dueRealties = (db.realties || []).filter(r => {
+    const dueRealties = getActiveRealties().filter(r => {
         const sub = getSubscriptionState(r.id);
         return sub.state === "EXPIRED" || sub.state === "NEAR_EXPIRY";
     });
@@ -379,7 +402,7 @@ function submitBossMultiPayment() {
     // Determine target rooms covered
     const bossSub = getSubscriptionState("BOSS");
     const isBossDue = bossSub.state === "EXPIRED" || bossSub.state === "NEAR_EXPIRY";
-    const dueRealties = (db.realties || []).filter(r => {
+    const dueRealties = getActiveRealties().filter(r => {
         const sub = getSubscriptionState(r.id);
         return sub.state === "EXPIRED" || sub.state === "NEAR_EXPIRY";
     });
@@ -597,7 +620,7 @@ function renderAddRealty() {
                         <thead>
                             <tr><th>Branch / Room ID</th><th>Manager</th><th>Login Username</th><th>Actions</th></tr>
                         </thead>
-                        <tbody>${db.realties.map(r => {
+                        <tbody>${getActiveRealties().map(r => {
                             const admin = db.staff.find(s => s.realtyId === r.id && s.role === "ADMIN") || db.staff.find(s => s.realtyId === r.id);
                             return `
                                 <tr>
