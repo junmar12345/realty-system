@@ -2575,7 +2575,25 @@ function renderReports() {
     if (!content) return;
 
     content.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <style id="bossReportsPrintStyle">
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+  html, body { width:100% !important; height:auto !important; margin:0 !important; padding:0 !important; overflow:visible !important; background:#fff !important; color:#111 !important; }
+  body * { visibility:hidden !important; }
+  #loginPortal, #expiredOfflineRoom, .sidebar, .topbar, #globalModal, .modal-overlay { display:none !important; }
+  #app:not(.hidden) { display:block !important; visibility:visible !important; width:100% !important; height:auto !important; overflow:visible !important; }
+  .main-wrapper { display:block !important; visibility:visible !important; width:100% !important; height:auto !important; min-height:0 !important; overflow:visible !important; background:#fff !important; }
+  #content { display:block !important; position:static !important; visibility:visible !important; width:100% !important; max-width:none !important; height:auto !important; min-height:0 !important; overflow:visible !important; margin:0 !important; padding:0 !important; background:#fff !important; color:#111 !important; }
+  #content * { visibility:visible !important; color:#111 !important; text-shadow:none !important; box-shadow:none !important; }
+  #content button, #content .btn { display:none !important; }
+  #content .card-3d, #content .panel { background:#fff !important; border:1px solid #bbb !important; color:#111 !important; padding:12px !important; break-inside:avoid !important; }
+  #content table { width:100% !important; border-collapse:collapse !important; font-size:11pt !important; background:#fff !important; }
+  #content table th, #content table td, #content table tr, #content table tr * { background:#fff !important; color:#111 !important; border-color:#ccc !important; }
+  #content table th, #content table td { padding:7px 8px !important; }
+  #content h3, #content h4, #content strong { color:#111 !important; }
+}
+</style>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <div>
                 <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b; margin:0;">📈 Executive Performance Reports</h3>
                 <small style="color:#64748b;">Consolidated ledger statements and financial health summary</small>

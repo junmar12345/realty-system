@@ -871,6 +871,514 @@ p,span,small{color:#aebbd0;}
 #expiredOfflineRoom img[src*="QRCODE"]{background:#fff !important;}
 
 </style>
+<style id="realtyLiveLoginMotionStyles">
+/* REALTY LIVE LOGIN MOTION 2026-10-09: real HTML/CSS/JS effects; no mockup image */
+#loginPortal {
+  position: relative !important;
+  isolation: isolate !important;
+  box-sizing: border-box !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  padding: clamp(22px, 4.2vw, 64px) !important;
+  gap: clamp(28px, 4.2vw, 72px) !important;
+  justify-content: space-evenly !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  background: linear-gradient(118deg, #160207 0%, #25050d 48%, #100206 100%) !important;
+}
+#loginPortal::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 78% 20%, rgba(165, 26, 48, .26), transparent 36%),
+    radial-gradient(ellipse at 72% 76%, rgba(103, 10, 29, .35), transparent 42%),
+    radial-gradient(ellipse at 10% 18%, rgba(108, 10, 27, .22), transparent 33%),
+    repeating-linear-gradient(27deg, transparent 0 83px, rgba(255, 110, 122, .025) 84px 85px),
+    repeating-linear-gradient(117deg, transparent 0 115px, rgba(255, 110, 122, .022) 116px 117px);
+  animation: rlAmbientGlow 17s ease-in-out infinite alternate;
+}
+#loginPortal::after {
+  content: "";
+  position: absolute;
+  width: 76vw;
+  height: 1px;
+  top: 75%;
+  left: -82vw;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .4;
+  background: linear-gradient(90deg, transparent, rgba(255, 73, 91, .72), rgba(255, 185, 167, .32), transparent);
+  box-shadow: 0 0 18px rgba(255, 43, 66, .24);
+  transform: rotate(-7deg);
+  animation: rlPortalWindSweep 15s ease-in-out infinite;
+}
+#loginPortal > div:first-child {
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 2 !important;
+  flex: 0 0 min(410px, 38vw) !important;
+  width: min(100%, 410px) !important;
+  max-width: 410px !important;
+  margin: 0 !important;
+  padding: clamp(23px, 2.4vw, 32px) !important;
+  border: 1px solid rgba(184, 37, 58, .82) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, rgba(39, 6, 13, .88), rgba(14, 2, 6, .82)) !important;
+  box-shadow: 0 26px 68px rgba(0, 0, 0, .34), 0 0 28px rgba(140, 10, 31, .12), inset 0 1px rgba(255, 184, 190, .06) !important;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+#loginPortal > div:first-child #portalLogo {
+  box-shadow: 0 0 26px rgba(206, 29, 54, .12);
+}
+#loginPortal > div:first-child #portalSystemName {
+  color: #fff0f1 !important;
+  letter-spacing: .02em;
+}
+#loginPortal input[type="text"],
+#loginPortal input[type="password"] {
+  box-sizing: border-box !important;
+  min-height: 44px;
+  border-color: rgba(128, 139, 164, .48) !important;
+  background: rgba(9, 13, 32, .94) !important;
+  color: #f8fafc !important;
+}
+#loginPortal input[type="text"]:focus,
+#loginPortal input[type="password"]:focus {
+  border-color: #c92b40 !important;
+  box-shadow: 0 0 0 3px rgba(201, 43, 64, .14) !important;
+  outline: none !important;
+}
+#loginPortal form button[type="submit"] {
+  min-height: 46px;
+  border: 1px solid rgba(255, 111, 122, .24) !important;
+  background: linear-gradient(100deg, #a8182c, #ca2635) !important;
+  box-shadow: 0 8px 24px rgba(117, 9, 27, .18);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+#loginPortal form button[type="submit"]:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(164, 18, 39, .24);
+}
+#realtyLoginHero {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+  flex: 1 1 480px;
+  width: 100%;
+  max-width: 690px;
+  min-width: 0;
+  padding: 8px 0;
+  color: #f8edf0;
+  animation: rlHeroArrive .85s ease-out both;
+}
+#realtyLoginHero .rl-kicker {
+  margin: 0 0 18px;
+  color: #f29aa4;
+  font-size: clamp(10px, .94vw, 13px);
+  font-weight: 650;
+  letter-spacing: .22em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+#realtyLoginHero .rl-kicker span { color: #ec4055; padding: 0 .35em; }
+#realtyLoginHero h1 {
+  margin: 0;
+  color: #fff7f6;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(34px, 3.35vw, 56px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+#realtyLoginHero h1 span {
+  color: #ee4658;
+  font-style: italic;
+}
+#realtyLoginHero .rl-rule {
+  width: 98px;
+  height: 2px;
+  margin: 23px 0 20px;
+  background: linear-gradient(90deg, #e62b43, rgba(230, 43, 67, .04));
+  box-shadow: 0 0 16px rgba(230, 43, 67, .25);
+}
+#realtyLoginHero .rl-copy {
+  margin: 0;
+  color: rgba(247, 232, 235, .84);
+  font-size: clamp(14px, 1.35vw, 19px);
+  font-weight: 400;
+  line-height: 1.7;
+}
+#realtyLoginHero .rl-services {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: clamp(24px, 3.6vh, 38px) 0 22px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(205, 53, 70, .3);
+  border-bottom: 1px solid rgba(205, 53, 70, .3);
+}
+#realtyLoginHero .rl-service {
+  min-width: 0;
+  padding: 0 10px;
+  border-right: 1px solid rgba(205, 53, 70, .28);
+}
+#realtyLoginHero .rl-service:first-child { padding-left: 0; }
+#realtyLoginHero .rl-service:last-child { padding-right: 0; border-right: 0; }
+#realtyLoginHero .rl-service-mark {
+  display: block;
+  margin-bottom: 7px;
+  color: #f04b5e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  line-height: 1;
+}
+#realtyLoginHero .rl-service strong {
+  display: block;
+  color: #f8e7e9;
+  font-size: clamp(8px, .75vw, 11px);
+  font-weight: 650;
+  letter-spacing: .08em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+#realtyLoginHero .rl-service small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(235, 208, 213, .62);
+  font-size: 9px;
+  line-height: 1.4;
+}
+#realtyLoginHero .rl-quote {
+  margin: 0;
+  padding-left: 15px;
+  border-left: 2px solid #d32a40;
+  color: rgba(255, 242, 242, .88);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(14px, 1.15vw, 17px);
+  font-style: italic;
+  line-height: 1.55;
+}
+#realtyLoginHero .rl-quote cite {
+  display: block;
+  margin-top: 5px;
+  color: rgba(234, 210, 215, .65);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: .04em;
+}
+#realtyLoginHero .rl-footer {
+  margin-top: 25px;
+  color: rgba(222, 190, 197, .54);
+  font-size: 9px;
+  letter-spacing: .18em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+#realtyLoginMotion {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+#realtyLoginMotion .rl-leaf {
+  position: absolute;
+  top: -14vh;
+  left: var(--leaf-left);
+  display: block;
+  width: var(--leaf-size);
+  height: calc(var(--leaf-size) * 1.55);
+  border-radius: 100% 0 100% 0;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 0 5px rgba(226, 54, 65, .11));
+  animation: rlLeafTravel var(--leaf-duration) linear var(--leaf-delay) infinite;
+  will-change: transform, opacity;
+}
+#realtyLoginMotion .rl-leaf::after {
+  content: "";
+  position: absolute;
+  left: 48%;
+  top: 12%;
+  width: 1px;
+  height: 76%;
+  background: rgba(255, 213, 179, .48);
+  transform: rotate(-20deg);
+}
+#realtyLoginMotion .rl-leaf.warm { background: linear-gradient(145deg, #e67853, #a41b30 72%); }
+#realtyLoginMotion .rl-leaf.red { background: linear-gradient(145deg, #bd293e, #5b0d20 78%); }
+#realtyLoginMotion .rl-leaf.gold { background: linear-gradient(145deg, #d7a36a, #862039 78%); }
+#realtyLoginMotion .rl-particle {
+  position: absolute;
+  left: var(--particle-left);
+  top: var(--particle-top);
+  width: var(--particle-size);
+  height: var(--particle-size);
+  border-radius: 50%;
+  background: #ffb3a2;
+  opacity: 0;
+  box-shadow: 0 0 10px rgba(250, 93, 100, .7);
+  animation: rlParticleGlow var(--particle-duration) ease-in-out var(--particle-delay) infinite;
+}
+#realtyLoginMotion .rl-wind {
+  position: absolute;
+  left: -75vw;
+  width: 68vw;
+  height: 1px;
+  border-radius: 50%;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 90, 102, .08) 22%, rgba(255, 133, 139, .55) 58%, transparent);
+  box-shadow: 0 0 12px rgba(237, 53, 69, .13);
+  transform: rotate(-8deg);
+  animation: rlWindLine var(--wind-duration) ease-in-out var(--wind-delay) infinite;
+}
+@keyframes rlLeafTravel {
+  0% { opacity: 0; transform: translate3d(0, -12vh, 0) rotate(0deg) scale(var(--leaf-scale)); }
+  9% { opacity: var(--leaf-opacity); }
+  52% { transform: translate3d(calc(var(--leaf-drift) * .52), 51vh, 0) rotate(255deg) scale(var(--leaf-scale)); }
+  91% { opacity: var(--leaf-opacity); }
+  100% { opacity: 0; transform: translate3d(var(--leaf-drift), 116vh, 0) rotate(var(--leaf-rotation)) scale(var(--leaf-scale)); }
+}
+@keyframes rlWindLine {
+  0% { left: -75vw; opacity: 0; }
+  20% { opacity: .7; }
+  72% { opacity: .4; }
+  100% { left: 120vw; opacity: 0; }
+}
+@keyframes rlPortalWindSweep {
+  0%, 100% { left: -82vw; opacity: .1; }
+  40% { opacity: .46; }
+  65% { left: 110vw; opacity: 0; }
+}
+@keyframes rlAmbientGlow {
+  from { transform: translate3d(-1%, 0, 0) scale(1); filter: saturate(.9); }
+  to { transform: translate3d(1%, -1%, 0) scale(1.035); filter: saturate(1.12); }
+}
+@keyframes rlParticleGlow {
+  0%, 100% { opacity: 0; transform: translate3d(0, 12px, 0) scale(.6); }
+  45% { opacity: .54; }
+  58% { opacity: .18; transform: translate3d(16px, -20px, 0) scale(1.1); }
+}
+@keyframes rlHeroArrive {
+  from { opacity: 0; transform: translate3d(14px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (max-width: 1080px) and (min-width: 761px) {
+  #loginPortal { padding: 26px !important; gap: 28px !important; }
+  #loginPortal > div:first-child { flex-basis: 355px !important; width: 355px !important; padding: 23px !important; }
+  #realtyLoginHero h1 { font-size: clamp(31px, 3.6vw, 42px); }
+  #realtyLoginHero .rl-services { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 14px; }
+  #realtyLoginHero .rl-service:nth-child(2) { border-right: 0; }
+}
+@media (max-width: 760px) {
+  #loginPortal {
+    height: auto !important;
+    min-height: 100vh !important;
+    min-height: 100svh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 25px !important;
+    padding: 24px 16px 32px !important;
+  }
+  #loginPortal > div:first-child {
+    flex: 0 0 auto !important;
+    width: min(100%, 430px) !important;
+    max-width: 430px !important;
+    padding: 24px !important;
+  }
+  #realtyLoginHero { flex: 0 0 auto; width: min(100%, 430px); max-width: 430px; padding: 0 4px 20px; }
+  #realtyLoginHero h1 { font-size: clamp(32px, 9vw, 43px); }
+  #realtyLoginHero .rl-kicker { font-size: 10px; letter-spacing: .14em; }
+  #realtyLoginHero .rl-services { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 14px; margin-top: 23px; }
+  #realtyLoginHero .rl-service { padding: 0 10px; }
+  #realtyLoginHero .rl-service:nth-child(2) { border-right: 0; }
+  #realtyLoginHero .rl-service:nth-child(3) { padding-left: 0; }
+  #realtyLoginHero .rl-service strong { font-size: 10px; }
+  #realtyLoginHero .rl-footer { margin-top: 18px; }
+}
+@media (max-height: 700px) and (min-width: 761px) {
+  #loginPortal { padding-top: 18px !important; padding-bottom: 18px !important; gap: clamp(20px, 3vw, 45px) !important; }
+  #loginPortal > div:first-child { padding-top: 22px !important; padding-bottom: 22px !important; }
+  #realtyLoginHero .rl-services { margin-top: 18px; margin-bottom: 14px; padding: 12px 0; }
+  #realtyLoginHero .rl-rule { margin: 16px 0 13px; }
+  #realtyLoginHero .rl-footer { margin-top: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #loginPortal::before, #loginPortal::after, #realtyLoginHero { animation: none !important; }
+  #realtyLoginMotion .rl-leaf, #realtyLoginMotion .rl-particle, #realtyLoginMotion .rl-wind { animation: none !important; opacity: .16; }
+}
+</style>
+<style id="realtyInterior3DPolish">
+/* REALTY INTERIOR 3D POLISH 2026-10-09
+   Visual-only treatment for the signed-in system interior; login form and business JS remain unchanged. */
+#app {
+  perspective: 1400px;
+  background: #100308;
+}
+#app .sidebar {
+  position: relative;
+  z-index: 3;
+  background: linear-gradient(180deg, #100308 0%, #080205 72%, #16050b 100%) !important;
+  border-right: 1px solid rgba(177, 38, 58, .42) !important;
+  box-shadow: 9px 0 32px rgba(0, 0, 0, .24), inset -1px 0 rgba(255, 152, 164, .035);
+}
+#app .sidebar-brand {
+  background: linear-gradient(135deg, rgba(110, 12, 31, .32), rgba(14, 3, 7, .1));
+  border-bottom-color: rgba(190, 47, 65, .3) !important;
+  text-shadow: 0 1px 12px rgba(220, 38, 58, .18);
+}
+#app .sidebar-menu { perspective: 700px; }
+#app .nav-btn {
+  position: relative;
+  border: 1px solid transparent !important;
+  border-left: 3px solid transparent !important;
+  border-radius: 9px !important;
+  background: linear-gradient(110deg, rgba(255,255,255,0), rgba(255,255,255,0)) !important;
+  transform: translateZ(0);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+}
+#app .nav-btn:hover {
+  background: linear-gradient(110deg, rgba(131, 18, 39, .42), rgba(53, 7, 18, .24)) !important;
+  border-color: rgba(204, 54, 72, .22) !important;
+  border-left-color: #d52c43 !important;
+  box-shadow: 0 6px 15px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.04);
+  transform: translate3d(2px, -1px, 3px);
+}
+#app .nav-btn.active {
+  background: linear-gradient(115deg, #941a30, #5a0d20) !important;
+  border-color: rgba(232, 75, 92, .42) !important;
+  border-left-color: #ff6b78 !important;
+  box-shadow: 0 7px 18px rgba(86, 7, 23, .3), inset 0 1px rgba(255,255,255,.1), inset 0 -1px rgba(0,0,0,.15);
+}
+#app .main-wrapper {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(117, 13, 34, .12), transparent 35%),
+    linear-gradient(145deg, #12050a, #0b0306 62%, #11040a) !important;
+}
+#app .topbar {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(105deg, rgba(32, 7, 14, .97), rgba(15, 4, 8, .98)) !important;
+  border-bottom: 1px solid rgba(183, 43, 61, .38) !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.025);
+}
+#app .content-area {
+  background:
+    radial-gradient(ellipse at 82% 4%, rgba(118, 15, 34, .10), transparent 30%),
+    radial-gradient(ellipse at 8% 100%, rgba(66, 9, 22, .10), transparent 38%),
+    #100308 !important;
+}
+#app .card-3d,
+#app .panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(160, 43, 61, .52) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg, rgba(43, 10, 19, .96), rgba(19, 5, 10, .98)) !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,.23), 0 3px 8px rgba(0,0,0,.18), inset 0 1px rgba(255,190,198,.055), inset 0 -1px rgba(0,0,0,.26) !important;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease !important;
+}
+#app .card-3d::before,
+#app .panel::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 0 0 auto 0;
+  height: 2px;
+  opacity: .72;
+  background: linear-gradient(90deg, transparent, rgba(231, 67, 86, .72), rgba(255, 180, 187, .25), transparent);
+}
+#app .card-3d:hover,
+#app .panel:hover {
+  border-color: rgba(217, 64, 82, .76) !important;
+  box-shadow: 0 20px 36px rgba(0,0,0,.3), 0 0 0 1px rgba(182,32,53,.08), inset 0 1px rgba(255,190,198,.075) !important;
+  transform: translateY(-3px);
+}
+#app .panel-header {
+  border-bottom: 1px solid rgba(174, 48, 65, .26);
+  padding-bottom: 11px;
+}
+#app .btn,
+#app button:not(.nav-btn) {
+  border-radius: 8px;
+  box-shadow: 0 5px 12px rgba(0,0,0,.16), inset 0 1px rgba(255,255,255,.065);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease !important;
+}
+#app .btn:hover,
+#app button:not(.nav-btn):hover {
+  filter: brightness(1.06);
+  box-shadow: 0 9px 19px rgba(0,0,0,.23), inset 0 1px rgba(255,255,255,.09);
+  transform: translateY(-2px);
+}
+#app .btn:active,
+#app button:not(.nav-btn):active {
+  box-shadow: 0 2px 5px rgba(0,0,0,.2), inset 0 2px 5px rgba(0,0,0,.18);
+  transform: translateY(1px) scale(.99);
+}
+#app input,
+#app select,
+#app textarea,
+#app .form-group input,
+#app .form-group select,
+#app .form-group textarea {
+  border-radius: 7px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.16), 0 1px rgba(255,255,255,.025);
+  transition: border-color .18s ease, box-shadow .18s ease !important;
+}
+#app input:focus,
+#app select:focus,
+#app textarea:focus,
+#app .form-group input:focus,
+#app .form-group select:focus,
+#app .form-group textarea:focus {
+  border-color: #bd2a41 !important;
+  box-shadow: 0 0 0 3px rgba(190, 38, 60, .13), inset 0 2px 5px rgba(0,0,0,.13) !important;
+  outline: none;
+}
+#app table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(153, 37, 55, .28);
+  border-radius: 9px;
+  overflow: hidden;
+}
+#app table th {
+  background: linear-gradient(180deg, #270a12, #19050b) !important;
+  border-bottom-color: rgba(194, 48, 67, .42) !important;
+}
+#app table td { border-bottom-color: rgba(149, 43, 58, .2) !important; }
+#app table tr:last-child td { border-bottom: 0 !important; }
+#app .modal-box {
+  border: 1px solid rgba(201, 51, 71, .56) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #280913, #110308) !important;
+  box-shadow: 0 28px 72px rgba(0,0,0,.5), inset 0 1px rgba(255,190,198,.06) !important;
+}
+@media (max-width: 760px) {
+  #app .card-3d:hover, #app .panel:hover { transform: none; }
+  #app .content-area { padding: 14px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app .nav-btn, #app .card-3d, #app .panel, #app .btn, #app button,
+  #app input, #app select, #app textarea { transition: none !important; }
+  #app .nav-btn:hover, #app .card-3d:hover, #app .panel:hover,
+  #app .btn:hover, #app button:hover { transform: none !important; }
+}
+</style>
 </head>
 <body>
 
@@ -1206,6 +1714,80 @@ document.addEventListener('click', function(e) {
         setTimeout(() => spark.remove(), 450);
     }
 }, true);
+</script>
+
+<script id="realtyLiveLoginMotionScript">
+(function realtyLiveLoginMotion() {
+  'use strict';
+  function init() {
+    const portal = document.getElementById('loginPortal');
+    if (!portal || portal.dataset.realtyLiveMotionReady === 'yes') return;
+    portal.dataset.realtyLiveMotionReady = 'yes';
+
+    // Real text and layout, not a flattened screenshot. The original login form stays intact.
+    const hero = document.createElement('section');
+    hero.id = 'realtyLoginHero';
+    hero.setAttribute('aria-label', 'KhaineJosh Realty introduction');
+    hero.innerHTML = `
+      <p class="rl-kicker">PROPERTY <span>&bull;</span> PLANNING <span>&bull;</span> LAND TITLING</p>
+      <h1>Building trust,<br>one property <span>at a time.</span></h1>
+      <div class="rl-rule" aria-hidden="true"></div>
+      <p class="rl-copy">Reliable records. Thoughtful planning.<br>A clearer path to ownership.</p>
+      <div class="rl-services" aria-label="Realty services">
+        <div class="rl-service"><span class="rl-service-mark">01</span><strong>LAND TITLING</strong><small>Secure ownership</small></div>
+        <div class="rl-service"><span class="rl-service-mark">02</span><strong>SUBDIVISION</strong><small>Planned communities</small></div>
+        <div class="rl-service"><span class="rl-service-mark">03</span><strong>HOUSE PLANNING</strong><small>From vision to reality</small></div>
+        <div class="rl-service"><span class="rl-service-mark">04</span><strong>PROPERTY CARE</strong><small>Organized records</small></div>
+      </div>
+      <blockquote class="rl-quote">&ldquo;Great properties begin with clarity, care, and trust.&rdquo;<cite>&mdash; KhaineJosh Realty</cite></blockquote>
+      <div class="rl-footer">KHAINEJOSH REALTY SYSTEM &nbsp; &bull; &nbsp; PEOPLE &middot; PROCESS &middot; PROGRESS</div>`;
+    portal.appendChild(hero);
+
+    // Background movement is built from HTML elements and CSS. No background picture is used.
+    const motion = document.createElement('div');
+    motion.id = 'realtyLoginMotion';
+    motion.setAttribute('aria-hidden', 'true');
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const leafCount = reduced ? 6 : 23;
+    for (let i = 0; i < leafCount; i++) {
+      const leaf = document.createElement('span');
+      leaf.className = 'rl-leaf ' + (['warm', 'red', 'gold'][i % 3]);
+      leaf.style.setProperty('--leaf-left', (Math.random() * 105 - 2) + '%');
+      leaf.style.setProperty('--leaf-size', (7 + Math.random() * 11).toFixed(1) + 'px');
+      leaf.style.setProperty('--leaf-scale', (0.7 + Math.random() * 0.9).toFixed(2));
+      leaf.style.setProperty('--leaf-duration', (15 + Math.random() * 17).toFixed(1) + 's');
+      leaf.style.setProperty('--leaf-delay', (-Math.random() * 26).toFixed(1) + 's');
+      leaf.style.setProperty('--leaf-drift', ((Math.random() * 2 - 1) * (75 + Math.random() * 160)).toFixed(0) + 'px');
+      leaf.style.setProperty('--leaf-rotation', (360 + Math.random() * 520).toFixed(0) + 'deg');
+      leaf.style.setProperty('--leaf-opacity', (0.18 + Math.random() * 0.28).toFixed(2));
+      motion.appendChild(leaf);
+    }
+    for (let i = 0; i < (reduced ? 5 : 15); i++) {
+      const particle = document.createElement('span');
+      particle.className = 'rl-particle';
+      particle.style.setProperty('--particle-left', (Math.random() * 100) + '%');
+      particle.style.setProperty('--particle-top', (Math.random() * 100) + '%');
+      particle.style.setProperty('--particle-size', (1 + Math.random() * 2.2).toFixed(1) + 'px');
+      particle.style.setProperty('--particle-duration', (5 + Math.random() * 7).toFixed(1) + 's');
+      particle.style.setProperty('--particle-delay', (-Math.random() * 10).toFixed(1) + 's');
+      motion.appendChild(particle);
+    }
+    for (let i = 0; i < 3; i++) {
+      const wind = document.createElement('span');
+      wind.className = 'rl-wind';
+      wind.style.top = (28 + i * 21) + '%';
+      wind.style.setProperty('--wind-duration', (13 + i * 3) + 's');
+      wind.style.setProperty('--wind-delay', (-i * 4.4) + 's');
+      motion.appendChild(wind);
+    }
+    portal.appendChild(motion);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+})();
 </script>
 </body>
 </html>
