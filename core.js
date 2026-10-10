@@ -545,7 +545,12 @@ function applyDynamicBranding() {
     const logo = db.settings.logo || "🏢";
 
     const portalName = document.getElementById("portalSystemName");
-    if (portalName) portalName.textContent = sysName;
+    if (portalName) {
+        const configuredPortalName = String(db.settings.systemName || "").trim();
+        const useDefaultPortalLabel = !configuredPortalName ||
+            configuredPortalName.toUpperCase() === "KHAINEJOSH REALTY";
+        portalName.textContent = useDefaultPortalLabel ? "REALTY SYSTEM" : configuredPortalName;
+    }
 
     const portalLogo = document.getElementById("portalLogo");
     if (portalLogo) portalLogo.innerHTML = renderLogoHTML(logo);
